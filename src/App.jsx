@@ -1,5 +1,7 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Outlet } from 'react-router-dom';
+import { AuthProvider } from './context/AuthContext';
+import { SocketProvider } from './context/SocketContext'; // Added SocketProvider import
 import Header from './components/Header';
 import BottomNav from './components/BottomNav';
 import Home from './pages/Home';
@@ -9,6 +11,8 @@ import Chat from './pages/Chat';
 import ChatDetail from './pages/ChatDetail';
 import Profile from './pages/Profile';
 import UserProfile from './pages/UserProfile';
+import Login from './pages/Login';
+import Register from './pages/Register';
 
 const MainLayout = () => {
   return (
@@ -24,19 +28,26 @@ const MainLayout = () => {
 
 function App() {
   return (
-    <Router>
-      <Routes>
-        <Route element={<MainLayout />}>
-          <Route path="/" element={<Home />} />
-          <Route path="/favourites" element={<Favourites />} />
-          <Route path="/special" element={<Special />} />
-          <Route path="/chat" element={<Chat />} />
-          <Route path="/profile" element={<Profile />} />
-        </Route>
-        <Route path="/chat/:id" element={<ChatDetail />} />
-        <Route path="/user/:id" element={<UserProfile />} />
-      </Routes>
-    </Router>
+    <AuthProvider>
+      <SocketProvider> {/* Wrapped Router with SocketProvider */}
+        <Router>
+          <Routes>
+            <Route path="/login" element={<Login />} />
+            <Route path="/register" element={<Register />} />
+
+            <Route element={<MainLayout />}>
+              <Route path="/" element={<Home />} />
+              <Route path="/favourites" element={<Favourites />} />
+              <Route path="/special" element={<Special />} />
+              <Route path="/chat" element={<Chat />} />
+              <Route path="/profile" element={<Profile />} />
+            </Route>
+            <Route path="/chat/:id" element={<ChatDetail />} />
+            <Route path="/user/:id" element={<UserProfile />} />
+          </Routes>
+        </Router>
+      </SocketProvider>
+    </AuthProvider>
   );
 }
 

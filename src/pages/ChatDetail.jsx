@@ -1,62 +1,97 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useContext } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { getAllUsers } from '../data/users';
+import { getUser, getMessages, sendMessage } from '../services/api';
+import AuthContext from '../context/AuthContext';
+import SocketContext from '../context/SocketContext';
 
 const ChatDetail = () => {
     const { id } = useParams();
     const navigate = useNavigate();
-    const users = getAllUsers();
-    const user = users.find(u => u.id === parseInt(id));
+    const { token, user: currentUser } = useContext(AuthContext);
+    const { socket } = useContext(SocketContext);
+    const [user, setUser] = useState(null);
+    const [messages, setMessages] = useState([]);
+    const [inputText, setInputText] = useState('');
     const messagesEndRef = useRef(null);
     const fileInputRef = useRef(null);
-
-    const [messages, setMessages] = useState([
-        { id: 1, text: 'สวัสดีครับ', sender: 'them', time: '10:00', type: 'text' },
-        { id: 2, text: 'สวัสดีครับ ทักทายนะครับ', sender: 'me', time: '10:05', type: 'text' },
-        { id: 3, text: 'ยินดีที่ได้รู้จักครับ', sender: 'them', time: '10:06', type: 'text' },
-    ]);
-    const [inputText, setInputText] = useState('');
 
     const scrollToBottom = () => {
         messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
     };
 
     useEffect(() => {
+        const fetchData = async () => {
+            if (token && id) {
+                try {
+                    const userData = await getUser(id, token);
+                    setUser(userData);
+                    const msgs = await getMessages(id, token);
+                    setMessages(msgs);
+                    if (socket) {
+                        socket.emit('join chat', id);
+                    }
+                } catch (error) {
+                    console.error("Error fetching chat data:", error);
+                }
+            }
+        };
+        fetchData();
+    }, [id, token, socket]);
+
+    useEffect(() => {
+        if (!socket) return;
+
+        const handleMessageReceived = (newMessage) => {
+            if (newMessage.sender._id === id || newMessage.recipient._id === id) {
+                setMessages((prev) => [...prev, newMessage]);
+            }
+        };
+
+        socket.on('message received', handleMessageReceived);
+
+        return () => {
+            socket.off('message received', handleMessageReceived);
+        };
+    }, [socket, id]);
+
+    useEffect(() => {
         scrollToBottom();
     }, [messages]);
 
     if (!user) {
-        return <div className="app-content" style={{ color: 'white', textAlign: 'center', marginTop: '50px' }}>User not found</div>;
+        return <div className="app-content" style={{ color: 'white', textAlign: 'center', marginTop: '50px' }}>Loading...</div>;
     }
 
-    const handleSend = () => {
+    const handleSend = async () => {
         if (inputText.trim() === '') return;
 
-        const newMessage = {
-            id: messages.length + 1,
-            text: inputText,
-            sender: 'me',
-            time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-            type: 'text'
-        };
+        try {
+            const newMessage = await sendMessage({
+                recipientId: id,
+                text: inputText
+            }, token);
 
-        setMessages([...messages, newMessage]);
-        setInputText('');
+            setMessages([...messages, newMessage]);
+            setInputText('');
+        } catch (error) {
+            console.error("Error sending message:", error);
+        }
     };
 
-    const handleImageUpload = (e) => {
+    const handleImageUpload = async (e) => {
         const file = e.target.files[0];
         if (file) {
             const imageUrl = URL.createObjectURL(file);
-            const newMessage = {
-                id: messages.length + 1,
-                text: '',
-                image: imageUrl,
-                sender: 'me',
-                time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-                type: 'image'
-            };
-            setMessages([...messages, newMessage]);
+
+            try {
+                const newMessage = await sendMessage({
+                    recipientId: id,
+                    image: imageUrl
+                }, token);
+                setMessages([...messages, newMessage]);
+            } catch (error) {
+                console.error("Error sending image:", error);
+            }
         }
     };
 
@@ -75,7 +110,7 @@ const ChatDetail = () => {
                 <div className="chat-user-info">
                     <div className="chat-avatar">
                         <img src={user.img} alt={user.name} />
-                        <div className={`status-dot ${user.online ? 'online' : ''}`}></div>
+                        <div className={`status-dot ${user.isOnline ? 'online' : ''}`}></div>
                     </div>
                     <span className="chat-username">{user.name}</span>
                 </div>
@@ -86,15 +121,17 @@ const ChatDetail = () => {
 
             <div className="chat-messages">
                 {messages.map((msg) => (
-                    <div key={msg.id} className={`message-bubble ${msg.sender}`}>
+                    <div key={msg._id || msg.id} className={`message-bubble ${(msg.sender._id === currentUser?._id || msg.sender === currentUser?._id) ? 'me' : 'them'}`}>
                         <div className="message-content">
-                            {msg.type === 'image' ? (
+                            {msg.image ? (
                                 <img src={msg.image} alt="Sent image" className="message-image" />
                             ) : (
                                 msg.text
                             )}
                         </div>
-                        <span className="message-time">{msg.time}</span>
+                        <span className="message-time">
+                            {new Date(msg.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                        </span>
                     </div>
                 ))}
                 <div ref={messagesEndRef} />
