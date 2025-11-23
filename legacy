@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GTHAILOVER</title>
+    <link rel="stylesheet" href="styles.css">
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Material Icons -->
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+</head>
+
+<body>
+
+    <header class="app-header">
+        <div class="search-bar">
+            <span class="material-icons search-icon">search</span>
+            <input type="text" placeholder="ค้นหา">
+        </div>
+        <button class="menu-btn">
+            <span class="material-icons">menu</span>
+        </button>
+    </header>
+
+    <main class="app-content">
+        <section class="user-section">
+            <h2 class="section-title">มาใหม่</h2>
+            <div class="horizontal-scroll-container" id="fresh-faces-container">
+                <!-- Fresh faces injected here -->
+            </div>
+        </section>
+
+        <section class="user-section">
+            <h2 class="section-title">ที่คุณชอบ</h2>
+            <div class="horizontal-scroll-container" id="favourites-container">
+                <!-- Favourites injected here -->
+            </div>
+        </section>
+
+        <section class="user-section">
+            <h2 class="section-title">ใกล้กัน</h2>
+            <div class="grid-container" id="nearby-container">
+                <!-- Nearby users injected here -->
+            </div>
+        </section>
+    </main>
+
+    <nav class="bottom-nav">
+        <a href="#" class="nav-item">
+            <span class="material-icons">star_border</span>
+            <span class="nav-label">ที่คุณชอบ</span>
+        </a>
+        <a href="#" class="nav-item">
+            <span class="material-icons">layers</span>
+            <span class="nav-label">พิเศษ</span>
+        </a>
+        <a href="#" class="nav-item active">
+            <span class="material-icons">masks</span> <!-- Closest match to the mask icon -->
+            <span class="nav-label">GTHAI</span>
+        </a>
+        <a href="#" class="nav-item">
+            <span class="material-icons">chat_bubble_outline</span>
+            <span class="nav-label">แชท</span>
+        </a>
+        <a href="#" class="nav-item">
+            <span class="material-icons">person_outline</span>
+            <span class="nav-label">โปรไฟล์</span>
+        </a>
+    </nav>
+
+    <script src="app.js"></script>
+</body>
+
+</html>

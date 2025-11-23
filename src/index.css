@@ -1,0 +1,471 @@
+:root {
+    --bg-color: #000000;
+    --text-color: #ffffff;
+    --secondary-text: #a0a0a0;
+    --accent-color: #a607d6;
+    /* Grindr Yellow */
+    --online-color: #2ecc71;
+    --card-bg: #1a1a1a;
+    --header-height: 60px;
+    --nav-height: 60px;
+}
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: 'Inter', sans-serif;
+    background-color: var(--bg-color);
+    color: var(--text-color);
+    padding-bottom: var(--nav-height);
+    /* Space for bottom nav */
+}
+
+/* Header */
+.app-header {
+    display: flex;
+    align-items: center;
+    padding: 10px 15px;
+    position: sticky;
+    top: 0;
+    background-color: var(--bg-color);
+    z-index: 100;
+}
+
+.search-bar {
+    flex: 1;
+    position: relative;
+    margin-right: 15px;
+}
+
+.search-bar input {
+    width: 100%;
+    background-color: #ffffff;
+    border: none;
+    border-radius: 20px;
+    padding: 8px 15px 8px 40px;
+    font-size: 16px;
+    color: #333;
+}
+
+.search-bar input:focus {
+    outline: none;
+}
+
+.search-icon {
+    position: absolute;
+    left: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #999;
+    font-size: 20px;
+}
+
+.menu-btn {
+    background: none;
+    border: none;
+    color: var(--text-color);
+    cursor: pointer;
+}
+
+.menu-btn .material-icons {
+    font-size: 28px;
+}
+
+/* Main Content */
+.app-content {
+    padding: 10px 0;
+}
+
+.user-section {
+    margin-bottom: 20px;
+}
+
+.section-title {
+    font-size: 20px;
+    font-weight: 600;
+    margin-left: 15px;
+    margin-bottom: 10px;
+}
+
+/* Scroll Containers */
+.horizontal-scroll-container {
+    display: flex;
+    overflow-x: auto;
+    padding-left: 15px;
+    padding-right: 15px;
+    gap: 10px;
+    scrollbar-width: none;
+    /* Firefox */
+}
+
+.horizontal-scroll-container::-webkit-scrollbar {
+    display: none;
+    /* Chrome/Safari */
+}
+
+/* Grid Container */
+.grid-container {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 2px;
+}
+
+/* Profile Card */
+.profile-card {
+    position: relative;
+    width: 110px;
+    /* Fixed width for horizontal scroll items */
+    flex-shrink: 0;
+    aspect-ratio: 3/4;
+    background-color: #333;
+    overflow: hidden;
+}
+
+.grid-container .profile-card {
+    width: 100%;
+    /* Full width in grid */
+    border-radius: 0;
+    /* Sharp edges for grid */
+}
+
+/* Rounded corners for horizontal lists only */
+.horizontal-scroll-container .profile-card {
+    border-radius: 4px;
+}
+
+.profile-card img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.profile-info {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    padding: 5px;
+    background: linear-gradient(to top, rgba(0, 0, 0, 0.8), transparent);
+    display: flex;
+    align-items: center;
+}
+
+.status-dot {
+    width: 10px;
+    height: 10px;
+    background-color: var(--online-color);
+    border-radius: 50%;
+    margin-right: 5px;
+    border: 1px solid #fff;
+}
+
+.profile-name {
+    font-size: 12px;
+    font-weight: 600;
+    color: #fff;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+}
+
+.star-icon {
+    position: absolute;
+    top: 5px;
+    right: 5px;
+    color: var(--accent-color);
+    font-size: 16px;
+}
+
+/* Bottom Nav */
+.bottom-nav {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: var(--nav-height);
+    background-color: #000;
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    border-top: 1px solid #333;
+    z-index: 100;
+}
+
+.nav-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-decoration: none;
+    color: var(--secondary-text);
+    font-size: 10px;
+}
+
+.nav-item.active {
+    color: var(--accent-color);
+}
+
+.nav-item .material-icons {
+    font-size: 24px;
+    margin-bottom: 2px;
+}
+
+/* User Profile Page */
+.user-profile-page {
+    position: relative;
+    min-height: 100vh;
+    background-color: var(--bg-color);
+}
+
+.profile-cover {
+    position: relative;
+    height: 250px;
+    width: 100%;
+}
+
+.profile-cover img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.back-btn {
+    position: absolute;
+    top: 15px;
+    left: 15px;
+    background: rgba(0, 0, 0, 0.5);
+    border: none;
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    cursor: pointer;
+    z-index: 10;
+}
+
+.profile-content {
+    padding: 0 20px 20px;
+    position: relative;
+    top: -40px;
+}
+
+.profile-header {
+    display: flex;
+    align-items: flex-end;
+    margin-bottom: 20px;
+}
+
+.profile-avatar {
+    position: relative;
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    border: 3px solid var(--bg-color);
+    margin-right: 15px;
+}
+
+.profile-avatar img {
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    object-fit: cover;
+}
+
+.profile-avatar .status-dot {
+    position: absolute;
+    bottom: 5px;
+    right: 5px;
+    width: 15px;
+    height: 15px;
+    border: 2px solid var(--bg-color);
+}
+
+.profile-title h1 {
+    font-size: 24px;
+    margin-bottom: 5px;
+}
+
+.online-status {
+    color: var(--online-color);
+    font-size: 14px;
+    font-weight: 500;
+}
+
+.profile-stats {
+    display: flex;
+    justify-content: space-between;
+    background-color: var(--card-bg);
+    padding: 15px;
+    border-radius: 10px;
+    margin-bottom: 20px;
+}
+
+.stat-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.stat-label {
+    color: var(--secondary-text);
+    font-size: 12px;
+    margin-bottom: 5px;
+}
+
+.stat-value {
+    font-weight: 600;
+    font-size: 16px;
+}
+
+.profile-details {
+    background-color: var(--card-bg);
+    padding: 15px;
+    border-radius: 10px;
+    margin-bottom: 20px;
+}
+
+.detail-row {
+    display: flex;
+    align-items: center;
+    margin-bottom: 10px;
+    color: var(--secondary-text);
+}
+
+.detail-row:last-child {
+    margin-bottom: 0;
+}
+
+.detail-row .material-icons {
+    margin-right: 10px;
+    color: var(--accent-color);
+}
+
+.profile-actions {
+    display: flex;
+    gap: 10px;
+}
+
+.action-btn {
+    flex: 1;
+    padding: 12px;
+    border: none;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+}
+
+.action-btn.chat {
+    background-color: var(--accent-color);
+    color: white;
+}
+
+.action-btn.favorite {
+    background-color: #333;
+    color: white;
+}
+
+.action-btn.block {
+    background-color: #333;
+    color: #ff4444;
+}
+
+/* Gallery */
+.gallery-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 5px;
+    margin-top: 10px;
+}
+
+.gallery-item {
+    aspect-ratio: 1;
+    overflow: hidden;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.gallery-item img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.2s;
+}
+
+.gallery-item img:hover {
+    transform: scale(1.05);
+}
+
+/* Lightbox */
+.lightbox-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.9);
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.lightbox-content {
+    position: relative;
+    max-width: 90%;
+    max-height: 90%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.lightbox-content img {
+    max-width: 100%;
+    max-height: 80vh;
+    object-fit: contain;
+}
+
+.lightbox-nav {
+    background: none;
+    border: none;
+    color: white;
+    cursor: pointer;
+    padding: 10px;
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    z-index: 10;
+}
+
+.lightbox-nav.prev {
+    left: -50px;
+}
+
+.lightbox-nav.next {
+    right: -50px;
+}
+
+.lightbox-nav .material-icons {
+    font-size: 40px;
+}
+
+.lightbox-close {
+    position: absolute;
+    top: -40px;
+    right: 0;
+    background: none;
+    border: none;
+    color: white;
+    cursor: pointer;
+}
+
+.lightbox-close .material-icons {
+    font-size: 30px;
+}

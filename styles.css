@@ -1,0 +1,212 @@
+:root {
+    --bg-color: #000000;
+    --text-color: #ffffff;
+    --secondary-text: #a0a0a0;
+    --accent-color: #a607d6;
+    /* Grindr Yellow */
+    --online-color: #2ecc71;
+    --card-bg: #1a1a1a;
+    --header-height: 60px;
+    --nav-height: 60px;
+}
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: 'Inter', sans-serif;
+    background-color: var(--bg-color);
+    color: var(--text-color);
+    padding-bottom: var(--nav-height);
+    /* Space for bottom nav */
+}
+
+/* Header */
+.app-header {
+    display: flex;
+    align-items: center;
+    padding: 10px 15px;
+    position: sticky;
+    top: 0;
+    background-color: var(--bg-color);
+    z-index: 100;
+}
+
+.search-bar {
+    flex: 1;
+    position: relative;
+    margin-right: 15px;
+}
+
+.search-bar input {
+    width: 100%;
+    background-color: #ffffff;
+    border: none;
+    border-radius: 20px;
+    padding: 8px 15px 8px 40px;
+    font-size: 16px;
+    color: #333;
+}
+
+.search-bar input:focus {
+    outline: none;
+}
+
+.search-icon {
+    position: absolute;
+    left: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #999;
+    font-size: 20px;
+}
+
+.menu-btn {
+    background: none;
+    border: none;
+    color: var(--text-color);
+    cursor: pointer;
+}
+
+.menu-btn .material-icons {
+    font-size: 28px;
+}
+
+/* Main Content */
+.app-content {
+    padding: 10px 0;
+}
+
+.user-section {
+    margin-bottom: 20px;
+}
+
+.section-title {
+    font-size: 20px;
+    font-weight: 600;
+    margin-left: 15px;
+    margin-bottom: 10px;
+}
+
+/* Scroll Containers */
+.horizontal-scroll-container {
+    display: flex;
+    overflow-x: auto;
+    padding-left: 15px;
+    padding-right: 15px;
+    gap: 10px;
+    scrollbar-width: none;
+    /* Firefox */
+}
+
+.horizontal-scroll-container::-webkit-scrollbar {
+    display: none;
+    /* Chrome/Safari */
+}
+
+/* Grid Container */
+.grid-container {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 2px;
+}
+
+/* Profile Card */
+.profile-card {
+    position: relative;
+    width: 110px;
+    /* Fixed width for horizontal scroll items */
+    flex-shrink: 0;
+    aspect-ratio: 3/4;
+    background-color: #333;
+    overflow: hidden;
+}
+
+.grid-container .profile-card {
+    width: 100%;
+    /* Full width in grid */
+    border-radius: 0;
+    /* Sharp edges for grid */
+}
+
+/* Rounded corners for horizontal lists only */
+.horizontal-scroll-container .profile-card {
+    border-radius: 4px;
+}
+
+.profile-card img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.profile-info {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    padding: 5px;
+    background: linear-gradient(to top, rgba(0, 0, 0, 0.8), transparent);
+    display: flex;
+    align-items: center;
+}
+
+.status-dot {
+    width: 10px;
+    height: 10px;
+    background-color: var(--online-color);
+    border-radius: 50%;
+    margin-right: 5px;
+    border: 1px solid #fff;
+}
+
+.profile-name {
+    font-size: 12px;
+    font-weight: 600;
+    color: #fff;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+}
+
+.star-icon {
+    position: absolute;
+    top: 5px;
+    right: 5px;
+    color: var(--accent-color);
+    font-size: 16px;
+}
+
+/* Bottom Nav */
+.bottom-nav {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: var(--nav-height);
+    background-color: #000;
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    border-top: 1px solid #333;
+    z-index: 100;
+}
+
+.nav-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-decoration: none;
+    color: var(--secondary-text);
+    font-size: 10px;
+}
+
+.nav-item.active {
+    color: var(--accent-color);
+}
+
+.nav-item .material-icons {
+    font-size: 24px;
+    margin-bottom: 2px;
+}
