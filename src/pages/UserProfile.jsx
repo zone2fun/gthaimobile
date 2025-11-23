@@ -82,7 +82,7 @@ const UserProfile = () => {
                 </div>
 
                 <div className="profile-actions">
-                    <button className="action-btn chat">
+                    <button className="action-btn chat" onClick={() => navigate(`/chat/${user.id}`)}>
                         <span className="material-icons">chat_bubble</span>
                         แชท
                     </button>
