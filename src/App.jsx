@@ -17,6 +17,7 @@ import Register from './pages/Register';
 import EditProfile from './pages/EditProfile';
 import BlockList from './pages/BlockList';
 import SearchResults from './pages/SearchResults';
+import LocationTracker from './components/LocationTracker';
 
 const MainLayout = () => {
   return (
@@ -34,6 +35,7 @@ function App() {
   return (
     <AuthProvider>
       <SocketProvider>
+        <LocationTracker />
         <Router>
           <Routes>
             <Route path="/login" element={<Login />} />
