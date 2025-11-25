@@ -19,12 +19,28 @@ const io = new Server(server, {
     }
 });
 
+const User = require('./models/User'); // Import User model
+
 io.on('connection', (socket) => {
     console.log('New client connected:', socket.id);
 
-    socket.on('setup', (userData) => {
+    socket.on('setup', async (userData) => {
         socket.join(userData._id);
+        socket.userId = userData._id; // Store userId in socket session
         socket.emit('connected');
+
+        // Set user online
+        try {
+            const user = await User.findByIdAndUpdate(userData._id, { isOnline: true }, { new: true });
+            io.emit('user status', {
+                userId: userData._id,
+                isOnline: true,
+                userName: user.name,
+                userImg: user.img
+            });
+        } catch (error) {
+            console.error('Error setting user online:', error);
+        }
     });
 
     socket.on('join chat', (room) => {
@@ -32,8 +48,30 @@ io.on('connection', (socket) => {
         console.log('User joined room: ' + room);
     });
 
-    socket.on('disconnect', () => {
+    socket.on('typing', (room) => {
+        socket.to(room).emit('typing');
+    });
+
+    socket.on('stop typing', (room) => {
+        socket.to(room).emit('stop typing');
+    });
+
+    socket.on('disconnect', async () => {
         console.log('Client disconnected');
+        if (socket.userId) {
+            // Set user offline
+            try {
+                const user = await User.findByIdAndUpdate(socket.userId, { isOnline: false }, { new: true });
+                io.emit('user status', {
+                    userId: socket.userId,
+                    isOnline: false,
+                    userName: user.name,
+                    userImg: user.img
+                });
+            } catch (error) {
+                console.error('Error setting user offline:', error);
+            }
+        }
     });
 });
 
@@ -50,9 +88,16 @@ app.get('/', (req, res) => {
     res.send('API is running...');
 });
 
-app.use('/api/auth', require('./routes/auth'));
-app.use('/api/users', require('./routes/users'));
-app.use('/api/chat', require('./routes/chat'));
+const authRoutes = require('./routes/auth');
+const userRoutes = require('./routes/users');
+const chatRoutes = require('./routes/chat');
+const postRoutes = require('./routes/posts');
+
+// Use Routes
+app.use('/api/auth', authRoutes);
+app.use('/api/users', userRoutes);
+app.use('/api/chat', chatRoutes);
+app.use('/api/posts', postRoutes);
 
 const PORT = process.env.PORT || 5000;
 

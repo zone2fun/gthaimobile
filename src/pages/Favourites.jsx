@@ -1,25 +1,30 @@
 import React, { useState, useEffect, useContext } from 'react';
 import ProfileCard from '../components/ProfileCard';
-import { getUsers } from '../services/api';
+import { getUsers, getUser } from '../services/api';
 import AuthContext from '../context/AuthContext';
 
 const Favourites = () => {
     const [favourites, setFavourites] = useState([]);
-    const { token } = useContext(AuthContext);
+    const { token, user } = useContext(AuthContext);
 
     useEffect(() => {
         const fetchData = async () => {
-            if (token) {
+            if (token && user) {
                 try {
-                    const users = await getUsers(token);
-                    setFavourites(users.filter(u => u.starred));
+                    const allUsers = await getUsers(token);
+                    const currentUserProfile = await getUser(user._id, token);
+
+                    if (currentUserProfile && currentUserProfile.favorites) {
+                        const favs = allUsers.filter(u => currentUserProfile.favorites.includes(u._id || u.id));
+                        setFavourites(favs);
+                    }
                 } catch (error) {
                     console.error("Error fetching favourites:", error);
                 }
             }
         };
         fetchData();
-    }, [token]);
+    }, [token, user]);
 
     return (
         <div className="app-content">

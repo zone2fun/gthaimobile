@@ -44,7 +44,10 @@ const Chat = () => {
                     // Update existing conversation
                     const updatedConv = {
                         ...newConvs[existingConvIndex],
-                        lastMessage: newMessage
+                        lastMessage: newMessage,
+                        unreadCount: newMessage.sender._id !== currentUser._id
+                            ? (newConvs[existingConvIndex].unreadCount || 0) + 1
+                            : newConvs[existingConvIndex].unreadCount
                     };
                     // Move to top
                     newConvs.splice(existingConvIndex, 1);
@@ -54,7 +57,8 @@ const Chat = () => {
                     const otherUser = newMessage.sender._id === currentUser._id ? newMessage.recipient : newMessage.sender;
                     newConvs.unshift({
                         user: otherUser,
-                        lastMessage: newMessage
+                        lastMessage: newMessage,
+                        unreadCount: newMessage.sender._id !== currentUser._id ? 1 : 0
                     });
                 }
                 return newConvs;
@@ -81,11 +85,16 @@ const Chat = () => {
                         <div key={conv.user._id} className="chat-list-item" onClick={() => navigate(`/chat/${conv.user._id}`)}>
                             <div className="chat-avatar">
                                 <img src={conv.user.img} alt={conv.user.name} />
-                                <div className={`status-dot ${conv.user.isOnline ? 'online' : ''}`}></div>
+                                <div className={`status-dot ${conv.user.isOnline ? 'online' : 'offline'}`}></div>
                             </div>
                             <div className="chat-info">
                                 <div className="chat-name-time">
-                                    <span className="chat-name">{conv.user.name}</span>
+                                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                        <span className="chat-name">{conv.user.name}</span>
+                                        {conv.unreadCount > 0 && (
+                                            <span className="unread-badge">{conv.unreadCount}</span>
+                                        )}
+                                    </div>
                                     <span className="chat-time">
                                         {new Date(conv.lastMessage.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                                     </span>

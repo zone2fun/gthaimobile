@@ -12,10 +12,10 @@ const BottomNav = () => {
             </NavLink>
             <NavLink to="/special" className={({ isActive }) => isActive ? "nav-item active" : "nav-item"}>
                 <span className="material-icons">layers</span>
-                <span className="nav-label">พิเศษ</span>
+                <span className="nav-label">โพสต์</span>
             </NavLink>
             <NavLink to="/" className={({ isActive }) => isActive ? "nav-item active" : "nav-item"}>
-                <span className="material-icons">masks</span>
+                <span className="material-icons">groups</span>
                 <span className="nav-label">GTHAI</span>
             </NavLink>
             <NavLink to="/chat" className={({ isActive }) => isActive ? "nav-item active" : "nav-item"}>

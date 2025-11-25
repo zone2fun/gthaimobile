@@ -13,14 +13,28 @@ const generateToken = (id) => {
 // @route   POST /api/auth/register
 // @access  Public
 const registerUser = async (req, res) => {
-    const { username, password, name, age, height, weight, country } = req.body;
+    const { username, password, email, name, age, height, weight, country } = req.body;
 
-    if (!username || !password || !name) {
+    if (!username || !password || !email || !name) {
         return res.status(400).json({ message: 'Please add all required fields' });
     }
 
+    // Validation
+    if (username.length < 8) {
+        return res.status(400).json({ message: 'Username must be at least 8 characters' });
+    }
+    if (password.length < 8) {
+        return res.status(400).json({ message: 'Password must be at least 8 characters' });
+    }
+    if (name.length < 3) {
+        return res.status(400).json({ message: 'Display name must be at least 3 characters' });
+    }
+    if (!email.includes('@')) {
+        return res.status(400).json({ message: 'Please enter a valid email' });
+    }
+
     // Check if user exists
-    const userExists = await User.findOne({ username });
+    const userExists = await User.findOne({ $or: [{ username }, { email }] });
 
     if (userExists) {
         return res.status(400).json({ message: 'User already exists' });
@@ -30,15 +44,28 @@ const registerUser = async (req, res) => {
     const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(password, salt);
 
+    // Use provided location or randomize around Bangkok
+    let lat = req.body.lat;
+    let lng = req.body.lng;
+
+    if (!lat || !lng) {
+        // +/- 0.05 degrees is roughly 5-6 km
+        lat = 13.7563 + (Math.random() - 0.5) * 0.1;
+        lng = 100.5018 + (Math.random() - 0.5) * 0.1;
+    }
+
     // Create user
     const user = await User.create({
         username,
         password: hashedPassword,
+        email,
         name,
         age,
         height,
         weight,
-        country
+        country,
+        lat,
+        lng
     });
 
     if (user) {
@@ -46,6 +73,7 @@ const registerUser = async (req, res) => {
             _id: user.id,
             name: user.name,
             username: user.username,
+            img: user.img,
             token: generateToken(user._id)
         });
     } else {
@@ -67,6 +95,7 @@ const loginUser = async (req, res) => {
             _id: user.id,
             name: user.name,
             username: user.username,
+            img: user.img,
             token: generateToken(user._id)
         });
     } else {

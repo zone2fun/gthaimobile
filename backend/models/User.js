@@ -10,23 +10,34 @@ const userSchema = mongoose.Schema({
         type: String,
         required: true
     },
+    email: {
+        type: String,
+        required: false, // Changed to false to support existing users
+        unique: true,
+        sparse: true // Allows multiple null values
+    },
     name: {
         type: String,
         required: true
     },
     img: {
         type: String,
-        default: 'https://via.placeholder.com/150'
+        default: '/user_avatar.png'
     },
     cover: {
         type: String,
-        default: 'https://via.placeholder.com/600x200'
+        default: '/cover_default.png'
     },
     age: Number,
     height: Number,
     weight: Number,
     country: String,
     lookingFor: [String],
+    bio: {
+        type: String,
+        maxlength: 200,
+        default: ''
+    },
     gallery: [String],
     isOnline: {
         type: Boolean,
@@ -39,7 +50,15 @@ const userSchema = mongoose.Schema({
     lng: {
         type: Number,
         default: 100.5018
-    }
+    },
+    favorites: [{
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'User'
+    }],
+    blockedUsers: [{
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'User'
+    }]
 }, {
     timestamps: true
 });

@@ -71,10 +71,148 @@ export const sendMessage = async (messageData, token) => {
     const response = await fetch(`${API_URL}/chat`, {
         method: 'POST',
         headers: {
+            Authorization: `Bearer ${token}`,
+            // Don't set Content-Type for FormData, browser will set it with boundary
+        },
+        body: messageData, // Can be FormData or JSON
+    });
+    return response.json();
+};
+
+export const deleteMessage = async (messageId, token) => {
+    const response = await fetch(`${API_URL}/chat/${messageId}`, {
+        method: 'DELETE',
+        headers: {
+            Authorization: `Bearer ${token}`,
+        },
+    });
+    return response.json();
+};
+
+export const markAsRead = async (senderId, token) => {
+    const response = await fetch(`${API_URL}/chat/read`, {
+        method: 'PUT',
+        headers: {
             'Content-Type': 'application/json',
             Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify(messageData),
+        body: JSON.stringify({ senderId }),
+    });
+    return response.json();
+};
+
+export const toggleFavorite = async (userId, token) => {
+    const response = await fetch(`${API_URL}/users/${userId}/favorite`, {
+        method: 'PUT',
+        headers: {
+            Authorization: `Bearer ${token}`,
+        },
+    });
+    return response.json();
+};
+
+export const blockUser = async (userId, token) => {
+    const response = await fetch(`${API_URL}/users/${userId}/block`, {
+        method: 'PUT',
+        headers: {
+            Authorization: `Bearer ${token}`,
+        },
+    });
+    return response.json();
+};
+
+export const unblockUser = async (userId, token) => {
+    const response = await fetch(`${API_URL}/users/${userId}/unblock`, {
+        method: 'PUT',
+        headers: {
+            Authorization: `Bearer ${token}`,
+        },
+    });
+    return response.json();
+};
+
+export const getBlockedUsers = async (token) => {
+    const response = await fetch(`${API_URL}/users/blocked`, {
+        headers: {
+            Authorization: `Bearer ${token}`,
+        },
+    });
+    return response.json();
+};
+export const updateProfile = async (formData, token) => {
+    const response = await fetch(`${API_URL}/users/profile`, {
+        method: 'PUT',
+        headers: {
+            Authorization: `Bearer ${token}`,
+            // Content-Type is not set here because FormData sets it automatically with boundary
+        },
+        body: formData,
+    });
+    return response.json();
+    return response.json();
+};
+
+export const getMe = async (token) => {
+    const response = await fetch(`${API_URL}/auth/me`, {
+        headers: {
+            Authorization: `Bearer ${token}`,
+        },
+    });
+    return response.json();
+};
+
+export const getPosts = async (token, hashtag = '') => {
+    let url = `${API_URL}/posts`;
+    if (hashtag) {
+        url += `?hashtag=${encodeURIComponent(hashtag)}`;
+    }
+    const response = await fetch(url, {
+        headers: {
+            Authorization: `Bearer ${token}`,
+        },
+    });
+    return response.json();
+};
+
+export const createPost = async (postData, token) => {
+    const response = await fetch(`${API_URL}/posts`, {
+        method: 'POST',
+        headers: {
+            Authorization: `Bearer ${token}`,
+        },
+        body: postData,
+    });
+    return response.json();
+};
+
+export const likePost = async (postId, token) => {
+    const response = await fetch(`${API_URL}/posts/${postId}/like`, {
+        method: 'PUT',
+        headers: {
+            Authorization: `Bearer ${token}`,
+        },
+    });
+    return response.json();
+};
+
+export const addComment = async (postId, text, token) => {
+    const response = await fetch(`${API_URL}/posts/${postId}/comment`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ text }),
+    });
+    return response.json();
+};
+
+export const deletePost = async (postId, token) => {
+    const response = await fetch(`${API_URL}/posts/${postId}`, {
+        method: 'DELETE',
+        headers: {
+            Authorization: `Bearer ${token}`,
+        },
     });
     return response.json();
 };
