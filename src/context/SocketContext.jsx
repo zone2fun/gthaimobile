@@ -16,7 +16,7 @@ export const SocketProvider = ({ children }) => {
             if (user && user._id) {
                 try {
                     // First, fetch user favorites
-                    const response = await fetch(`http://localhost:5000/api/users/${user._id}`, {
+                    const response = await fetch(`${import.meta.env.VITE_API_URL}/api/users/${user._id}`, {
                         headers: {
                             Authorization: `Bearer ${localStorage.getItem('token')}`,
                         },
@@ -26,7 +26,7 @@ export const SocketProvider = ({ children }) => {
                     console.log('User favorites loaded:', favorites);
 
                     // Then, setup socket connection
-                    const newSocket = io('http://localhost:5000');
+                    const newSocket = io(import.meta.env.VITE_API_URL);
                     setSocket(newSocket);
 
                     newSocket.emit('setup', user);

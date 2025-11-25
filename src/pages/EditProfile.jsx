@@ -29,7 +29,7 @@ const EditProfile = () => {
             if (user && token) {
                 try {
                     // Fetch full user profile from API
-                    const response = await fetch(`http://localhost:5000/api/users/${user._id}`, {
+                    const response = await fetch(`${import.meta.env.VITE_API_URL}/api/users/${user._id}`, {
                         headers: {
                             Authorization: `Bearer ${token}`,
                         },
