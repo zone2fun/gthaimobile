@@ -337,9 +337,11 @@ body {
 .status-dot {
     width: 10px;
     height: 10px;
+    aspect-ratio: 1;
     border-radius: 50%;
     margin-right: 5px;
     border: 1px solid #fff;
+    flex-shrink: 0;
 }
 
 .status-dot.online {
@@ -460,6 +462,7 @@ body {
 .profile-avatar {
     width: 100px;
     height: 100px;
+    aspect-ratio: 1;
     border-radius: 50%;
     border: 2px solid var(--card-bg);
     overflow: visible;
@@ -477,6 +480,9 @@ body {
     height: 100%;
     object-fit: cover;
     border-radius: 50%;
+    object-fit: cover;
+    background-color: #333;
+    /* Fallback background */
 }
 
 .profile-avatar .status-dot {
@@ -485,6 +491,8 @@ body {
     right: 5px;
     width: 15px;
     height: 15px;
+    aspect-ratio: 1;
+    border-radius: 50%;
     border: 2px solid var(--bg-color);
 }
 
