@@ -259,3 +259,21 @@ export const deleteComment = async (postId, commentId, token) => {
     return response.json();
 };
 
+export const getNotifications = async (token) => {
+    const response = await fetch(`${API_URL}/notifications`, {
+        headers: {
+            Authorization: `Bearer ${token}`,
+        },
+    });
+    return response.json();
+};
+
+export const markNotificationAsRead = async (id, token) => {
+    const response = await fetch(`${API_URL}/notifications/${id}/read`, {
+        method: 'PUT',
+        headers: {
+            Authorization: `Bearer ${token}`,
+        },
+    });
+    return response.json();
+};

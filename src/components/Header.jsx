@@ -2,6 +2,7 @@ import React, { useState, useContext, useEffect, useRef } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import AuthContext from '../context/AuthContext';
 import SocketContext from '../context/SocketContext';
+import { getNotifications, markNotificationAsRead } from '../services/api';
 
 const Header = () => {
     const [showMenu, setShowMenu] = useState(false);
@@ -18,6 +19,80 @@ const Header = () => {
     const searchRef = useRef(null);
     const chipsRef = useRef(null);
     const isSpecialPage = location.pathname === '/special';
+
+    // Notification State
+    const [notifications, setNotifications] = useState([]);
+    const [showNotifications, setShowNotifications] = useState(false);
+    const [unreadCount, setUnreadCount] = useState(0);
+    const { socket } = useContext(SocketContext);
+    const notificationRef = useRef(null);
+
+    // Fetch notifications
+    useEffect(() => {
+        if (user && localStorage.getItem('token')) {
+            const fetchNotifications = async () => {
+                try {
+                    const data = await getNotifications(localStorage.getItem('token'));
+                    setNotifications(data);
+                    setUnreadCount(data.filter(n => !n.read).length);
+                } catch (error) {
+                    console.error('Error fetching notifications:', error);
+                }
+            };
+            fetchNotifications();
+        }
+    }, [user]);
+
+    // Listen for real-time notifications
+    useEffect(() => {
+        if (socket) {
+            const handleNewNotification = (notification) => {
+                setNotifications(prev => [notification, ...prev]);
+                setUnreadCount(prev => prev + 1);
+            };
+
+            socket.on('new notification', handleNewNotification);
+
+            return () => {
+                socket.off('new notification', handleNewNotification);
+            };
+        }
+    }, [socket]);
+
+    // Close notification dropdown when clicking outside
+    useEffect(() => {
+        const handleClickOutside = (event) => {
+            if (notificationRef.current && !notificationRef.current.contains(event.target)) {
+                setShowNotifications(false);
+            }
+        };
+
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => document.removeEventListener('mousedown', handleClickOutside);
+    }, []);
+
+    const handleNotificationClick = async (notification) => {
+        if (!notification.read) {
+            try {
+                await markNotificationAsRead(notification._id, localStorage.getItem('token'));
+                setNotifications(prev =>
+                    prev.map(n => n._id === notification._id ? { ...n, read: true } : n)
+                );
+                setUnreadCount(prev => Math.max(0, prev - 1));
+            } catch (error) {
+                console.error('Error marking notification as read:', error);
+            }
+        }
+
+        setShowNotifications(false);
+
+        if (notification.type === 'like_post' && notification.post) {
+            // Navigate to post (assuming we have a post detail page or just go to feed)
+            // For now, let's go to the user's profile or feed
+            // Ideally we should have a /post/:id route
+            navigate('/'); // Or wherever posts are shown
+        }
+    };
 
     const handleLogout = () => {
         disconnectSocket();
@@ -292,7 +367,93 @@ const Header = () => {
                 </div>
             )}
 
-            <div className="menu-container" style={{ position: 'relative' }}>
+            <div className="menu-container" style={{ position: 'relative', display: 'flex', alignItems: 'center', gap: '15px' }}>
+                {user && (
+                    <div ref={notificationRef} style={{ position: 'relative' }}>
+                        <div
+                            onClick={() => setShowNotifications(!showNotifications)}
+                            style={{ position: 'relative', cursor: 'pointer', display: 'flex', alignItems: 'center' }}
+                        >
+                            <span className="material-icons" style={{ color: '#fff', fontSize: '24px' }}>notifications</span>
+                            {unreadCount > 0 && (
+                                <span style={{
+                                    position: 'absolute',
+                                    top: '-5px',
+                                    right: '-5px',
+                                    backgroundColor: 'red',
+                                    color: 'white',
+                                    borderRadius: '50%',
+                                    width: '16px',
+                                    height: '16px',
+                                    fontSize: '10px',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    fontWeight: 'bold'
+                                }}>
+                                    {unreadCount > 9 ? '9+' : unreadCount}
+                                </span>
+                            )}
+                        </div>
+
+                        {showNotifications && (
+                            <div className="dropdown-menu" style={{
+                                right: '-50px',
+                                width: '300px',
+                                maxHeight: '400px',
+                                overflowY: 'auto',
+                                padding: '0'
+                            }}>
+                                <div style={{ padding: '10px 15px', borderBottom: '1px solid #333', fontWeight: 'bold' }}>
+                                    Notifications
+                                </div>
+                                {notifications.length === 0 ? (
+                                    <div style={{ padding: '20px', textAlign: 'center', color: '#888' }}>
+                                        No notifications
+                                    </div>
+                                ) : (
+                                    notifications.map(notification => (
+                                        <div
+                                            key={notification._id}
+                                            onClick={() => handleNotificationClick(notification)}
+                                            style={{
+                                                padding: '10px 15px',
+                                                borderBottom: '1px solid #333',
+                                                cursor: 'pointer',
+                                                backgroundColor: notification.read ? 'transparent' : 'rgba(166, 7, 214, 0.1)',
+                                                display: 'flex',
+                                                alignItems: 'center',
+                                                gap: '10px'
+                                            }}
+                                        >
+                                            <img
+                                                src={notification.sender.img || '/user_avatar.png'}
+                                                alt={notification.sender.name}
+                                                style={{ width: '40px', height: '40px', borderRadius: '50%', objectFit: 'cover' }}
+                                            />
+                                            <div style={{ flex: 1 }}>
+                                                <div style={{ fontSize: '14px' }}>
+                                                    <strong>{notification.sender.name}</strong> liked your post
+                                                </div>
+                                                <div style={{ fontSize: '12px', color: '#888', marginTop: '4px' }}>
+                                                    {new Date(notification.createdAt).toLocaleDateString()}
+                                                </div>
+                                            </div>
+                                            {notification.post && notification.post.image && (
+                                                <img
+                                                    src={notification.post.image}
+                                                    alt="Post"
+                                                    style={{ width: '40px', height: '40px', borderRadius: '4px', objectFit: 'cover' }}
+                                                />
+                                            )}
+                                        </div>
+                                    ))
+                                )}
+                            </div>
+                        )}
+                    </div>
+                )}
+
                 <button className="menu-btn" onClick={() => setShowMenu(!showMenu)} style={{ padding: 0, background: 'none', border: 'none' }}>
                     {user ? (
                         <img
