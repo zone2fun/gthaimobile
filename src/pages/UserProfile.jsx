@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useContext } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { getUser, toggleFavorite, blockUser, unblockUser, getMe, createReport } from '../services/api';
+import { getUser, toggleFavorite, blockUser, unblockUser, getMe, createReport, checkAlbumAccess, requestAlbumAccess } from '../services/api';
 import AuthContext from '../context/AuthContext';
 import SocketContext from '../context/SocketContext';
 
@@ -20,17 +20,21 @@ const UserProfile = ({ userId }) => {
     const [reportReason, setReportReason] = useState('');
     const [reportAdditionalInfo, setReportAdditionalInfo] = useState('');
     const [showReportSuccessModal, setShowReportSuccessModal] = useState(false);
+    const [albumAccess, setAlbumAccess] = useState({ hasAccess: false, isOwner: false, hasPendingRequest: false });
+    const [showAccessRequestModal, setShowAccessRequestModal] = useState(false);
 
     useEffect(() => {
         const fetchData = async () => {
             if (token && targetId) {
                 try {
-                    const [userData, currentUserData] = await Promise.all([
+                    const [userData, currentUserData, accessData] = await Promise.all([
                         getUser(targetId, token),
-                        getMe(token)
+                        getMe(token),
+                        checkAlbumAccess(targetId, token)
                     ]);
 
                     setUser(userData);
+                    setAlbumAccess(accessData);
 
                     // Check if this user is in current user's favorites
                     if (currentUserData && currentUserData.favorites && currentUserData.favorites.includes(targetId)) {
@@ -114,6 +118,17 @@ const UserProfile = ({ userId }) => {
             setShowReportSuccessModal(true);
         } catch (error) {
             console.error('Error reporting user:', error);
+        }
+    };
+
+    const handleRequestAccess = async () => {
+        try {
+            await requestAlbumAccess(user._id || user.id, token);
+            setAlbumAccess(prev => ({ ...prev, hasPendingRequest: true }));
+            setShowAccessRequestModal(true);
+        } catch (error) {
+            console.error('Error requesting album access:', error);
+            // Could add an error modal here if needed, but for now just log it
         }
     };
 
@@ -260,6 +275,79 @@ const UserProfile = ({ userId }) => {
                         </div>
                     </div>
                 )}
+
+                {/* Private Album Section */}
+                {user.privateAlbum && user.privateAlbum.length > 0 && (
+                    <div className="gallery-section">
+                        <h3 className="section-title" style={{ marginTop: '20px', marginLeft: 0, display: 'flex', alignItems: 'center', gap: '8px' }}>
+                            <span className="material-icons" style={{ fontSize: '20px', color: '#a607d6' }}>lock</span>
+                            Private Album
+                        </h3>
+
+                        {albumAccess.hasAccess ? (
+                            <div className="gallery-grid">
+                                {user.privateAlbum.map((img, index) => (
+                                    <div key={index} className="gallery-item" onClick={() => {
+                                        // Handle private album lightbox (need to adjust existing lightbox logic or add new one)
+                                        // For simplicity, reusing openLightbox but need to handle index offset if mixing with public gallery
+                                        // Or create a separate lightbox state for private album
+                                        // Let's just open image directly for now or implement proper lightbox later
+                                        window.open(img, '_blank');
+                                    }}>
+                                        <img src={img} alt={`Private ${index + 1}`} />
+                                    </div>
+                                ))}
+                            </div>
+                        ) : (
+                            <div style={{
+                                backgroundColor: '#1a1a1a',
+                                borderRadius: '12px',
+                                padding: '30px',
+                                textAlign: 'center',
+                                border: '1px dashed #333'
+                            }}>
+                                <span className="material-icons" style={{ fontSize: '48px', color: '#666', marginBottom: '15px' }}>lock</span>
+                                <p style={{ color: '#888', marginBottom: '20px' }}>
+                                    อัลบั้มนี้เป็นส่วนตัว ต้องได้รับอนุญาตจากเจ้าของก่อน
+                                </p>
+                                {albumAccess.hasPendingRequest ? (
+                                    <button disabled style={{
+                                        padding: '10px 20px',
+                                        borderRadius: '8px',
+                                        border: 'none',
+                                        backgroundColor: '#333',
+                                        color: '#888',
+                                        cursor: 'not-allowed',
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        gap: '8px',
+                                        margin: '0 auto'
+                                    }}>
+                                        <span className="material-icons" style={{ fontSize: '18px' }}>hourglass_empty</span>
+                                        รอการอนุมัติ
+                                    </button>
+                                ) : (
+                                    <button onClick={handleRequestAccess} style={{
+                                        padding: '10px 20px',
+                                        borderRadius: '8px',
+                                        border: 'none',
+                                        backgroundColor: '#a607d6',
+                                        color: 'white',
+                                        cursor: 'pointer',
+                                        fontWeight: '500',
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        gap: '8px',
+                                        margin: '0 auto'
+                                    }}>
+                                        <span className="material-icons" style={{ fontSize: '18px' }}>key</span>
+                                        ขอสิทธิ์เข้าถึง
+                                    </button>
+                                )}
+                            </div>
+                        )}
+                    </div>
+                )}
             </div>
 
             {lightboxOpen && (
@@ -322,6 +410,23 @@ const UserProfile = ({ userId }) => {
                         <h3 style={{ margin: '0 0 12px 0', fontSize: '24px', fontWeight: '600' }}>ส่งรายงานสำเร็จ</h3>
                         <p style={{ color: '#888', marginBottom: '30px', fontSize: '15px', lineHeight: '1.6' }}>ขอบคุณที่แจ้งให้เราทราบ<br />ทีมงานจะตรวจสอบและดำเนินการโดยเร็วที่สุด</p>
                         <button onClick={() => setShowReportSuccessModal(false)} style={{ width: '100%', padding: '14px 24px', borderRadius: '12px', border: 'none', backgroundColor: '#a607d6', color: 'white', cursor: 'pointer', fontWeight: '600', fontSize: '16px', transition: 'all 0.2s', boxShadow: '0 4px 12px rgba(166, 7, 214, 0.3)' }}>เข้าใจแล้ว</button>
+                    </div>
+                </div>
+            )}
+
+            {/* Access Request Success Modal */}
+            {showAccessRequestModal && (
+                <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(0, 0, 0, 0.8)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1001, animation: 'fadeIn 0.2s ease-in' }} onClick={() => setShowAccessRequestModal(false)}>
+                    <div style={{ backgroundColor: '#1a1a1a', borderRadius: '20px', padding: '40px 30px', maxWidth: '400px', width: '90%', textAlign: 'center', animation: 'slideUp 0.3s ease-out' }} onClick={(e) => e.stopPropagation()}>
+                        <div style={{ width: '80px', height: '80px', borderRadius: '50%', backgroundColor: 'rgba(166, 7, 214, 0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 20px', animation: 'scaleIn 0.4s ease-out' }}>
+                            <span className="material-icons" style={{ fontSize: '40px', color: '#a607d6' }}>send</span>
+                        </div>
+                        <h3 style={{ margin: '0 0 12px 0', fontSize: '24px', fontWeight: '600' }}>ส่งคำขอเรียบร้อย</h3>
+                        <p style={{ color: '#888', marginBottom: '30px', fontSize: '15px', lineHeight: '1.6' }}>
+                            เราได้แจ้งเตือนไปยังเจ้าของโปรไฟล์แล้ว<br />
+                            กรุณารอการอนุมัติเพื่อเข้าชมอัลบั้มส่วนตัว
+                        </p>
+                        <button onClick={() => setShowAccessRequestModal(false)} style={{ width: '100%', padding: '14px 24px', borderRadius: '12px', border: 'none', backgroundColor: '#a607d6', color: 'white', cursor: 'pointer', fontWeight: '600', fontSize: '16px', transition: 'all 0.2s', boxShadow: '0 4px 12px rgba(166, 7, 214, 0.3)' }}>ตกลง</button>
                     </div>
                 </div>
             )}

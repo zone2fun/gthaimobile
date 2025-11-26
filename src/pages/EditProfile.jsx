@@ -21,6 +21,8 @@ const EditProfile = () => {
     const [coverPreview, setCoverPreview] = useState(null);
     const [galleryImages, setGalleryImages] = useState([]);
     const [newGalleryFiles, setNewGalleryFiles] = useState([]);
+    const [privateAlbum, setPrivateAlbum] = useState([]);
+    const [newPrivateFiles, setNewPrivateFiles] = useState([]);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
     const [isPublic, setIsPublic] = useState(true);
@@ -54,6 +56,7 @@ const EditProfile = () => {
                     setImgPreview(fullUserData.img);
                     setCoverPreview(fullUserData.cover);
                     setGalleryImages(fullUserData.gallery || []);
+                    setPrivateAlbum(fullUserData.privateAlbum || []);
                     setIsPublic(fullUserData.isPublic !== undefined ? fullUserData.isPublic : true);
                 } catch (error) {
                     console.error('Error fetching user profile:', error);
@@ -98,16 +101,37 @@ const EditProfile = () => {
             return;
         }
 
-        setNewGalleryFiles([...newGalleryFiles, ...files]);
         setError('');
+        setNewGalleryFiles([...newGalleryFiles, ...files]);
     };
 
-    const handleDeleteGalleryImage = (index, isExisting) => {
-        if (isExisting) {
-            setGalleryImages(galleryImages.filter((_, i) => i !== index));
-        } else {
-            setNewGalleryFiles(newGalleryFiles.filter((_, i) => i !== index));
+    const handlePrivateAlbumUpload = (e) => {
+        const files = Array.from(e.target.files);
+        const totalImages = privateAlbum.length + newPrivateFiles.length + files.length;
+
+        if (totalImages > 3) {
+            setError('Private album can only have 3 photos');
+            return;
         }
+
+        setError('');
+        setNewPrivateFiles([...newPrivateFiles, ...files]);
+    };
+
+    const removeGalleryImage = (index) => {
+        setGalleryImages(galleryImages.filter((_, i) => i !== index));
+    };
+
+    const removeNewGalleryFile = (index) => {
+        setNewGalleryFiles(newGalleryFiles.filter((_, i) => i !== index));
+    };
+
+    const removePrivateAlbumImage = (index) => {
+        setPrivateAlbum(privateAlbum.filter((_, i) => i !== index));
+    };
+
+    const removeNewPrivateFile = (index) => {
+        setNewPrivateFiles(newPrivateFiles.filter((_, i) => i !== index));
     };
 
     const handleSubmit = async (e) => {
@@ -132,6 +156,16 @@ const EditProfile = () => {
         // Add new gallery files
         newGalleryFiles.forEach(file => {
             data.append('gallery', file);
+        });
+
+        // Add existing private album URLs
+        if (privateAlbum.length > 0) {
+            data.append('existingPrivateAlbum', privateAlbum.join(','));
+        }
+
+        // Add new private album files
+        newPrivateFiles.forEach(file => {
+            data.append('privateAlbum', file);
         });
 
         try {
@@ -361,6 +395,59 @@ const EditProfile = () => {
                             </div>
                         )}
                     </div>
+                </div>
+
+                {/* Private Album Section */}
+                <div style={{ marginBottom: '20px' }}>
+                    <label style={labelStyle}>Private Album (Max 3 images)</label>
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '10px', marginTop: '10px' }}>
+                        {/* Existing private album images */}
+                        {privateAlbum.map((img, index) => (
+                            <div key={`existing-private-${index}`} style={{ position: 'relative', paddingTop: '100%', backgroundColor: '#333', borderRadius: '8px', overflow: 'hidden' }}>
+                                <img src={img} alt={`Private ${index + 1}`} style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', objectFit: 'cover' }} />
+                                <button
+                                    type="button"
+                                    onClick={() => removePrivateAlbumImage(index)}
+                                    style={{ position: 'absolute', top: '5px', right: '5px', background: 'rgba(255,0,0,0.8)', border: 'none', borderRadius: '50%', width: '24px', height: '24px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                                >
+                                    <span className="material-icons" style={{ fontSize: '16px', color: 'white' }}>close</span>
+                                </button>
+                            </div>
+                        ))}
+
+                        {/* New private album files preview */}
+                        {newPrivateFiles.map((file, index) => (
+                            <div key={`new-private-${index}`} style={{ position: 'relative', paddingTop: '100%', backgroundColor: '#333', borderRadius: '8px', overflow: 'hidden' }}>
+                                <img src={URL.createObjectURL(file)} alt={`New Private ${index + 1}`} style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', objectFit: 'cover' }} />
+                                <button
+                                    type="button"
+                                    onClick={() => removeNewPrivateFile(index)}
+                                    style={{ position: 'absolute', top: '5px', right: '5px', background: 'rgba(255,0,0,0.8)', border: 'none', borderRadius: '50%', width: '24px', height: '24px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                                >
+                                    <span className="material-icons" style={{ fontSize: '16px', color: 'white' }}>close</span>
+                                </button>
+                            </div>
+                        ))}
+
+                        {/* Upload button */}
+                        {(privateAlbum.length + newPrivateFiles.length) < 3 && (
+                            <div style={{ position: 'relative', paddingTop: '100%' }}>
+                                <div style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', backgroundColor: '#333', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center', border: '2px dashed #666' }}>
+                                    <span className="material-icons" style={{ fontSize: '40px', color: '#666', pointerEvents: 'none' }}>lock</span>
+                                </div>
+                                <input
+                                    type="file"
+                                    accept="image/*"
+                                    multiple
+                                    onChange={handlePrivateAlbumUpload}
+                                    style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', opacity: 0, cursor: 'pointer', zIndex: 10 }}
+                                />
+                            </div>
+                        )}
+                    </div>
+                    <p style={{ fontSize: '12px', color: '#888', marginTop: '5px' }}>
+                        รูปในอัลบั้มส่วนตัวจะเห็นได้เฉพาะคนที่คุณอนุญาตเท่านั้น
+                    </p>
                 </div>
 
                 <button type="submit" disabled={loading} style={{ width: '100%', padding: '12px', borderRadius: '8px', border: 'none', backgroundColor: '#a607d6', color: 'white', fontWeight: 'bold', cursor: loading ? 'not-allowed' : 'pointer', opacity: loading ? 0.7 : 1 }}>

@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef, useContext } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { getUser, getMessages, sendMessage, deleteMessage, markAsRead } from '../services/api';
+import { getUser, getMessages, sendMessage, deleteMessage, markAsRead, updateAlbumAccessRequest } from '../services/api';
 import AuthContext from '../context/AuthContext';
 import SocketContext from '../context/SocketContext';
 
@@ -159,6 +159,60 @@ const ChatDetail = () => {
         }
     };
 
+    const handleAccessResponse = async (requestId, status) => {
+        try {
+            await updateAlbumAccessRequest(requestId, status, token);
+            // Update message status locally or re-fetch messages
+            // For simplicity, we can just reload messages or update the specific message if we had state for it
+            // But since the backend creates a new response message, we should just see it appear
+        } catch (error) {
+            console.error('Error updating access request:', error);
+        }
+    };
+
+    const renderMessageContent = (msg) => {
+        if (msg.type === 'request_album_access') {
+            const isMe = msg.sender._id === currentUser?._id || msg.sender === currentUser?._id;
+            return (
+                <div style={{ padding: '10px', textAlign: 'center' }}>
+                    <div style={{ marginBottom: '10px', fontWeight: 'bold' }}>
+                        <span className="material-icons" style={{ verticalAlign: 'middle', marginRight: '5px' }}>lock</span>
+                        ขอสิทธิ์เข้าถึงอัลบั้มส่วนตัว
+                    </div>
+                    {!isMe && (
+                        <div style={{ display: 'flex', gap: '10px', justifyContent: 'center' }}>
+                            <button
+                                onClick={() => handleAccessResponse(msg.relatedId, 'rejected')}
+                                style={{ padding: '5px 15px', borderRadius: '15px', border: '1px solid #ff4444', background: 'transparent', color: '#ff4444', cursor: 'pointer' }}
+                            >
+                                ปฏิเสธ
+                            </button>
+                            <button
+                                onClick={() => handleAccessResponse(msg.relatedId, 'approved')}
+                                style={{ padding: '5px 15px', borderRadius: '15px', border: 'none', background: '#a607d6', color: 'white', cursor: 'pointer' }}
+                            >
+                                อนุมัติ
+                            </button>
+                        </div>
+                    )}
+                    {isMe && <div style={{ fontSize: '12px', color: '#ccc' }}>รอการตอบรับ...</div>}
+                </div>
+            );
+        } else if (msg.type === 'album_access_response') {
+            return (
+                <div style={{ padding: '10px', textAlign: 'center' }}>
+                    <div style={{ fontWeight: 'bold', color: msg.text.includes('อนุมัติ') ? '#4CAF50' : '#ff4444' }}>
+                        {msg.text}
+                    </div>
+                </div>
+            );
+        } else if (msg.image) {
+            return <img src={msg.image} alt="Sent image" className="message-image" />;
+        } else {
+            return msg.text;
+        }
+    };
+
     return (
         <div className="chat-page">
             <header className="chat-header">
@@ -181,11 +235,7 @@ const ChatDetail = () => {
                 {messages.map((msg) => (
                     <div key={msg._id || msg.id} className={`message-bubble ${(msg.sender._id === currentUser?._id || msg.sender === currentUser?._id) ? 'me' : 'them'}`}>
                         <div className="message-content">
-                            {msg.image ? (
-                                <img src={msg.image} alt="Sent image" className="message-image" />
-                            ) : (
-                                msg.text
-                            )}
+                            {renderMessageContent(msg)}
                         </div>
                         <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                             <span className="message-time">

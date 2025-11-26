@@ -298,3 +298,44 @@ export const createReport = async (postId, userId, reason, additionalInfo, repor
     });
     return response.json();
 };
+
+// Album Access APIs
+export const requestAlbumAccess = async (userId, token) => {
+    const response = await fetch(`${API_URL}/album-access/request/${userId}`, {
+        method: 'POST',
+        headers: {
+            Authorization: `Bearer ${token}`,
+        },
+    });
+    return response.json();
+};
+
+export const getAlbumAccessRequests = async (token) => {
+    const response = await fetch(`${API_URL}/album-access/requests`, {
+        headers: {
+            Authorization: `Bearer ${token}`,
+        },
+    });
+    return response.json();
+};
+
+export const updateAlbumAccessRequest = async (requestId, status, token) => {
+    const response = await fetch(`${API_URL}/album-access/requests/${requestId}`, {
+        method: 'PUT',
+        headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ status }),
+    });
+    return response.json();
+};
+
+export const checkAlbumAccess = async (userId, token) => {
+    const response = await fetch(`${API_URL}/album-access/check/${userId}`, {
+        headers: {
+            Authorization: `Bearer ${token}`,
+        },
+    });
+    return response.json();
+};
