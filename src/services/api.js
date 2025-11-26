@@ -216,3 +216,14 @@ export const deletePost = async (postId, token) => {
     });
     return response.json();
 };
+
+export const deleteComment = async (postId, commentId, token) => {
+    const response = await fetch(`${API_URL}/posts/${postId}/comment/${commentId}`, {
+        method: 'DELETE',
+        headers: {
+            Authorization: `Bearer ${token}`,
+        },
+    });
+    return response.json();
+};
+

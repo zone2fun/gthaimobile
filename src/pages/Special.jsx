@@ -2,7 +2,8 @@ import React, { useState, useEffect, useContext, useRef } from 'react';
 import EmojiPicker from 'emoji-picker-react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import AuthContext from '../context/AuthContext';
-import { getPosts, createPost, likePost, deletePost, addComment } from '../services/api';
+import { getPosts, createPost, likePost, deletePost, addComment, deleteComment } from '../services/api';
+import SkeletonPost from '../components/SkeletonPost';
 
 const Special = () => {
     const [posts, setPosts] = useState([]);
@@ -123,6 +124,17 @@ const Special = () => {
         }
     };
 
+    const handleDeleteComment = async (postId, commentId) => {
+        try {
+            const updatedComments = await deleteComment(postId, commentId, token);
+            setPosts(posts.map(post =>
+                post._id === postId ? { ...post, comments: updatedComments } : post
+            ));
+        } catch (error) {
+            console.error('Error deleting comment:', error);
+        }
+    };
+
     return (
         <div className="app-content" style={{ paddingBottom: '80px' }}>
             <h2 className="section-title">Community Feed</h2>
@@ -232,7 +244,11 @@ const Special = () => {
                 )}
 
                 {loading ? (
-                    <div style={{ textAlign: 'center', color: '#888', marginTop: '20px' }}>Loading posts...</div>
+                    <>
+                        <SkeletonPost />
+                        <SkeletonPost />
+                        <SkeletonPost />
+                    </>
                 ) : posts.length === 0 ? (
                     <div style={{ textAlign: 'center', color: '#888', marginTop: '20px' }}>No posts yet. Be the first to share!</div>
                 ) : (
@@ -339,18 +355,51 @@ const Special = () => {
                                 <div className="comments-section" style={{ marginTop: '10px', paddingTop: '10px' }}>
                                     <div className="comments-list" style={{ maxHeight: '200px', overflowY: 'auto', marginBottom: '10px' }}>
                                         {post.comments?.map((comment, index) => (
-                                            <div key={index} className="comment-item" style={{ display: 'flex', marginBottom: '10px' }}>
+                                            <div key={comment._id || index} className="comment-item" style={{ display: 'flex', marginBottom: '10px', alignItems: 'flex-start' }}>
                                                 <img
                                                     src={comment.user?.img || '/user_avatar.png'}
                                                     alt={comment.user?.name}
                                                     onClick={() => navigate(`/user/${comment.user?._id}`)}
                                                     style={{ width: '30px', height: '30px', borderRadius: '50%', marginRight: '10px', objectFit: 'cover', cursor: 'pointer' }}
                                                 />
-                                                <div className="comment-content" style={{ backgroundColor: '#333', padding: '8px 12px', borderRadius: '15px', flex: 1 }}>
-                                                    <div className="comment-author" style={{ fontWeight: '600', fontSize: '13px', marginBottom: '2px' }}>
-                                                        {comment.user?.name || 'Unknown User'}
+                                                <div style={{ flex: 1, display: 'flex', alignItems: 'flex-start', gap: '8px' }}>
+                                                    <div className="comment-content" style={{ backgroundColor: '#333', padding: '8px 12px', borderRadius: '15px', flex: 1 }}>
+                                                        <div className="comment-author" style={{ fontWeight: '600', fontSize: '13px', marginBottom: '2px' }}>
+                                                            {comment.user?.name || 'Unknown User'}
+                                                        </div>
+                                                        <div className="comment-text" style={{ fontSize: '14px' }}>{comment.text}</div>
                                                     </div>
-                                                    <div className="comment-text" style={{ fontSize: '14px' }}>{comment.text}</div>
+                                                    {user?._id === post.user._id && (
+                                                        <button
+                                                            onClick={() => handleDeleteComment(post._id, comment._id)}
+                                                            style={{
+                                                                background: 'none',
+                                                                border: 'none',
+                                                                color: '#888',
+                                                                cursor: 'pointer',
+                                                                padding: '4px',
+                                                                display: 'flex',
+                                                                alignItems: 'center',
+                                                                justifyContent: 'center',
+                                                                borderRadius: '50%',
+                                                                transition: 'all 0.2s ease',
+                                                                width: '24px',
+                                                                height: '24px',
+                                                                flexShrink: 0
+                                                            }}
+                                                            onMouseEnter={(e) => {
+                                                                e.currentTarget.style.backgroundColor = 'rgba(255, 68, 68, 0.1)';
+                                                                e.currentTarget.style.color = '#ff4444';
+                                                            }}
+                                                            onMouseLeave={(e) => {
+                                                                e.currentTarget.style.backgroundColor = 'transparent';
+                                                                e.currentTarget.style.color = '#888';
+                                                            }}
+                                                            title="Delete comment"
+                                                        >
+                                                            <span className="material-icons" style={{ fontSize: '16px' }}>delete_outline</span>
+                                                        </button>
+                                                    )}
                                                 </div>
                                             </div>
                                         ))}
