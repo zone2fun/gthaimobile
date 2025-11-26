@@ -100,8 +100,12 @@ const Chat = () => {
                                     </span>
                                 </div>
                                 <p className="chat-last-message">
-                                    {(conv.lastMessage.sender._id === currentUser?._id || conv.lastMessage.sender === currentUser?._id) && 'You: '}
-                                    {conv.lastMessage.image ? 'ส่งรูปภาพ' : conv.lastMessage.text}
+                                    {conv.lastMessage && (
+                                        <>
+                                            {(conv.lastMessage.sender._id === currentUser?._id || conv.lastMessage.sender === currentUser?._id) && 'You: '}
+                                            {conv.lastMessage.image ? 'ส่งรูปภาพ' : (conv.lastMessage.text || '')}
+                                        </>
+                                    )}
                                 </p>
                             </div>
                         </div>

@@ -23,6 +23,7 @@ const Special = () => {
     const [postToReport, setPostToReport] = useState(null);
     const [reportReason, setReportReason] = useState('');
     const [reportAdditionalInfo, setReportAdditionalInfo] = useState('');
+    const [showReportSuccessModal, setShowReportSuccessModal] = useState(false);
     const { token, user } = useContext(AuthContext);
     const fileInputRef = useRef(null);
     const navigate = useNavigate();
@@ -148,7 +149,6 @@ const Special = () => {
 
     const confirmReport = async () => {
         if (!reportReason) {
-            alert('กรุณาเลือกเหตุผลในการรายงาน');
             return;
         }
 
@@ -158,10 +158,10 @@ const Special = () => {
             setPostToReport(null);
             setReportReason('');
             setReportAdditionalInfo('');
-            alert('รายงานโพสต์เรียบร้อยแล้ว ทีมงานจะตรวจสอบโดยเร็วที่สุด');
+            setShowReportSuccessModal(true);
         } catch (error) {
             console.error('Error reporting post:', error);
-            alert('เกิดข้อผิดพลาดในการรายงาน');
+            // Keep modal open to show error
         }
     };
 
@@ -744,6 +744,102 @@ const Special = () => {
                                 ส่งรายงาน
                             </button>
                         </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Report Success Modal */}
+            {showReportSuccessModal && (
+                <div
+                    style={{
+                        position: 'fixed',
+                        top: 0,
+                        left: 0,
+                        right: 0,
+                        bottom: 0,
+                        backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        zIndex: 1001,
+                        animation: 'fadeIn 0.2s ease-in'
+                    }}
+                    onClick={() => setShowReportSuccessModal(false)}
+                >
+                    <div
+                        style={{
+                            backgroundColor: '#1a1a1a',
+                            borderRadius: '20px',
+                            padding: '40px 30px',
+                            maxWidth: '400px',
+                            width: '90%',
+                            textAlign: 'center',
+                            animation: 'slideUp 0.3s ease-out'
+                        }}
+                        onClick={(e) => e.stopPropagation()}
+                    >
+                        {/* Success Icon */}
+                        <div style={{
+                            width: '80px',
+                            height: '80px',
+                            borderRadius: '50%',
+                            backgroundColor: 'rgba(76, 175, 80, 0.1)',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            margin: '0 auto 20px',
+                            animation: 'scaleIn 0.4s ease-out'
+                        }}>
+                            <span className="material-icons" style={{
+                                fontSize: '48px',
+                                color: '#4CAF50'
+                            }}>check_circle</span>
+                        </div>
+
+                        <h3 style={{
+                            margin: '0 0 12px 0',
+                            fontSize: '24px',
+                            fontWeight: '600'
+                        }}>ส่งรายงานสำเร็จ</h3>
+
+                        <p style={{
+                            color: '#888',
+                            marginBottom: '30px',
+                            fontSize: '15px',
+                            lineHeight: '1.6'
+                        }}>
+                            ขอบคุณที่แจ้งให้เราทราบ<br />
+                            ทีมงานจะตรวจสอบและดำเนินการโดยเร็วที่สุด
+                        </p>
+
+                        <button
+                            onClick={() => setShowReportSuccessModal(false)}
+                            style={{
+                                width: '100%',
+                                padding: '14px 24px',
+                                borderRadius: '12px',
+                                border: 'none',
+                                backgroundColor: '#a607d6',
+                                color: 'white',
+                                cursor: 'pointer',
+                                fontWeight: '600',
+                                fontSize: '16px',
+                                transition: 'all 0.2s',
+                                boxShadow: '0 4px 12px rgba(166, 7, 214, 0.3)'
+                            }}
+                            onMouseEnter={(e) => {
+                                e.target.style.backgroundColor = '#8a05b8';
+                                e.target.style.transform = 'translateY(-2px)';
+                                e.target.style.boxShadow = '0 6px 16px rgba(166, 7, 214, 0.4)';
+                            }}
+                            onMouseLeave={(e) => {
+                                e.target.style.backgroundColor = '#a607d6';
+                                e.target.style.transform = 'translateY(0)';
+                                e.target.style.boxShadow = '0 4px 12px rgba(166, 7, 214, 0.3)';
+                            }}
+                        >
+                            เข้าใจแล้ว
+                        </button>
                     </div>
                 </div>
             )}
