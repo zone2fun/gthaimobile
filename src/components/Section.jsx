@@ -118,7 +118,7 @@ const Section = ({ title, items, isGrid = false }) => {
                     ) : (
                         // Show actual user cards
                         items && items.map((user, index) => (
-                            <ProfileCard key={user._id || user.id || index} user={user} />
+                            <ProfileCard key={user._id || user.id || index} user={user} isGrid={isGrid} />
                         ))
                     )}
                 </div>
