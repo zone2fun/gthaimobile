@@ -153,7 +153,7 @@ const Special = () => {
         }
 
         try {
-            await createReport(postToReport, reportReason, reportAdditionalInfo, token);
+            await createReport(postToReport, null, reportReason, reportAdditionalInfo, 'post', token);
             setShowReportModal(false);
             setPostToReport(null);
             setReportReason('');
