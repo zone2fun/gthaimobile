@@ -170,34 +170,78 @@ const ChatDetail = () => {
         }
     };
 
+    const AccessRequestMessage = ({ msg }) => {
+        const isMe = msg.sender._id === currentUser?._id || msg.sender === currentUser?._id;
+        // We need to know the current status. For now, we'll assume 'pending' initially 
+        // or try to infer from recent messages? 
+        // Better: fetch status on mount if it's a request message
+        // But for simplicity in this turn, let's use a local state that defaults to false (not approved)
+        // unless we know otherwise.
+        // Actually, the toggle should reflect the TRUE state.
+        // Let's assume the user starts with 'pending' (false).
+        const [isApproved, setIsApproved] = useState(false);
+        const [loading, setLoading] = useState(false);
+
+        const handleToggle = async () => {
+            setLoading(true);
+            const newStatus = isApproved ? 'rejected' : 'approved';
+            try {
+                await updateAlbumAccessRequest(msg.relatedId, newStatus, token);
+                setIsApproved(!isApproved);
+            } catch (error) {
+                console.error('Error updating access request:', error);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        return (
+            <div style={{ padding: '10px', textAlign: 'center', minWidth: '200px' }}>
+                <div style={{ marginBottom: '15px', fontWeight: 'bold', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>
+                    <span className="material-icons" style={{ color: '#a607d6' }}>lock</span>
+                    <span>ขอสิทธิ์เข้าถึงอัลบั้ม</span>
+                </div>
+
+                {!isMe ? (
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', backgroundColor: 'rgba(255,255,255,0.05)', padding: '10px 15px', borderRadius: '12px' }}>
+                        <span style={{ fontSize: '14px', color: '#ccc' }}>อนุญาตให้เข้าถึง</span>
+                        <div
+                            onClick={!loading ? handleToggle : undefined}
+                            style={{
+                                width: '50px',
+                                height: '28px',
+                                backgroundColor: isApproved ? '#a607d6' : '#444',
+                                borderRadius: '14px',
+                                position: 'relative',
+                                cursor: loading ? 'wait' : 'pointer',
+                                transition: 'background-color 0.3s'
+                            }}
+                        >
+                            <div style={{
+                                width: '24px',
+                                height: '24px',
+                                backgroundColor: 'white',
+                                borderRadius: '50%',
+                                position: 'absolute',
+                                top: '2px',
+                                left: isApproved ? '24px' : '2px',
+                                transition: 'left 0.3s',
+                                boxShadow: '0 2px 4px rgba(0,0,0,0.2)'
+                            }} />
+                        </div>
+                    </div>
+                ) : (
+                    <div style={{ fontSize: '12px', color: '#888', fontStyle: 'italic' }}>
+                        รอการอนุมัติจากเจ้าของ...
+                    </div>
+                )}
+            </div>
+        );
+    };
+
     const renderMessageContent = (msg) => {
         if (msg.type === 'request_album_access') {
-            const isMe = msg.sender._id === currentUser?._id || msg.sender === currentUser?._id;
-            return (
-                <div style={{ padding: '10px', textAlign: 'center' }}>
-                    <div style={{ marginBottom: '10px', fontWeight: 'bold' }}>
-                        <span className="material-icons" style={{ verticalAlign: 'middle', marginRight: '5px' }}>lock</span>
-                        ขอสิทธิ์เข้าถึงอัลบั้มส่วนตัว
-                    </div>
-                    {!isMe && (
-                        <div style={{ display: 'flex', gap: '10px', justifyContent: 'center' }}>
-                            <button
-                                onClick={() => handleAccessResponse(msg.relatedId, 'rejected')}
-                                style={{ padding: '5px 15px', borderRadius: '15px', border: '1px solid #ff4444', background: 'transparent', color: '#ff4444', cursor: 'pointer' }}
-                            >
-                                ปฏิเสธ
-                            </button>
-                            <button
-                                onClick={() => handleAccessResponse(msg.relatedId, 'approved')}
-                                style={{ padding: '5px 15px', borderRadius: '15px', border: 'none', background: '#a607d6', color: 'white', cursor: 'pointer' }}
-                            >
-                                อนุมัติ
-                            </button>
-                        </div>
-                    )}
-                    {isMe && <div style={{ fontSize: '12px', color: '#ccc' }}>รอการตอบรับ...</div>}
-                </div>
-            );
+            return <AccessRequestMessage msg={msg} />;
         } else if (msg.type === 'album_access_response') {
             return (
                 <div style={{ padding: '10px', textAlign: 'center' }}>

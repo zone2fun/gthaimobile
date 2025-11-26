@@ -63,10 +63,26 @@ const UserProfile = ({ userId }) => {
                 }
             };
 
+            const handleAlbumAccessResponse = (request) => {
+                const requestOwnerId = request.owner._id || request.owner;
+                const currentProfileId = user._id || user.id;
+
+                // Check if the response is for the current profile being viewed
+                if (requestOwnerId === currentProfileId) {
+                    if (request.status === 'approved') {
+                        setAlbumAccess(prev => ({ ...prev, hasAccess: true, hasPendingRequest: false }));
+                    } else if (request.status === 'rejected') {
+                        setAlbumAccess(prev => ({ ...prev, hasAccess: false, hasPendingRequest: false }));
+                    }
+                }
+            };
+
             socket.on('user status', handleUserStatus);
+            socket.on('album access response', handleAlbumAccessResponse);
 
             return () => {
                 socket.off('user status', handleUserStatus);
+                socket.off('album access response', handleAlbumAccessResponse);
             };
         }
     }, [socket, user]);
