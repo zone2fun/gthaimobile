@@ -1,5 +1,5 @@
 import React, { createContext, useState, useEffect } from 'react';
-import { login as apiLogin, register as apiRegister } from '../services/api';
+import { login as apiLogin, register as apiRegister, googleLogin as apiGoogleLogin } from '../services/api';
 
 const AuthContext = createContext();
 
@@ -62,8 +62,26 @@ export const AuthProvider = ({ children }) => {
         setUser(null);
     };
 
+    const googleLogin = async (accessToken) => {
+        try {
+            const data = await apiGoogleLogin(accessToken);
+            if (data.token) {
+                localStorage.setItem('token', data.token);
+                localStorage.setItem('user', JSON.stringify(data));
+                setToken(data.token);
+                setUser(data);
+                return { success: true };
+            } else {
+                return { success: false, message: data.message };
+            }
+        } catch (error) {
+            return { success: false, message: error.message };
+        }
+    };
+
+
     return (
-        <AuthContext.Provider value={{ user, setUser, token, login, register, logout, loading }}>
+        <AuthContext.Provider value={{ user, setUser, token, login, register, logout, googleLogin, loading }}>
             {children}
         </AuthContext.Provider>
     );

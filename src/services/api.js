@@ -11,6 +11,17 @@ export const login = async (username, password) => {
     return response.json();
 };
 
+export const googleLogin = async (token) => {
+    const response = await fetch(`${API_URL}/auth/google`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ token }),
+    });
+    return response.json();
+};
+
 export const register = async (userData) => {
     const response = await fetch(`${API_URL}/auth/register`, {
         method: 'POST',
