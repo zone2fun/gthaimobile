@@ -86,11 +86,14 @@ const Header = () => {
 
         setShowNotifications(false);
 
-        if (notification.type === 'like_post' && notification.post) {
-            // Navigate to post (assuming we have a post detail page or just go to feed)
-            // For now, let's go to the user's profile or feed
-            // Ideally we should have a /post/:id route
-            navigate(`/post/${notification.post._id || notification.post}`);
+        if (notification.post) {
+            const postId = notification.post._id || notification.post;
+            // If it's a comment notification, navigate to post with comment hash
+            if (notification.type === 'comment_post' && notification.comment) {
+                navigate(`/post/${postId}#comment-${notification.comment}`);
+            } else {
+                navigate(`/post/${postId}`);
+            }
         }
     };
 
@@ -433,7 +436,7 @@ const Header = () => {
                                             />
                                             <div style={{ flex: 1 }}>
                                                 <div style={{ fontSize: '14px' }}>
-                                                    <strong>{notification.sender.name}</strong> liked your post
+                                                    <strong>{notification.sender.name}</strong> {notification.type === 'like_post' ? 'liked your post' : 'commented on your post'}
                                                 </div>
                                                 <div style={{ fontSize: '12px', color: '#888', marginTop: '4px' }}>
                                                     {new Date(notification.createdAt).toLocaleDateString()}

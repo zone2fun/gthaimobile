@@ -30,6 +30,24 @@ const PostDetail = () => {
         }
     }, [id, token]);
 
+    // Scroll to comment if hash is present
+    useEffect(() => {
+        if (post && window.location.hash) {
+            const commentId = window.location.hash.substring(1); // Remove #
+            const element = document.getElementById(commentId);
+            if (element) {
+                setTimeout(() => {
+                    element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    // Highlight the comment briefly
+                    element.style.backgroundColor = 'rgba(166, 7, 214, 0.2)';
+                    setTimeout(() => {
+                        element.style.backgroundColor = 'transparent';
+                    }, 2000);
+                }, 100);
+            }
+        }
+    }, [post]);
+
     const handleLike = async () => {
         try {
             const updatedLikes = await likePost(post._id, token);
@@ -156,7 +174,7 @@ const PostDetail = () => {
                 <div className="comments-section" style={{ marginTop: '10px', paddingTop: '10px' }}>
                     <div className="comments-list" style={{ marginBottom: '10px' }}>
                         {post.comments?.map((comment, index) => (
-                            <div key={comment._id || index} className="comment-item" style={{ display: 'flex', marginBottom: '10px', alignItems: 'flex-start' }}>
+                            <div key={comment._id || index} id={`comment-${comment._id}`} className="comment-item" style={{ display: 'flex', marginBottom: '10px', alignItems: 'flex-start', transition: 'background-color 0.3s' }}>
                                 <img
                                     src={comment.user?.img || '/user_avatar.png'}
                                     alt={comment.user?.name}
