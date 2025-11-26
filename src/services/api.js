@@ -149,6 +149,27 @@ export const updateProfile = async (formData, token) => {
         body: formData,
     });
     return response.json();
+};
+
+export const changePassword = async (currentPassword, newPassword, token) => {
+    const response = await fetch(`${API_URL}/users/password`, {
+        method: 'PUT',
+        headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ currentPassword, newPassword }),
+    });
+    return response.json();
+};
+
+export const deleteAccount = async (token) => {
+    const response = await fetch(`${API_URL}/users/profile`, {
+        method: 'DELETE',
+        headers: {
+            Authorization: `Bearer ${token}`,
+        },
+    });
     return response.json();
 };
 

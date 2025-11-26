@@ -1111,7 +1111,7 @@ body {
 }
 
 .toggle-switch input:checked+.toggle-slider:before {
-    transform: translateX(24px);
+    transform: translateX(22px);
     background-color: white;
 }
 

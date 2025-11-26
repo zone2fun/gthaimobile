@@ -219,9 +219,9 @@ const ChatDetail = () => {
 
             <div className="chat-input-bar">
                 <div className="chat-actions">
-                    <button className="icon-btn">
+                    {/* <button className="icon-btn">
                         <span className="material-icons">camera_alt</span>
-                    </button>
+                    </button> */}
                     <button className="icon-btn" onClick={() => fileInputRef.current.click()}>
                         <span className="material-icons">image</span>
                     </button>

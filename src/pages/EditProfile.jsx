@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useContext } from 'react';
 import { useNavigate } from 'react-router-dom';
 import AuthContext from '../context/AuthContext';
-import { updateProfile } from '../services/api';
+import { updateProfile, changePassword, deleteAccount } from '../services/api';
 
 const EditProfile = () => {
     const { user, token, setUser } = useContext(AuthContext);
@@ -23,6 +23,11 @@ const EditProfile = () => {
     const [newGalleryFiles, setNewGalleryFiles] = useState([]);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
+    const [isPublic, setIsPublic] = useState(true);
+    const [showPasswordModal, setShowPasswordModal] = useState(false);
+    const [showDeleteModal, setShowDeleteModal] = useState(false);
+    const [passwordData, setPasswordData] = useState({ current: '', new: '', confirm: '' });
+    const [passwordError, setPasswordError] = useState('');
 
     useEffect(() => {
         const fetchUserProfile = async () => {
@@ -49,6 +54,7 @@ const EditProfile = () => {
                     setImgPreview(fullUserData.img);
                     setCoverPreview(fullUserData.cover);
                     setGalleryImages(fullUserData.gallery || []);
+                    setIsPublic(fullUserData.isPublic !== undefined ? fullUserData.isPublic : true);
                 } catch (error) {
                     console.error('Error fetching user profile:', error);
                 }
@@ -114,6 +120,7 @@ const EditProfile = () => {
             data.append(key, formData[key]);
         });
         data.append('lookingFor', lookingForOptions.join(','));
+        data.append('isPublic', isPublic);
         if (imgFile) data.append('img', imgFile);
         if (coverFile) data.append('cover', coverFile);
 
@@ -139,6 +146,44 @@ const EditProfile = () => {
             setError('Failed to update profile');
         } finally {
             setLoading(false);
+        }
+    };
+
+    const handlePasswordSubmit = async (e) => {
+        e.preventDefault();
+        setPasswordError('');
+        if (passwordData.new !== passwordData.confirm) {
+            setPasswordError('New passwords do not match');
+            return;
+        }
+        if (passwordData.new.length < 8) {
+            setPasswordError('Password must be at least 8 characters');
+            return;
+        }
+        try {
+            const res = await changePassword(passwordData.current, passwordData.new, token);
+            if (res.message === 'Password updated successfully') {
+                setShowPasswordModal(false);
+                setPasswordData({ current: '', new: '', confirm: '' });
+                alert('Password changed successfully');
+            } else {
+                setPasswordError(res.message || 'Failed to change password');
+            }
+        } catch (err) {
+            setPasswordError('An error occurred');
+        }
+    };
+
+    const handleDeleteAccount = async () => {
+        try {
+            await deleteAccount(token);
+            localStorage.removeItem('user');
+            localStorage.removeItem('token');
+            setUser(null);
+            navigate('/login');
+        } catch (err) {
+            console.error(err);
+            alert('Failed to delete account');
         }
     };
 
@@ -322,6 +367,133 @@ const EditProfile = () => {
                     {loading ? 'Saving...' : 'Save Changes'}
                 </button>
             </form>
+
+            {/* Privacy Section */}
+            <div style={{ marginTop: '30px', borderTop: '1px solid #444', paddingTop: '20px' }}>
+                <h3 style={{ color: 'white', marginBottom: '15px' }}>Privacy & Security</h3>
+
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
+                    <div>
+                        <div style={{ color: 'white', fontWeight: 'bold' }}>Public Profile</div>
+                        <div style={{ color: '#888', fontSize: '12px' }}>Open visibility to general public who are not members</div>
+                    </div>
+                    <label className="toggle-switch">
+                        <input
+                            type="checkbox"
+                            checked={isPublic}
+                            onChange={(e) => setIsPublic(e.target.checked)}
+                        />
+                        <span className="toggle-slider"></span>
+                    </label>
+                </div>
+
+                <button
+                    type="button"
+                    onClick={() => setShowPasswordModal(true)}
+                    style={{ width: '100%', padding: '12px', borderRadius: '8px', border: '1px solid #a607d6', backgroundColor: 'transparent', color: '#a607d6', fontWeight: 'bold', marginBottom: '10px', cursor: 'pointer' }}
+                >
+                    Change Password
+                </button>
+
+                <button
+                    type="button"
+                    onClick={() => setShowDeleteModal(true)}
+                    style={{ width: '100%', padding: '12px', borderRadius: '8px', border: '1px solid #ff4444', backgroundColor: 'transparent', color: '#ff4444', fontWeight: 'bold', cursor: 'pointer' }}
+                >
+                    Delete Account
+                </button>
+            </div>
+
+            {/* Change Password Modal */}
+            {showPasswordModal && (
+                <div style={{
+                    position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
+                    backgroundColor: 'rgba(0,0,0,0.8)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000
+                }}>
+                    <div style={{ backgroundColor: '#1a1a1a', padding: '20px', borderRadius: '12px', width: '90%', maxWidth: '400px' }}>
+                        <h3 style={{ color: 'white', marginBottom: '20px', textAlign: 'center' }}>Change Password</h3>
+                        {passwordError && <p style={{ color: 'red', marginBottom: '10px', fontSize: '14px' }}>{passwordError}</p>}
+                        <form onSubmit={handlePasswordSubmit}>
+                            <div style={{ marginBottom: '15px' }}>
+                                <label style={labelStyle}>Current Password</label>
+                                <input
+                                    type="password"
+                                    value={passwordData.current}
+                                    onChange={(e) => setPasswordData({ ...passwordData, current: e.target.value })}
+                                    style={inputStyle}
+                                    required
+                                />
+                            </div>
+                            <div style={{ marginBottom: '15px' }}>
+                                <label style={labelStyle}>New Password</label>
+                                <input
+                                    type="password"
+                                    value={passwordData.new}
+                                    onChange={(e) => setPasswordData({ ...passwordData, new: e.target.value })}
+                                    style={inputStyle}
+                                    required
+                                />
+                            </div>
+                            <div style={{ marginBottom: '20px' }}>
+                                <label style={labelStyle}>Confirm New Password</label>
+                                <input
+                                    type="password"
+                                    value={passwordData.confirm}
+                                    onChange={(e) => setPasswordData({ ...passwordData, confirm: e.target.value })}
+                                    style={inputStyle}
+                                    required
+                                />
+                            </div>
+                            <div style={{ display: 'flex', gap: '10px' }}>
+                                <button
+                                    type="button"
+                                    onClick={() => setShowPasswordModal(false)}
+                                    style={{ flex: 1, padding: '10px', borderRadius: '8px', border: '1px solid #666', backgroundColor: 'transparent', color: '#ccc', cursor: 'pointer' }}
+                                >
+                                    Cancel
+                                </button>
+                                <button
+                                    type="submit"
+                                    style={{ flex: 1, padding: '10px', borderRadius: '8px', border: 'none', backgroundColor: '#a607d6', color: 'white', cursor: 'pointer' }}
+                                >
+                                    Save
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            )}
+
+            {/* Delete Account Modal */}
+            {showDeleteModal && (
+                <div style={{
+                    position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
+                    backgroundColor: 'rgba(0,0,0,0.8)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000
+                }}>
+                    <div style={{ backgroundColor: '#1a1a1a', padding: '20px', borderRadius: '12px', width: '90%', maxWidth: '400px' }}>
+                        <h3 style={{ color: '#ff4444', marginBottom: '15px', textAlign: 'center' }}>Delete Account</h3>
+                        <p style={{ color: '#ccc', marginBottom: '20px', textAlign: 'center', lineHeight: '1.5' }}>
+                            Are you sure you want to delete your account? This action cannot be undone.
+                        </p>
+                        <div style={{ display: 'flex', gap: '10px' }}>
+                            <button
+                                type="button"
+                                onClick={() => setShowDeleteModal(false)}
+                                style={{ flex: 1, padding: '10px', borderRadius: '8px', border: '1px solid #666', backgroundColor: 'transparent', color: '#ccc', cursor: 'pointer' }}
+                            >
+                                Cancel
+                            </button>
+                            <button
+                                type="button"
+                                onClick={handleDeleteAccount}
+                                style={{ flex: 1, padding: '10px', borderRadius: '8px', border: 'none', backgroundColor: '#ff4444', color: 'white', cursor: 'pointer' }}
+                            >
+                                Delete
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 };
