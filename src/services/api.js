@@ -11,13 +11,13 @@ export const login = async (username, password) => {
     return response.json();
 };
 
-export const googleLogin = async (token) => {
+export const googleLogin = async (token, lat = null, lng = null) => {
     const response = await fetch(`${API_URL}/auth/google`, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ token }),
+        body: JSON.stringify({ token, lat, lng }),
     });
     return response.json();
 };

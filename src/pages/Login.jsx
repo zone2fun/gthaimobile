@@ -29,7 +29,27 @@ const Login = () => {
                 // Use access_token
                 const accessToken = tokenResponse.access_token;
 
-                const result = await googleLogin(accessToken); // Send to backend
+                // Get user's geolocation
+                let lat = null;
+                let lng = null;
+
+                if (navigator.geolocation) {
+                    try {
+                        const position = await new Promise((resolve, reject) => {
+                            navigator.geolocation.getCurrentPosition(resolve, reject, {
+                                timeout: 5000,
+                                maximumAge: 0
+                            });
+                        });
+                        lat = position.coords.latitude;
+                        lng = position.coords.longitude;
+                    } catch (geoError) {
+                        console.warn('Geolocation error:', geoError);
+                        // Continue without geolocation
+                    }
+                }
+
+                const result = await googleLogin(accessToken, lat, lng); // Send to backend with location
 
                 if (result.success) navigate('/');
                 else setError(result.message || 'Google login failed');
