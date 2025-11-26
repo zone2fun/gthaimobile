@@ -286,3 +286,15 @@ export const markNotificationAsRead = async (id, token) => {
     });
     return response.json();
 };
+
+export const createReport = async (postId, reason, additionalInfo, token) => {
+    const response = await fetch(`${API_URL}/reports`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ postId, reason, additionalInfo }),
+    });
+    return response.json();
+};

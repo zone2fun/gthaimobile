@@ -2,7 +2,7 @@ import React, { useState, useEffect, useContext, useRef } from 'react';
 import EmojiPicker from 'emoji-picker-react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import AuthContext from '../context/AuthContext';
-import { getPosts, createPost, likePost, deletePost, addComment, deleteComment } from '../services/api';
+import { getPosts, createPost, likePost, deletePost, addComment, deleteComment, createReport } from '../services/api';
 import SkeletonPost from '../components/SkeletonPost';
 
 const Special = () => {
@@ -19,6 +19,10 @@ const Special = () => {
     const [isPosting, setIsPosting] = useState(false);
     const [showDeleteModal, setShowDeleteModal] = useState(false);
     const [postToDelete, setPostToDelete] = useState(null);
+    const [showReportModal, setShowReportModal] = useState(false);
+    const [postToReport, setPostToReport] = useState(null);
+    const [reportReason, setReportReason] = useState('');
+    const [reportAdditionalInfo, setReportAdditionalInfo] = useState('');
     const { token, user } = useContext(AuthContext);
     const fileInputRef = useRef(null);
     const navigate = useNavigate();
@@ -132,6 +136,32 @@ const Special = () => {
             ));
         } catch (error) {
             console.error('Error deleting comment:', error);
+        }
+    };
+
+    const handleReport = (postId) => {
+        setPostToReport(postId);
+        setReportReason('');
+        setReportAdditionalInfo('');
+        setShowReportModal(true);
+    };
+
+    const confirmReport = async () => {
+        if (!reportReason) {
+            alert('กรุณาเลือกเหตุผลในการรายงาน');
+            return;
+        }
+
+        try {
+            await createReport(postToReport, reportReason, reportAdditionalInfo, token);
+            setShowReportModal(false);
+            setPostToReport(null);
+            setReportReason('');
+            setReportAdditionalInfo('');
+            alert('รายงานโพสต์เรียบร้อยแล้ว ทีมงานจะตรวจสอบโดยเร็วที่สุด');
+        } catch (error) {
+            console.error('Error reporting post:', error);
+            alert('เกิดข้อผิดพลาดในการรายงาน');
         }
     };
 
@@ -344,9 +374,9 @@ const Special = () => {
                                     <span className="material-icons">chat_bubble_outline</span>
                                     Comment ({post.comments?.length || 0})
                                 </button>
-                                <button className="post-action-btn">
-                                    <span className="material-icons">share</span>
-                                    Share
+                                <button className="post-action-btn" onClick={() => handleReport(post._id)} style={{ color: '#ff6b6b' }}>
+                                    <span className="material-icons">flag</span>
+                                    Report
                                 </button>
                             </div>
 
@@ -575,6 +605,143 @@ const Special = () => {
                                 }}
                             >
                                 Delete
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Report Modal */}
+            {showReportModal && (
+                <div
+                    style={{
+                        position: 'fixed',
+                        top: 0,
+                        left: 0,
+                        right: 0,
+                        bottom: 0,
+                        backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        zIndex: 1000
+                    }}
+                    onClick={() => setShowReportModal(false)}
+                >
+                    <div
+                        style={{
+                            backgroundColor: '#1a1a1a',
+                            borderRadius: '15px',
+                            padding: '30px',
+                            maxWidth: '500px',
+                            width: '90%',
+                            maxHeight: '80vh',
+                            overflow: 'auto'
+                        }}
+                        onClick={(e) => e.stopPropagation()}
+                    >
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
+                            <h3 style={{ margin: 0, fontSize: '20px' }}>รายงานโพสต์</h3>
+                            <button
+                                onClick={() => setShowReportModal(false)}
+                                style={{ background: 'none', border: 'none', color: 'white', cursor: 'pointer' }}
+                            >
+                                <span className="material-icons">close</span>
+                            </button>
+                        </div>
+
+                        <p style={{ color: '#888', marginBottom: '20px', fontSize: '14px' }}>
+                            กรุณาเลือกเหตุผลที่คุณต้องการรายงานโพสต์นี้
+                        </p>
+
+                        <div style={{ marginBottom: '20px' }}>
+                            {['spam', 'อนาจาร', 'กล่าวร้ายผู้อื่น', 'แอบอ้าง', 'หลอกลวง'].map((reason) => (
+                                <div
+                                    key={reason}
+                                    onClick={() => setReportReason(reason)}
+                                    style={{
+                                        padding: '15px',
+                                        marginBottom: '10px',
+                                        borderRadius: '10px',
+                                        border: `2px solid ${reportReason === reason ? '#a607d6' : '#333'}`,
+                                        backgroundColor: reportReason === reason ? 'rgba(166, 7, 214, 0.1)' : 'transparent',
+                                        cursor: 'pointer',
+                                        transition: 'all 0.2s',
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        gap: '10px'
+                                    }}
+                                >
+                                    <div style={{
+                                        width: '20px',
+                                        height: '20px',
+                                        borderRadius: '50%',
+                                        border: `2px solid ${reportReason === reason ? '#a607d6' : '#666'}`,
+                                        backgroundColor: reportReason === reason ? '#a607d6' : 'transparent',
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        justifyContent: 'center'
+                                    }}>
+                                        {reportReason === reason && (
+                                            <span className="material-icons" style={{ fontSize: '14px', color: 'white' }}>check</span>
+                                        )}
+                                    </div>
+                                    <span>{reason}</span>
+                                </div>
+                            ))}
+                        </div>
+
+                        <div style={{ marginBottom: '20px' }}>
+                            <label style={{ display: 'block', marginBottom: '8px', fontSize: '14px', color: '#888' }}>
+                                รายละเอียดเพิ่มเติม (ถ้ามี)
+                            </label>
+                            <textarea
+                                value={reportAdditionalInfo}
+                                onChange={(e) => setReportAdditionalInfo(e.target.value)}
+                                placeholder="อธิบายเพิ่มเติมเกี่ยวกับปัญหา..."
+                                style={{
+                                    width: '100%',
+                                    minHeight: '80px',
+                                    padding: '10px',
+                                    borderRadius: '8px',
+                                    border: '1px solid #333',
+                                    backgroundColor: '#2a2a2a',
+                                    color: 'white',
+                                    resize: 'vertical',
+                                    fontFamily: 'inherit'
+                                }}
+                            />
+                        </div>
+
+                        <div style={{ display: 'flex', gap: '10px', justifyContent: 'flex-end' }}>
+                            <button
+                                onClick={() => setShowReportModal(false)}
+                                style={{
+                                    padding: '12px 24px',
+                                    borderRadius: '8px',
+                                    border: '1px solid #333',
+                                    backgroundColor: 'transparent',
+                                    color: 'white',
+                                    cursor: 'pointer',
+                                    fontWeight: '500'
+                                }}
+                            >
+                                ยกเลิก
+                            </button>
+                            <button
+                                onClick={confirmReport}
+                                disabled={!reportReason}
+                                style={{
+                                    padding: '12px 24px',
+                                    borderRadius: '8px',
+                                    border: 'none',
+                                    backgroundColor: reportReason ? '#ff4444' : '#555',
+                                    color: 'white',
+                                    cursor: reportReason ? 'pointer' : 'not-allowed',
+                                    fontWeight: '500'
+                                }}
+                            >
+                                ส่งรายงาน
                             </button>
                         </div>
                     </div>
