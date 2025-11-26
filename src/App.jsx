@@ -12,6 +12,7 @@ import Chat from './pages/Chat';
 import ChatDetail from './pages/ChatDetail';
 import Profile from './pages/Profile';
 import UserProfile from './pages/UserProfile';
+import PostDetail from './pages/PostDetail';
 import Login from './pages/Login';
 import Register from './pages/Register';
 import EditProfile from './pages/EditProfile';
@@ -58,6 +59,7 @@ function App() {
             {/* Protected routes outside MainLayout */}
             <Route path="/chat/:id" element={<PrivateRoute><ChatDetail /></PrivateRoute>} />
             <Route path="/user/:id" element={<PrivateRoute><UserProfile /></PrivateRoute>} />
+            <Route path="/post/:id" element={<PrivateRoute><PostDetail /></PrivateRoute>} />
           </Routes>
         </Router>
       </SocketProvider>

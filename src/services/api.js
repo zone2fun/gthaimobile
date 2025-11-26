@@ -206,6 +206,15 @@ export const getPosts = async (token, hashtag = '') => {
     return response.json();
 };
 
+export const getPost = async (id, token) => {
+    const response = await fetch(`${API_URL}/posts/${id}`, {
+        headers: {
+            Authorization: `Bearer ${token}`,
+        },
+    });
+    return response.json();
+};
+
 export const createPost = async (postData, token) => {
     const response = await fetch(`${API_URL}/posts`, {
         method: 'POST',

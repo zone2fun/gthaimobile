@@ -90,7 +90,7 @@ const Header = () => {
             // Navigate to post (assuming we have a post detail page or just go to feed)
             // For now, let's go to the user's profile or feed
             // Ideally we should have a /post/:id route
-            navigate('/'); // Or wherever posts are shown
+            navigate(`/post/${notification.post._id || notification.post}`);
         }
     };
 
