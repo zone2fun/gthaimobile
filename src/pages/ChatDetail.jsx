@@ -165,7 +165,7 @@ const ChatDetail = () => {
                 <button className="back-btn-chat" onClick={() => navigate(-1)}>
                     <span className="material-icons">arrow_back</span>
                 </button>
-                <div className="chat-user-info">
+                <div className="chat-user-info" onClick={() => navigate(`/user/${id}`)} style={{ cursor: 'pointer' }}>
                     <div className="chat-avatar">
                         <img src={user.img} alt={user.name} />
                         <div className={`status-dot ${user.isOnline ? 'online' : 'offline'}`}></div>
