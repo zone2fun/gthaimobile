@@ -71,7 +71,7 @@ const Login = () => {
                 <div style={{ marginBottom: '15px' }}>
                     <input
                         type="text"
-                        placeholder="Username"
+                        placeholder="Username or Email"
                         value={username}
                         onChange={(e) => setUsername(e.target.value)}
                         style={{ width: '100%', padding: '10px', borderRadius: '5px', border: 'none' }}
