@@ -105,6 +105,14 @@ const EditProfile = () => {
         setNewGalleryFiles([...newGalleryFiles, ...files]);
     };
 
+    const handleDeleteGalleryImage = (index, isExisting) => {
+        if (isExisting) {
+            setGalleryImages(galleryImages.filter((_, i) => i !== index));
+        } else {
+            setNewGalleryFiles(newGalleryFiles.filter((_, i) => i !== index));
+        }
+    };
+
     const handlePrivateAlbumUpload = (e) => {
         const files = Array.from(e.target.files);
         const totalImages = privateAlbum.length + newPrivateFiles.length + files.length;
