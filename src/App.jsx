@@ -18,6 +18,8 @@ import Register from './pages/Register';
 import EditProfile from './pages/EditProfile';
 import BlockList from './pages/BlockList';
 import SearchResults from './pages/SearchResults';
+import ForgotPassword from './pages/ForgotPassword';
+import ResetPassword from './pages/ResetPassword';
 import LocationTracker from './components/LocationTracker';
 
 const MainLayout = () => {
@@ -41,6 +43,8 @@ function App() {
           <Routes>
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
+            <Route path="/forgot-password" element={<ForgotPassword />} />
+            <Route path="/reset-password/:token" element={<ResetPassword />} />
 
             <Route element={<MainLayout />}>
               {/* Public route - Home only */}
