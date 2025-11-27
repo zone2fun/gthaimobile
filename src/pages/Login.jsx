@@ -109,7 +109,7 @@ const Login = () => {
                 width: '100%',
                 maxWidth: '400px'
             }}>
-                <h1 style={{ marginBottom: '20px', color: 'white' }}>GthaiLover Login</h1>
+                <h1 style={{ marginBottom: '20px', color: 'white' }}><span style={{ color: '#a607d6' }}>GthaiLover</span> Login</h1>
                 {error && <p style={{ color: 'red', marginBottom: '10px' }}>{error}</p>}
                 <form onSubmit={handleSubmit} style={{ width: '100%' }}>
                     <div style={{ marginBottom: '15px' }}>
