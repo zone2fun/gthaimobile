@@ -71,63 +71,108 @@ const Register = () => {
     };
 
     return (
-        <div className="app-content" style={{ padding: '20px', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', minHeight: '80vh' }}>
-            <h1 style={{ marginBottom: '20px' }}>Register</h1>
-            {error && <p style={{ color: 'red', marginBottom: '10px' }}>{error}</p>}
-            <form onSubmit={handleSubmit} style={{ width: '100%', maxWidth: '300px' }}>
-                <div style={{ marginBottom: '10px' }}>
-                    <input
-                        type="text"
-                        name="username"
-                        placeholder="Username (min 8 characters)"
-                        onChange={handleChange}
-                        style={inputStyle}
-                        minLength="8"
-                        required
-                    />
-                </div>
-                <div style={{ marginBottom: '10px' }}>
-                    <input
-                        type="password"
-                        name="password"
-                        placeholder="Password (min 8 characters)"
-                        onChange={handleChange}
-                        style={inputStyle}
-                        minLength="8"
-                        required
-                    />
-                </div>
-                <div style={{ marginBottom: '10px' }}>
-                    <input
-                        type="email"
-                        name="email"
-                        placeholder="Email"
-                        onChange={handleChange}
-                        style={inputStyle}
-                        required
-                    />
-                </div>
-                <div style={{ marginBottom: '10px' }}>
-                    <input
-                        type="text"
-                        name="name"
-                        placeholder="Display Name (min 3 characters)"
-                        onChange={handleChange}
-                        style={inputStyle}
-                        minLength="3"
-                        required
-                    />
-                </div>
-                <div style={{ marginBottom: '10px', color: '#ccc', fontSize: '12px', textAlign: 'center' }}>
-                    {locationStatus}
-                </div>
-                <button type="submit" style={{ width: '100%', padding: '10px', borderRadius: '5px', border: 'none', backgroundColor: '#a607d6', color: 'white', fontWeight: 'bold', cursor: 'pointer' }}>
-                    Register
-                </button>
-            </form>
-            <p style={{ marginTop: '20px', color: '#a0a0a0' }}>
-                Already have an account? <Link to="/login" style={{ color: '#a607d6' }}>Login</Link>
-            </p>
+        <div style={{
+            height: '100vh',
+            width: '100%',
+            position: 'relative',
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            justifyContent: 'center',
+            overflow: 'hidden',
+            margin: 0,
+            padding: 0
+        }}>
+            {/* Background Image Layer */}
+            <div style={{
+                position: 'fixed',
+                top: 0,
+                left: 0,
+                width: '100%',
+                height: '100%',
+                backgroundImage: 'url("/bg.png")',
+                backgroundRepeat: 'repeat',
+                backgroundSize: '300px',
+                zIndex: -2
+            }} />
+
+            {/* Overlay Layer */}
+            <div style={{
+                position: 'fixed',
+                top: 0,
+                left: 0,
+                width: '100%',
+                height: '100%',
+                backgroundColor: 'rgba(0, 0, 0, 0.85)',
+                zIndex: -1
+            }} />
+
+            <div className="app-content" style={{
+                padding: '20px',
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                justifyContent: 'center',
+                width: '100%',
+                maxWidth: '400px'
+            }}>
+                <h1 style={{ marginBottom: '20px', color: 'white' }}>Register</h1>
+                {error && <p style={{ color: 'red', marginBottom: '10px' }}>{error}</p>}
+                <form onSubmit={handleSubmit} style={{ width: '100%' }}>
+                    <div style={{ marginBottom: '10px' }}>
+                        <input
+                            type="text"
+                            name="username"
+                            placeholder="Username (min 8 characters)"
+                            onChange={handleChange}
+                            style={inputStyle}
+                            minLength="8"
+                            required
+                        />
+                    </div>
+                    <div style={{ marginBottom: '10px' }}>
+                        <input
+                            type="password"
+                            name="password"
+                            placeholder="Password (min 8 characters)"
+                            onChange={handleChange}
+                            style={inputStyle}
+                            minLength="8"
+                            required
+                        />
+                    </div>
+                    <div style={{ marginBottom: '10px' }}>
+                        <input
+                            type="email"
+                            name="email"
+                            placeholder="Email"
+                            onChange={handleChange}
+                            style={inputStyle}
+                            required
+                        />
+                    </div>
+                    <div style={{ marginBottom: '10px' }}>
+                        <input
+                            type="text"
+                            name="name"
+                            placeholder="Display Name (min 3 characters)"
+                            onChange={handleChange}
+                            style={inputStyle}
+                            minLength="3"
+                            required
+                        />
+                    </div>
+                    <div style={{ marginBottom: '10px', color: '#ccc', fontSize: '12px', textAlign: 'center' }}>
+                        {locationStatus}
+                    </div>
+                    <button type="submit" style={{ width: '100%', padding: '10px', borderRadius: '5px', border: 'none', backgroundColor: '#a607d6', color: 'white', fontWeight: 'bold', cursor: 'pointer' }}>
+                        Register
+                    </button>
+                </form>
+                <p style={{ marginTop: '20px', color: '#a0a0a0' }}>
+                    Already have an account? <Link to="/login" style={{ color: '#a607d6' }}>Login</Link>
+                </p>
+            </div>
         </div>
     );
 };
