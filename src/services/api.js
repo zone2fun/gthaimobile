@@ -159,7 +159,16 @@ export const updateProfile = async (formData, token) => {
         },
         body: formData,
     });
-    return response.json();
+
+    const data = await response.json();
+
+    if (!response.ok) {
+        const error = new Error(data.message || 'Failed to update profile');
+        error.response = { data };
+        throw error;
+    }
+
+    return data;
 };
 
 export const changePassword = async (currentPassword, newPassword, token) => {

@@ -176,16 +176,24 @@ const EditProfile = () => {
             data.append('privateAlbum', file);
         });
 
+        console.log('Submitting profile update...');
+        console.log('Gallery images:', galleryImages);
+        console.log('New gallery files:', newGalleryFiles);
+        console.log('Private album:', privateAlbum);
+        console.log('New private files:', newPrivateFiles);
+
         try {
             const updatedUser = await updateProfile(data, token);
+            console.log('Profile updated successfully:', updatedUser);
             // Update context user
             setUser(updatedUser);
             // Update local storage
             localStorage.setItem('user', JSON.stringify(updatedUser));
             navigate(`/user/${updatedUser._id}`);
         } catch (err) {
-            console.error(err);
-            setError('Failed to update profile');
+            console.error('Profile update error:', err);
+            const errorMessage = err.response?.data?.message || err.message || 'Failed to update profile';
+            setError(errorMessage);
         } finally {
             setLoading(false);
         }
