@@ -358,7 +358,28 @@ const Special = () => {
                                             )}
                                         </div>
                                     )}
-                                    <span style={{ fontSize: '14px', color: '#888' }}>{post.likes.length} Likes</span>
+                                    <span
+                                        style={{
+                                            fontSize: '14px',
+                                            color: '#888',
+                                            cursor: post.likes.length > 0 ? 'pointer' : 'default',
+                                            marginLeft: '5px'
+                                        }}
+                                        onClick={() => {
+                                            if (post.likes.length > 0) {
+                                                setSelectedPostLikes(post.likes);
+                                                setShowLikesModal(true);
+                                            }
+                                        }}
+                                        onMouseEnter={(e) => {
+                                            if (post.likes.length > 0) e.target.style.textDecoration = 'underline';
+                                        }}
+                                        onMouseLeave={(e) => {
+                                            e.target.style.textDecoration = 'none';
+                                        }}
+                                    >
+                                        {post.likes.length} Likes
+                                    </span>
                                 </div>
                             </div>
 

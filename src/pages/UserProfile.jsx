@@ -14,6 +14,7 @@ const UserProfile = ({ userId }) => {
     const [loading, setLoading] = useState(true);
     const [lightboxOpen, setLightboxOpen] = useState(false);
     const [currentImageIndex, setCurrentImageIndex] = useState(0);
+    const [lightboxSource, setLightboxSource] = useState('public');
     const [isFavorite, setIsFavorite] = useState(false);
     const [isBlocked, setIsBlocked] = useState(false);
     const [showReportModal, setShowReportModal] = useState(false);
@@ -148,8 +149,9 @@ const UserProfile = ({ userId }) => {
         }
     };
 
-    const openLightbox = (index) => {
+    const openLightbox = (index, source = 'public') => {
         setCurrentImageIndex(index);
+        setLightboxSource(source);
         setLightboxOpen(true);
     };
 
@@ -159,12 +161,18 @@ const UserProfile = ({ userId }) => {
 
     const nextImage = (e) => {
         e.stopPropagation();
-        setCurrentImageIndex((prev) => (prev + 1) % user.gallery.length);
+        const images = lightboxSource === 'private' ? user.privateAlbum : user.gallery;
+        if (images && images.length > 0) {
+            setCurrentImageIndex((prev) => (prev + 1) % images.length);
+        }
     };
 
     const prevImage = (e) => {
         e.stopPropagation();
-        setCurrentImageIndex((prev) => (prev - 1 + user.gallery.length) % user.gallery.length);
+        const images = lightboxSource === 'private' ? user.privateAlbum : user.gallery;
+        if (images && images.length > 0) {
+            setCurrentImageIndex((prev) => (prev - 1 + images.length) % images.length);
+        }
     };
 
     if (loading) {
@@ -284,7 +292,7 @@ const UserProfile = ({ userId }) => {
                         <h3 className="section-title" style={{ marginTop: '20px', marginLeft: 0 }}>Photos</h3>
                         <div className="gallery-grid">
                             {user.gallery.map((img, index) => (
-                                <div key={index} className="gallery-item" onClick={() => openLightbox(index)}>
+                                <div key={index} className="gallery-item" onClick={() => openLightbox(index, 'public')}>
                                     <img src={img} alt={`Gallery ${index + 1}`} />
                                 </div>
                             ))}
@@ -303,13 +311,7 @@ const UserProfile = ({ userId }) => {
                         {albumAccess.hasAccess ? (
                             <div className="gallery-grid">
                                 {user.privateAlbum.map((img, index) => (
-                                    <div key={index} className="gallery-item" onClick={() => {
-                                        // Handle private album lightbox (need to adjust existing lightbox logic or add new one)
-                                        // For simplicity, reusing openLightbox but need to handle index offset if mixing with public gallery
-                                        // Or create a separate lightbox state for private album
-                                        // Let's just open image directly for now or implement proper lightbox later
-                                        window.open(img, '_blank');
-                                    }}>
+                                    <div key={index} className="gallery-item" onClick={() => openLightbox(index, 'private')}>
                                         <img src={img} alt={`Private ${index + 1}`} />
                                     </div>
                                 ))}
@@ -375,7 +377,7 @@ const UserProfile = ({ userId }) => {
                         <button className="lightbox-nav prev" onClick={prevImage}>
                             <span className="material-icons">chevron_left</span>
                         </button>
-                        <img src={user.gallery[currentImageIndex]} alt="Full size" />
+                        <img src={lightboxSource === 'private' ? user.privateAlbum[currentImageIndex] : user.gallery[currentImageIndex]} alt="Full size" />
                         <button className="lightbox-nav next" onClick={nextImage}>
                             <span className="material-icons">chevron_right</span>
                         </button>

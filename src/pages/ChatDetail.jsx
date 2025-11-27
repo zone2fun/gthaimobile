@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef, useContext } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { getUser, getMessages, sendMessage, deleteMessage, markAsRead, updateAlbumAccessRequest } from '../services/api';
+import { getUser, getMessages, sendMessage, deleteMessage, markAsRead, updateAlbumAccessRequest, blockUser, unblockUser, createReport, getMe } from '../services/api';
 import AuthContext from '../context/AuthContext';
 import SocketContext from '../context/SocketContext';
 
@@ -17,6 +17,14 @@ const ChatDetail = () => {
     const fileInputRef = useRef(null);
     const typingTimeoutRef = useRef(null);
 
+    // Menu & Action States
+    const [showMenu, setShowMenu] = useState(false);
+    const [isBlocked, setIsBlocked] = useState(false);
+    const [showReportModal, setShowReportModal] = useState(false);
+    const [reportReason, setReportReason] = useState('');
+    const [reportAdditionalInfo, setReportAdditionalInfo] = useState('');
+    const [showReportSuccessModal, setShowReportSuccessModal] = useState(false);
+
     const scrollToBottom = () => {
         messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
     };
@@ -25,10 +33,19 @@ const ChatDetail = () => {
         const fetchData = async () => {
             if (token && id) {
                 try {
-                    const userData = await getUser(id, token);
+                    const [userData, currentUserData, msgs] = await Promise.all([
+                        getUser(id, token),
+                        getMe(token),
+                        getMessages(id, token)
+                    ]);
+
                     setUser(userData);
-                    const msgs = await getMessages(id, token);
                     setMessages(msgs);
+
+                    // Check if this user is blocked
+                    if (currentUserData && currentUserData.blockedUsers && currentUserData.blockedUsers.includes(id)) {
+                        setIsBlocked(true);
+                    }
 
                     // Mark messages as read
                     await markAsRead(id, token);
@@ -159,6 +176,47 @@ const ChatDetail = () => {
         }
     };
 
+    const handleBlock = async () => {
+        try {
+            await blockUser(id, token);
+            setIsBlocked(true);
+            setShowMenu(false);
+        } catch (error) {
+            console.error("Error blocking user:", error);
+        }
+    };
+
+    const handleUnblock = async () => {
+        try {
+            await unblockUser(id, token);
+            setIsBlocked(false);
+            setShowMenu(false);
+        } catch (error) {
+            console.error("Error unblocking user:", error);
+        }
+    };
+
+    const handleReport = () => {
+        setReportReason('');
+        setReportAdditionalInfo('');
+        setShowReportModal(true);
+        setShowMenu(false);
+    };
+
+    const confirmReport = async () => {
+        if (!reportReason) return;
+
+        try {
+            await createReport(null, id, reportReason, reportAdditionalInfo, 'user', token);
+            setShowReportModal(false);
+            setReportReason('');
+            setReportAdditionalInfo('');
+            setShowReportSuccessModal(true);
+        } catch (error) {
+            console.error('Error reporting user:', error);
+        }
+    };
+
     const handleAccessResponse = async (requestId, status) => {
         try {
             await updateAlbumAccessRequest(requestId, status, token);
@@ -270,9 +328,64 @@ const ChatDetail = () => {
                     </div>
                     <span className="chat-username">{user.name}</span>
                 </div>
-                <button className="more-btn">
-                    <span className="material-icons">more_vert</span>
-                </button>
+                <div style={{ position: 'relative' }}>
+                    <button className="more-btn" onClick={() => setShowMenu(!showMenu)}>
+                        <span className="material-icons">more_vert</span>
+                    </button>
+                    {showMenu && (
+                        <div style={{
+                            position: 'absolute',
+                            top: '100%',
+                            right: 0,
+                            backgroundColor: '#1a1a1a',
+                            borderRadius: '8px',
+                            boxShadow: '0 4px 12px rgba(0,0,0,0.5)',
+                            padding: '8px 0',
+                            zIndex: 100,
+                            minWidth: '150px',
+                            border: '1px solid #333'
+                        }}>
+                            <button
+                                onClick={handleReport}
+                                style={{
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    gap: '10px',
+                                    width: '100%',
+                                    padding: '10px 15px',
+                                    background: 'none',
+                                    border: 'none',
+                                    color: '#ff4444',
+                                    cursor: 'pointer',
+                                    textAlign: 'left',
+                                    fontSize: '14px'
+                                }}
+                            >
+                                <span className="material-icons" style={{ fontSize: '18px' }}>flag</span>
+                                Report User
+                            </button>
+                            <button
+                                onClick={isBlocked ? handleUnblock : handleBlock}
+                                style={{
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    gap: '10px',
+                                    width: '100%',
+                                    padding: '10px 15px',
+                                    background: 'none',
+                                    border: 'none',
+                                    color: 'white',
+                                    cursor: 'pointer',
+                                    textAlign: 'left',
+                                    fontSize: '14px'
+                                }}
+                            >
+                                <span className="material-icons" style={{ fontSize: '18px' }}>{isBlocked ? 'check_circle' : 'block'}</span>
+                                {isBlocked ? 'Unblock User' : 'Block User'}
+                            </button>
+                        </div>
+                    )}
+                </div>
             </header>
 
             <div className="chat-messages">
@@ -340,7 +453,59 @@ const ChatDetail = () => {
                     <span className="material-icons">send</span>
                 </button>
             </div>
-        </div>
+
+
+            {/* Report User Modal */}
+            {
+                showReportModal && (
+                    <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(0, 0, 0, 0.8)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000 }} onClick={() => setShowReportModal(false)}>
+                        <div style={{ backgroundColor: '#1a1a1a', borderRadius: '15px', padding: '30px', maxWidth: '500px', width: '90%', maxHeight: '80vh', overflow: 'auto' }} onClick={(e) => e.stopPropagation()}>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
+                                <h3 style={{ margin: 0, fontSize: '20px' }}>รายงานผู้ใช้</h3>
+                                <button onClick={() => setShowReportModal(false)} style={{ background: 'none', border: 'none', color: 'white', cursor: 'pointer' }}>
+                                    <span className="material-icons">close</span>
+                                </button>
+                            </div>
+                            <p style={{ color: '#888', marginBottom: '20px', fontSize: '14px' }}>กรุณาเลือกเหตุผลที่คุณต้องการรายงานผู้ใช้นี้</p>
+                            <div style={{ marginBottom: '20px' }}>
+                                {['spam', 'อนาจาร', 'กล่าวร้ายผู้อื่น', 'แอบอ้าง', 'หลอกลวง', 'โปรไฟล์ปลอม', 'การล่วงละเมิด'].map((reason) => (
+                                    <div key={reason} onClick={() => setReportReason(reason)} style={{ padding: '15px', marginBottom: '10px', borderRadius: '10px', border: `2px solid ${reportReason === reason ? '#a607d6' : '#333'}`, backgroundColor: reportReason === reason ? 'rgba(166, 7, 214, 0.1)' : 'transparent', cursor: 'pointer', transition: 'all 0.2s', display: 'flex', alignItems: 'center', gap: '10px' }}>
+                                        <div style={{ width: '20px', height: '20px', borderRadius: '50%', border: `2px solid ${reportReason === reason ? '#a607d6' : '#666'}`, backgroundColor: reportReason === reason ? '#a607d6' : 'transparent', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                            {reportReason === reason && (<span className="material-icons" style={{ fontSize: '14px', color: 'white' }}>check</span>)}
+                                        </div>
+                                        <span>{reason}</span>
+                                    </div>
+                                ))}
+                            </div>
+                            <div style={{ marginBottom: '20px' }}>
+                                <label style={{ display: 'block', marginBottom: '8px', fontSize: '14px', color: '#888' }}>รายละเอียดเพิ่มเติม (ถ้ามี)</label>
+                                <textarea value={reportAdditionalInfo} onChange={(e) => setReportAdditionalInfo(e.target.value)} placeholder="อธิบายเพิ่มเติมเกี่ยวกับปัญหา..." style={{ width: '100%', minHeight: '80px', padding: '10px', borderRadius: '8px', border: '1px solid #333', backgroundColor: '#2a2a2a', color: 'white', resize: 'vertical', fontFamily: 'inherit' }} />
+                            </div>
+                            <div style={{ display: 'flex', gap: '10px', justifyContent: 'flex-end' }}>
+                                <button onClick={() => setShowReportModal(false)} style={{ padding: '12px 24px', borderRadius: '8px', border: '1px solid #333', backgroundColor: 'transparent', color: 'white', cursor: 'pointer', fontWeight: '500' }}>ยกเลิก</button>
+                                <button onClick={confirmReport} disabled={!reportReason} style={{ padding: '12px 24px', borderRadius: '8px', border: 'none', backgroundColor: reportReason ? '#ff4444' : '#555', color: 'white', cursor: reportReason ? 'pointer' : 'not-allowed', fontWeight: '500' }}>ส่งรายงาน</button>
+                            </div>
+                        </div>
+                    </div>
+                )
+            }
+
+            {/* Report Success Modal */}
+            {
+                showReportSuccessModal && (
+                    <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(0, 0, 0, 0.8)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1001, animation: 'fadeIn 0.2s ease-in' }} onClick={() => setShowReportSuccessModal(false)}>
+                        <div style={{ backgroundColor: '#1a1a1a', borderRadius: '20px', padding: '40px 30px', maxWidth: '400px', width: '90%', textAlign: 'center', animation: 'slideUp 0.3s ease-out' }} onClick={(e) => e.stopPropagation()}>
+                            <div style={{ width: '80px', height: '80px', borderRadius: '50%', backgroundColor: 'rgba(76, 175, 80, 0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 20px', animation: 'scaleIn 0.4s ease-out' }}>
+                                <span className="material-icons" style={{ fontSize: '48px', color: '#4CAF50' }}>check_circle</span>
+                            </div>
+                            <h3 style={{ margin: '0 0 12px 0', fontSize: '24px', fontWeight: '600' }}>ส่งรายงานสำเร็จ</h3>
+                            <p style={{ color: '#888', marginBottom: '30px', fontSize: '15px', lineHeight: '1.6' }}>ขอบคุณที่แจ้งให้เราทราบ<br />ทีมงานจะตรวจสอบและดำเนินการโดยเร็วที่สุด</p>
+                            <button onClick={() => setShowReportSuccessModal(false)} style={{ width: '100%', padding: '14px 24px', borderRadius: '12px', border: 'none', backgroundColor: '#a607d6', color: 'white', cursor: 'pointer', fontWeight: '600', fontSize: '16px', transition: 'all 0.2s', boxShadow: '0 4px 12px rgba(166, 7, 214, 0.3)' }}>เข้าใจแล้ว</button>
+                        </div>
+                    </div>
+                )
+            }
+        </div >
     );
 };
 
