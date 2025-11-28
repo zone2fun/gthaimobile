@@ -19,7 +19,7 @@ const UserManagement = () => {
     const [confirmModal, setConfirmModal] = useState({ isOpen: false, title: '', message: '', onConfirm: () => { }, type: 'danger' });
     const [alertModal, setAlertModal] = useState({ isOpen: false, title: '', message: '', type: 'success' });
 
-    const API_URL = 'http://localhost:5000/api/admin';
+    const API_URL = (import.meta.env.VITE_API_URL || 'http://localhost:5000') + '/api/admin';
     const token = localStorage.getItem('adminToken');
 
     // Fetch users

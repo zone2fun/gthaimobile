@@ -10,7 +10,7 @@ const ContentModeration = () => {
     const [alertModal, setAlertModal] = useState({ isOpen: false, title: '', message: '', type: 'success' });
     const [galleryModal, setGalleryModal] = useState({ isOpen: false, images: [], currentIndex: 0 });
 
-    const API_URL = 'http://localhost:5000/api';
+    const API_URL = (import.meta.env.VITE_API_URL || 'http://localhost:5000') + '/api';
     const token = localStorage.getItem('adminToken');
 
     // Fetch reports

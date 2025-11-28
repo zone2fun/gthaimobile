@@ -413,7 +413,7 @@ const UserProfile = ({ userId }) => {
                         </h3>
                         <div className="gallery-grid">
                             {user.pendingGallery.map((img, index) => (
-                                <div key={index} className="gallery-item" style={{ opacity: 0.7 }}>
+                                <div key={index} className="gallery-item" style={{ position: 'relative', opacity: 0.7 }}>
                                     <img src={img} alt={`Pending Gallery ${index + 1}`} />
                                     <div style={{
                                         position: 'absolute',
@@ -424,9 +424,10 @@ const UserProfile = ({ userId }) => {
                                         display: 'flex',
                                         alignItems: 'center',
                                         justifyContent: 'center',
-                                        backgroundColor: 'rgba(0,0,0,0.3)'
+                                        backgroundColor: 'rgba(0,0,0,0.3)',
+                                        pointerEvents: 'none'
                                     }}>
-                                        <span className="material-icons" style={{ color: '#FFC107' }}>hourglass_empty</span>
+                                        <span className="material-icons" style={{ color: '#FFC107', fontSize: '32px' }}>hourglass_empty</span>
                                     </div>
                                 </div>
                             ))}
@@ -544,7 +545,7 @@ const UserProfile = ({ userId }) => {
 
             {/* Lightbox */}
             {lightboxOpen && (
-                <div className="lightbox" onClick={closeLightbox}>
+                <div className="lightbox-overlay" onClick={closeLightbox}>
                     <button className="lightbox-close" onClick={closeLightbox}>
                         <span className="material-icons">close</span>
                     </button>
