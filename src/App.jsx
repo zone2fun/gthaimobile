@@ -62,7 +62,7 @@ function App() {
 
             {/* Protected routes outside MainLayout */}
             <Route path="/chat/:id" element={<PrivateRoute><ChatDetail /></PrivateRoute>} />
-            <Route path="/user/:id" element={<PrivateRoute><UserProfile /></PrivateRoute>} />
+            <Route path="/user/:id" element={<UserProfile />} />
             <Route path="/post/:id" element={<PrivateRoute><PostDetail /></PrivateRoute>} />
           </Routes>
         </Router>

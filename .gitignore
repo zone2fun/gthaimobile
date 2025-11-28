@@ -30,3 +30,6 @@ dist-ssr
 
 # Backend folder (deployed separately)
 backend/
+
+# Admin panel (deployed separately)
+# admin/

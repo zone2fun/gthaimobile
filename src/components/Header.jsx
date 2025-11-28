@@ -12,7 +12,7 @@ const Header = () => {
     const [searchTags, setSearchTags] = useState([]);
     const [chipsWidth, setChipsWidth] = useState(0);
     const [showMobileSearch, setShowMobileSearch] = useState(false);
-    const { logout, user } = useContext(AuthContext);
+    const { logout, user, setUser } = useContext(AuthContext);
     const { disconnectSocket } = useContext(SocketContext);
     const navigate = useNavigate();
     const location = useLocation();
@@ -51,13 +51,24 @@ const Header = () => {
                 setUnreadCount(prev => prev + 1);
             };
 
+            const handlePhotoApproved = (data) => {
+                // If avatar is approved, update current user state
+                if (data.photoType === 'Avatar' && user) {
+                    const updatedUser = { ...user, img: data.photoUrl };
+                    setUser(updatedUser);
+                    localStorage.setItem('user', JSON.stringify(updatedUser));
+                }
+            };
+
             socket.on('new notification', handleNewNotification);
+            socket.on('photo approved', handlePhotoApproved);
 
             return () => {
                 socket.off('new notification', handleNewNotification);
+                socket.off('photo approved', handlePhotoApproved);
             };
         }
-    }, [socket]);
+    }, [socket, user, setUser]);
 
     // Close notification dropdown when clicking outside
     useEffect(() => {
@@ -94,6 +105,8 @@ const Header = () => {
             } else {
                 navigate(`/post/${postId}`);
             }
+        } else if (notification.type === 'photo_approved' || notification.type === 'photo_denied') {
+            navigate(`/user/${user._id || user.id}`);
         }
     };
 
@@ -429,15 +442,29 @@ const Header = () => {
                                                 gap: '10px'
                                             }}
                                         >
-                                            <img
-                                                src={notification.type === 'admin_notification' ? '/admin_avatar.png' : (notification.sender?.img || '/user_avatar.png')}
-                                                alt={notification.type === 'admin_notification' ? 'Admin' : (notification.sender?.name || 'System')}
-                                                style={{ width: '40px', height: '40px', borderRadius: '50%', objectFit: 'cover' }}
-                                            />
+                                            {notification.type === 'photo_approved' ? (
+                                                <div style={{ width: '40px', height: '40px', borderRadius: '50%', backgroundColor: 'rgba(76, 175, 80, 0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                                    <span className="material-icons" style={{ color: '#4CAF50' }}>check_circle</span>
+                                                </div>
+                                            ) : notification.type === 'photo_denied' ? (
+                                                <div style={{ width: '40px', height: '40px', borderRadius: '50%', backgroundColor: 'rgba(244, 67, 54, 0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                                    <span className="material-icons" style={{ color: '#F44336' }}>cancel</span>
+                                                </div>
+                                            ) : (
+                                                <img
+                                                    src={notification.type === 'admin_notification' ? '/admin_avatar.png' : (notification.sender?.img || '/user_avatar.png')}
+                                                    alt={notification.type === 'admin_notification' ? 'Admin' : (notification.sender?.name || 'System')}
+                                                    style={{ width: '40px', height: '40px', borderRadius: '50%', objectFit: 'cover' }}
+                                                />
+                                            )}
                                             <div style={{ flex: 1 }}>
                                                 <div style={{ fontSize: '14px' }}>
                                                     {notification.type === 'admin_notification' ? (
                                                         <span style={{ color: '#ff4444' }}>{notification.message}</span>
+                                                    ) : notification.type === 'photo_approved' ? (
+                                                        <span style={{ color: '#4CAF50' }}>{notification.message}</span>
+                                                    ) : notification.type === 'photo_denied' ? (
+                                                        <span style={{ color: '#F44336' }}>{notification.message}</span>
                                                     ) : (
                                                         <>
                                                             <strong>{notification.sender?.name || 'Unknown'}</strong> {notification.type === 'like_post' ? 'liked your post' : 'commented on your post'}
