@@ -3,6 +3,7 @@ import EmojiPicker from 'emoji-picker-react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import AuthContext from '../context/AuthContext';
 import { getPosts, createPost, likePost, deletePost, addComment, deleteComment, createReport } from '../services/api';
+import SocketContext from '../context/SocketContext';
 import SkeletonPost from '../components/SkeletonPost';
 
 const Special = () => {
@@ -25,6 +26,7 @@ const Special = () => {
     const [reportAdditionalInfo, setReportAdditionalInfo] = useState('');
     const [showReportSuccessModal, setShowReportSuccessModal] = useState(false);
     const { token, user } = useContext(AuthContext);
+    const { socket } = useContext(SocketContext);
     const fileInputRef = useRef(null);
     const navigate = useNavigate();
     const [searchParams] = useSearchParams();
@@ -33,6 +35,34 @@ const Special = () => {
     useEffect(() => {
         fetchPosts();
     }, [token, hashtag]);
+
+    // Listen for photo approval to update avatars in real-time
+    useEffect(() => {
+        if (socket) {
+            const handlePhotoApproved = (data) => {
+                if (data.photoType === 'Avatar' || data.photoType === 'avatar' || data.isAvatar) {
+                    setPosts(prevPosts => prevPosts.map(post => {
+                        if (post.user._id === data.userId || post.user.id === data.userId) {
+                            return {
+                                ...post,
+                                user: {
+                                    ...post.user,
+                                    img: data.photoUrl
+                                }
+                            };
+                        }
+                        return post;
+                    }));
+                }
+            };
+
+            socket.on('photo approved', handlePhotoApproved);
+
+            return () => {
+                socket.off('photo approved', handlePhotoApproved);
+            };
+        }
+    }, [socket]);
 
     const fetchPosts = async () => {
         try {

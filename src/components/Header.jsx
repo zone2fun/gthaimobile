@@ -52,11 +52,14 @@ const Header = () => {
             };
 
             const handlePhotoApproved = (data) => {
-                // If avatar is approved, update current user state
-                if (data.photoType === 'Avatar' && user) {
-                    const updatedUser = { ...user, img: data.photoUrl };
-                    setUser(updatedUser);
-                    localStorage.setItem('user', JSON.stringify(updatedUser));
+                console.log('Header: Photo approved event', data);
+                // If avatar is approved and belongs to current user, update current user state
+                if (user && (data.userId === user._id || data.userId === user.id)) {
+                    if (data.photoType === 'Avatar' || data.photoType === 'avatar' || data.isAvatar) {
+                        const updatedUser = { ...user, img: data.photoUrl };
+                        setUser(updatedUser);
+                        localStorage.setItem('user', JSON.stringify(updatedUser));
+                    }
                 }
             };
 
