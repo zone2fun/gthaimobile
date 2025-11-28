@@ -430,13 +430,19 @@ const Header = () => {
                                             }}
                                         >
                                             <img
-                                                src={notification.sender.img || '/user_avatar.png'}
-                                                alt={notification.sender.name}
+                                                src={notification.type === 'admin_notification' ? '/admin_avatar.png' : (notification.sender?.img || '/user_avatar.png')}
+                                                alt={notification.type === 'admin_notification' ? 'Admin' : (notification.sender?.name || 'System')}
                                                 style={{ width: '40px', height: '40px', borderRadius: '50%', objectFit: 'cover' }}
                                             />
                                             <div style={{ flex: 1 }}>
                                                 <div style={{ fontSize: '14px' }}>
-                                                    <strong>{notification.sender.name}</strong> {notification.type === 'like_post' ? 'liked your post' : 'commented on your post'}
+                                                    {notification.type === 'admin_notification' ? (
+                                                        <span style={{ color: '#ff4444' }}>{notification.message}</span>
+                                                    ) : (
+                                                        <>
+                                                            <strong>{notification.sender?.name || 'Unknown'}</strong> {notification.type === 'like_post' ? 'liked your post' : 'commented on your post'}
+                                                        </>
+                                                    )}
                                                 </div>
                                                 <div style={{ fontSize: '12px', color: '#888', marginTop: '4px' }}>
                                                     {new Date(notification.createdAt).toLocaleDateString()}

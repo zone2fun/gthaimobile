@@ -299,16 +299,26 @@ const EditProfile = () => {
                         <select name="country" value={formData.country} onChange={handleChange} style={inputStyle}>
                             <option value="">Select Country</option>
                             <option value="Thailand">Thailand</option>
-                            <option value="USA">USA</option>
-                            <option value="UK">UK</option>
+                            <option value="United States">United States</option>
+                            <option value="United Kingdom">United Kingdom</option>
                             <option value="Japan">Japan</option>
-                            <option value="Korea">Korea</option>
                             <option value="China">China</option>
-                            <option value="Vietnam">Vietnam</option>
+                            <option value="Korea">Korea</option>
+                            <option value="Australia">Australia</option>
                             <option value="Singapore">Singapore</option>
                             <option value="Malaysia">Malaysia</option>
+                            <option value="Vietnam">Vietnam</option>
+                            <option value="Laos">Laos</option>
+                            <option value="Myanmar">Myanmar</option>
+                            <option value="Cambodia">Cambodia</option>
                             <option value="Philippines">Philippines</option>
                             <option value="Indonesia">Indonesia</option>
+                            <option value="India">India</option>
+                            <option value="Russia">Russia</option>
+                            <option value="Germany">Germany</option>
+                            <option value="France">France</option>
+                            <option value="Italy">Italy</option>
+                            <option value="Spain">Spain</option>
                             <option value="Other">Other</option>
                         </select>
                     </div>
