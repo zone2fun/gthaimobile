@@ -8,7 +8,7 @@ const UserProfile = ({ userId }) => {
     const { id } = useParams();
     const targetId = userId || id;
     const navigate = useNavigate();
-    const { token, user: currentUser } = useContext(AuthContext);
+    const { token, user: currentUser, setUser: setCurrentUser } = useContext(AuthContext);
     const { socket } = useContext(SocketContext);
     const [user, setUser] = useState(null);
     const [loading, setLoading] = useState(true);
@@ -90,9 +90,18 @@ const UserProfile = ({ userId }) => {
 
             const handlePhotoApproved = (data) => {
                 console.log('✅ Photo approved event received:', data);
+
                 // Refresh user data to get updated photos
                 if (currentUser && (user._id === currentUser._id || user.id === currentUser._id)) {
-                    getUser(targetId, token).then(userData => setUser(userData));
+                    getUser(targetId, token).then(userData => {
+                        setUser(userData);
+
+                        // Also update global user state if it's an avatar
+                        if (data.photoType === 'Avatar' || data.photoType === 'avatar' || data.isAvatar) {
+                            console.log('🖼️ UserProfile: Updating global user avatar to', data.photoUrl);
+                            setCurrentUser(prev => ({ ...prev, img: data.photoUrl }));
+                        }
+                    });
                 }
             };
 

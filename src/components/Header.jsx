@@ -27,6 +27,12 @@ const Header = () => {
     const { socket } = useContext(SocketContext);
     const notificationRef = useRef(null);
 
+    // Use refs to store latest user and setUser - update during render
+    const userRef = useRef(user);
+    const setUserRef = useRef(setUser);
+    userRef.current = user;
+    setUserRef.current = setUser;
+
     // Fetch notifications
     useEffect(() => {
         if (user && localStorage.getItem('token')) {
@@ -43,35 +49,58 @@ const Header = () => {
         }
     }, [user]);
 
-    // Listen for real-time notifications
+    // Listen for real-time notifications & photo approval
     useEffect(() => {
+        console.log('🔵 Header: Socket effect running. Socket:', !!socket);
+
         if (socket) {
+            console.log('🟢 Header: Registering socket listeners...');
+
             const handleNewNotification = (notification) => {
                 setNotifications(prev => [notification, ...prev]);
                 setUnreadCount(prev => prev + 1);
             };
 
             const handlePhotoApproved = (data) => {
-                console.log('Header: Photo approved event', data);
+                console.log('🎯 Header: Photo approved event received', data);
+
+                const currentUser = userRef.current;
+                console.log('👤 Header: Current user from ref', currentUser);
+
+                const currentUserId = currentUser?._id || currentUser?.id;
+                const incomingUserId = data.userId;
+
+                console.log(`🔍 Header: Comparing IDs - Incoming: "${incomingUserId}" vs Current: "${currentUserId}"`);
+
                 // If avatar is approved and belongs to current user, update current user state
-                if (user && (data.userId === user._id || data.userId === user.id)) {
+                if (currentUser && currentUserId && String(incomingUserId).trim() === String(currentUserId).trim()) {
+                    console.log('✅ Header: User ID matches!');
                     if (data.photoType === 'Avatar' || data.photoType === 'avatar' || data.isAvatar) {
-                        const updatedUser = { ...user, img: data.photoUrl };
-                        setUser(updatedUser);
-                        localStorage.setItem('user', JSON.stringify(updatedUser));
+                        console.log('🖼️ Header: Updating avatar to', data.photoUrl);
+                        const updatedUser = { ...currentUser, img: data.photoUrl };
+                        setUserRef.current(updatedUser);
+                        console.log('💾 Header: Avatar updated in state');
+                    } else {
+                        console.log('❌ Header: Photo type mismatch:', data.photoType);
                     }
+                } else {
+                    console.log('⚠️ Header: User ID mismatch or user not logged in');
                 }
             };
 
             socket.on('new notification', handleNewNotification);
             socket.on('photo approved', handlePhotoApproved);
+            console.log('✅ Header: Socket listeners registered');
 
             return () => {
+                console.log('🔴 Header: Cleaning up socket listeners');
                 socket.off('new notification', handleNewNotification);
                 socket.off('photo approved', handlePhotoApproved);
             };
+        } else {
+            console.log('⚠️ Header: Socket is null, skipping listener registration');
         }
-    }, [socket, user, setUser]);
+    }, [socket]);
 
     // Close notification dropdown when clicking outside
     useEffect(() => {

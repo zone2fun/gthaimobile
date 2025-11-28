@@ -21,6 +21,13 @@ export const AuthProvider = ({ children }) => {
         setLoading(false);
     }, [token]);
 
+    // Sync user state with localStorage whenever user changes
+    useEffect(() => {
+        if (user) {
+            localStorage.setItem('user', JSON.stringify(user));
+        }
+    }, [user]);
+
     const login = async (username, password) => {
         try {
             const data = await apiLogin(username, password);
