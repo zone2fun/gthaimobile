@@ -101,6 +101,10 @@ const ContentModeration = () => {
         <div>
             <div style={styles.header}>
                 <h1 style={styles.pageTitle}>Content Moderation</h1>
+                <button onClick={fetchReports} style={styles.refreshBtn}>
+                    <span className="material-icons">refresh</span>
+                    Refresh
+                </button>
             </div>
 
             {/* Filters */}
@@ -368,11 +372,29 @@ const ContentModeration = () => {
 
 const styles = {
     header: {
+        display: 'flex',
+        justifyContent: 'space-between',
+        alignItems: 'center',
         marginBottom: '20px',
     },
     pageTitle: {
         fontSize: '24px',
         fontWeight: 'bold',
+        margin: 0,
+    },
+    refreshBtn: {
+        display: 'flex',
+        alignItems: 'center',
+        gap: '8px',
+        padding: '10px 16px',
+        backgroundColor: '#2a2a2a',
+        border: '1px solid #333',
+        borderRadius: '8px',
+        color: '#fff',
+        cursor: 'pointer',
+        fontSize: '14px',
+        fontWeight: '500',
+        transition: 'all 0.2s',
     },
     filterBar: {
         display: 'flex',

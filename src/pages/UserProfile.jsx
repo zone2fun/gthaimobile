@@ -575,37 +575,136 @@ const UserProfile = ({ userId }) => {
 
             {/* Report Modal */}
             {showReportModal && (
-                <div className="modal-overlay" onClick={() => setShowReportModal(false)}>
-                    <div className="modal-content" onClick={(e) => e.stopPropagation()}>
-                        <h3>Report User</h3>
-                        <div className="form-group">
-                            <label>Reason</label>
-                            <select
-                                value={reportReason}
-                                onChange={(e) => setReportReason(e.target.value)}
-                                style={{ width: '100%', padding: '10px', borderRadius: '5px', backgroundColor: '#333', color: 'white', border: '1px solid #444' }}
+                <div
+                    style={{
+                        position: 'fixed',
+                        top: 0,
+                        left: 0,
+                        right: 0,
+                        bottom: 0,
+                        backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        zIndex: 1000
+                    }}
+                    onClick={() => setShowReportModal(false)}
+                >
+                    <div
+                        style={{
+                            backgroundColor: '#1a1a1a',
+                            borderRadius: '15px',
+                            padding: '30px',
+                            maxWidth: '500px',
+                            width: '90%',
+                            maxHeight: '80vh',
+                            overflow: 'auto'
+                        }}
+                        onClick={(e) => e.stopPropagation()}
+                    >
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
+                            <h3 style={{ margin: 0, fontSize: '20px' }}>รายงานผู้ใช้</h3>
+                            <button
+                                onClick={() => setShowReportModal(false)}
+                                style={{ background: 'none', border: 'none', color: 'white', cursor: 'pointer' }}
                             >
-                                <option value="">Select a reason</option>
-                                <option value="spam">Spam</option>
-                                <option value="inappropriate_content">Inappropriate Content</option>
-                                <option value="harassment">Harassment</option>
-                                <option value="fake_profile">Fake Profile</option>
-                                <option value="other">Other</option>
-                            </select>
+                                <span className="material-icons">close</span>
+                            </button>
                         </div>
-                        <div className="form-group">
-                            <label>Additional Details</label>
+
+                        <p style={{ color: '#888', marginBottom: '20px', fontSize: '14px' }}>
+                            กรุณาเลือกเหตุผลที่คุณต้องการรายงานผู้ใช้นี้
+                        </p>
+
+                        <div style={{ marginBottom: '20px' }}>
+                            {['spam', 'อนาจาร', 'กล่าวร้ายผู้อื่น', 'แอบอ้าง', 'หลอกลวง'].map((reason) => (
+                                <div
+                                    key={reason}
+                                    onClick={() => setReportReason(reason)}
+                                    style={{
+                                        padding: '15px',
+                                        marginBottom: '10px',
+                                        borderRadius: '10px',
+                                        border: `2px solid ${reportReason === reason ? '#a607d6' : '#333'}`,
+                                        backgroundColor: reportReason === reason ? 'rgba(166, 7, 214, 0.1)' : 'transparent',
+                                        cursor: 'pointer',
+                                        transition: 'all 0.2s',
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        gap: '10px'
+                                    }}
+                                >
+                                    <div style={{
+                                        width: '20px',
+                                        height: '20px',
+                                        borderRadius: '50%',
+                                        border: `2px solid ${reportReason === reason ? '#a607d6' : '#666'}`,
+                                        backgroundColor: reportReason === reason ? '#a607d6' : 'transparent',
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        justifyContent: 'center'
+                                    }}>
+                                        {reportReason === reason && (
+                                            <span className="material-icons" style={{ fontSize: '14px', color: 'white' }}>check</span>
+                                        )}
+                                    </div>
+                                    <span>{reason}</span>
+                                </div>
+                            ))}
+                        </div>
+
+                        <div style={{ marginBottom: '20px' }}>
+                            <label style={{ display: 'block', marginBottom: '8px', fontSize: '14px', color: '#888' }}>
+                                รายละเอียดเพิ่มเติม (ถ้ามี)
+                            </label>
                             <textarea
                                 value={reportAdditionalInfo}
                                 onChange={(e) => setReportAdditionalInfo(e.target.value)}
-                                placeholder="Please provide more details..."
-                                rows="4"
-                                style={{ width: '100%', padding: '10px', borderRadius: '5px', backgroundColor: '#333', color: 'white', border: '1px solid #444' }}
-                            ></textarea>
+                                placeholder="อธิบายเพิ่มเติมเกี่ยวกับปัญหา..."
+                                style={{
+                                    width: '100%',
+                                    minHeight: '80px',
+                                    padding: '10px',
+                                    borderRadius: '8px',
+                                    border: '1px solid #333',
+                                    backgroundColor: '#2a2a2a',
+                                    color: 'white',
+                                    resize: 'vertical',
+                                    fontFamily: 'inherit'
+                                }}
+                            />
                         </div>
-                        <div className="modal-actions">
-                            <button onClick={() => setShowReportModal(false)} className="cancel-btn">Cancel</button>
-                            <button onClick={confirmReport} className="confirm-btn" style={{ backgroundColor: '#ff4444' }}>Report</button>
+
+                        <div style={{ display: 'flex', gap: '10px', justifyContent: 'flex-end' }}>
+                            <button
+                                onClick={() => setShowReportModal(false)}
+                                style={{
+                                    padding: '12px 24px',
+                                    borderRadius: '8px',
+                                    border: '1px solid #333',
+                                    backgroundColor: 'transparent',
+                                    color: 'white',
+                                    cursor: 'pointer',
+                                    fontWeight: '500'
+                                }}
+                            >
+                                ยกเลิก
+                            </button>
+                            <button
+                                onClick={confirmReport}
+                                disabled={!reportReason}
+                                style={{
+                                    padding: '12px 24px',
+                                    borderRadius: '8px',
+                                    border: 'none',
+                                    backgroundColor: reportReason ? '#ff4444' : '#555',
+                                    color: 'white',
+                                    cursor: reportReason ? 'pointer' : 'not-allowed',
+                                    fontWeight: '500'
+                                }}
+                            >
+                                ส่งรายงาน
+                            </button>
                         </div>
                     </div>
                 </div>

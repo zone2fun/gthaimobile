@@ -1,85 +1,158 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
+import axios from 'axios';
 
 const Dashboard = () => {
-    // Mock data for dashboard
-    const stats = [
-        { title: 'Total Users', value: '12,345', change: '+12%', icon: 'people', color: '#a607d6' },
-        { title: 'Active Now', value: '1,234', change: '+5%', icon: 'wifi', color: '#2ecc71' },
-        { title: 'New Reports', value: '23', change: '-2%', icon: 'flag', color: '#ff4444' },
-        { title: 'Revenue', value: '$45,678', change: '+8%', icon: 'payments', color: '#f1c40f' },
-    ];
+    const [stats, setStats] = useState(null);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
+
+    useEffect(() => {
+        fetchStats();
+    }, []);
+
+    const fetchStats = async () => {
+        try {
+            setLoading(true);
+            const token = localStorage.getItem('adminToken');
+            const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+
+            const response = await axios.get(`${API_URL}/api/admin/users/stats`, {
+                headers: {
+                    Authorization: `Bearer ${token}`
+                }
+            });
+
+            setStats(response.data);
+            setError(null);
+        } catch (err) {
+            console.error('Error fetching stats:', err);
+            setError('Failed to load statistics');
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const formatNumber = (num) => {
+        if (!num && num !== 0) return '0';
+        return num.toLocaleString();
+    };
+
+    const statCards = stats ? [
+        {
+            title: 'Total Members',
+            value: formatNumber(stats.totalUsers),
+            icon: 'people',
+            color: '#a607d6',
+            subtitle: 'All registered users'
+        },
+        {
+            title: 'Active Users',
+            value: formatNumber(stats.activeUsers),
+            icon: 'check_circle',
+            color: '#2ecc71',
+            subtitle: 'Not banned users'
+        },
+        {
+            title: 'Online Now',
+            value: formatNumber(stats.onlineUsers),
+            icon: 'wifi',
+            color: '#3498db',
+            subtitle: 'Currently online'
+        },
+        {
+            title: 'Banned Users',
+            value: formatNumber(stats.bannedUsers),
+            icon: 'block',
+            color: '#ff4444',
+            subtitle: 'Suspended accounts'
+        },
+    ] : [];
+
+    if (loading) {
+        return (
+            <div style={styles.loadingContainer}>
+                <div style={styles.spinner}></div>
+                <p style={{ color: '#a0a0a0', marginTop: '20px' }}>Loading dashboard...</p>
+            </div>
+        );
+    }
+
+    if (error) {
+        return (
+            <div style={styles.errorContainer}>
+                <span className="material-icons" style={{ fontSize: '48px', color: '#ff4444' }}>error_outline</span>
+                <p style={{ color: '#ff4444', marginTop: '10px' }}>{error}</p>
+                <button onClick={fetchStats} style={styles.retryBtn}>Retry</button>
+            </div>
+        );
+    }
 
     return (
         <div>
-            <h1 style={styles.pageTitle}>Dashboard</h1>
+            <div style={styles.header}>
+                <h1 style={styles.pageTitle}>Dashboard</h1>
+                <button onClick={fetchStats} style={styles.refreshBtn}>
+                    <span className="material-icons">refresh</span>
+                    Refresh
+                </button>
+            </div>
 
             {/* Stats Grid */}
             <div style={styles.statsGrid}>
-                {stats.map((stat, index) => (
+                {statCards.map((stat, index) => (
                     <div key={index} style={styles.statCard}>
                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
                             <div>
                                 <p style={styles.statTitle}>{stat.title}</p>
                                 <h3 style={styles.statValue}>{stat.value}</h3>
+                                <p style={styles.statSubtitle}>{stat.subtitle}</p>
                             </div>
                             <div style={{ ...styles.iconBox, backgroundColor: `${stat.color}20`, color: stat.color }}>
                                 <span className="material-icons">{stat.icon}</span>
                             </div>
                         </div>
-                        <div style={styles.statChange}>
-                            <span style={{
-                                color: stat.change.startsWith('+') ? '#2ecc71' : '#ff4444',
-                                display: 'flex',
-                                alignItems: 'center',
-                                fontSize: '12px',
-                                fontWeight: '500'
-                            }}>
-                                {stat.change.startsWith('+') ? '↑' : '↓'} {stat.change}
-                            </span>
-                            <span style={{ color: '#666', fontSize: '12px', marginLeft: '5px' }}>vs last month</span>
-                        </div>
                     </div>
                 ))}
             </div>
 
-            {/* Recent Activity & Charts Section */}
-            <div style={styles.sectionGrid}>
-                {/* Recent Reports */}
-                <div style={styles.card}>
-                    <div style={styles.cardHeader}>
-                        <h3 style={styles.cardTitle}>Recent Reports</h3>
-                        <button style={styles.viewAllBtn}>View All</button>
+            {/* Additional Stats */}
+            {stats && (
+                <div style={styles.additionalStats}>
+                    <div style={styles.card}>
+                        <h3 style={styles.cardTitle}>User Overview</h3>
+                        <div style={styles.statsRow}>
+                            <div style={styles.statItem}>
+                                <span className="material-icons" style={{ color: '#a607d6', fontSize: '20px' }}>verified</span>
+                                <div style={{ marginLeft: '10px' }}>
+                                    <p style={styles.statItemLabel}>Verified Users</p>
+                                    <p style={styles.statItemValue}>{formatNumber(stats.verifiedUsers)}</p>
+                                </div>
+                            </div>
+                            <div style={styles.statItem}>
+                                <span className="material-icons" style={{ color: '#2ecc71', fontSize: '20px' }}>trending_up</span>
+                                <div style={{ marginLeft: '10px' }}>
+                                    <p style={styles.statItemLabel}>Active Rate</p>
+                                    <p style={styles.statItemValue}>
+                                        {stats.totalUsers > 0 ? ((stats.activeUsers / stats.totalUsers) * 100).toFixed(1) : 0}%
+                                    </p>
+                                </div>
+                            </div>
+                            <div style={styles.statItem}>
+                                <span className="material-icons" style={{ color: '#3498db', fontSize: '20px' }}>people_outline</span>
+                                <div style={{ marginLeft: '10px' }}>
+                                    <p style={styles.statItemLabel}>Online Rate</p>
+                                    <p style={styles.statItemValue}>
+                                        {stats.totalUsers > 0 ? ((stats.onlineUsers / stats.totalUsers) * 100).toFixed(1) : 0}%
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
                     </div>
-                    <table style={styles.table}>
-                        <thead>
-                            <tr>
-                                <th style={styles.th}>User</th>
-                                <th style={styles.th}>Reason</th>
-                                <th style={styles.th}>Status</th>
-                                <th style={styles.th}>Date</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {[1, 2, 3, 4, 5].map((item) => (
-                                <tr key={item} style={styles.tr}>
-                                    <td style={styles.td}>
-                                        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                                            <div style={{ width: '30px', height: '30px', borderRadius: '50%', backgroundColor: '#333' }}></div>
-                                            <span>User {item}</span>
-                                        </div>
-                                    </td>
-                                    <td style={styles.td}>Inappropriate Content</td>
-                                    <td style={styles.td}>
-                                        <span style={styles.statusBadge}>Pending</span>
-                                    </td>
-                                    <td style={{ ...styles.td, color: '#888' }}>2 mins ago</td>
-                                </tr>
-                            ))}
-                        </tbody>
-                    </table>
                 </div>
+            )}
 
-                {/* System Status */}
+            {/* System Status */}
+            <div style={styles.sectionGrid}>
                 <div style={styles.card}>
                     <h3 style={styles.cardTitle}>System Status</h3>
                     <div style={styles.statusList}>
@@ -99,11 +172,33 @@ const Dashboard = () => {
                         </div>
                         <div style={styles.statusItem}>
                             <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                                <span className="material-icons" style={{ color: '#f1c40f' }}>warning</span>
-                                <span>Image Server</span>
+                                <span className="material-icons" style={{ color: '#2ecc71' }}>check_circle</span>
+                                <span>Socket Server</span>
                             </div>
-                            <span style={{ color: '#f1c40f', fontSize: '12px' }}>High Load</span>
+                            <span style={{ color: '#2ecc71', fontSize: '12px' }}>Operational</span>
                         </div>
+                    </div>
+                </div>
+
+                <div style={styles.card}>
+                    <h3 style={styles.cardTitle}>Quick Actions</h3>
+                    <div style={styles.actionsList}>
+                        <button style={styles.actionBtn} onClick={() => window.location.href = '/users'}>
+                            <span className="material-icons">people</span>
+                            <span>Manage Users</span>
+                        </button>
+                        <button style={styles.actionBtn} onClick={() => window.location.href = '/moderation'}>
+                            <span className="material-icons">gavel</span>
+                            <span>Content Moderation</span>
+                        </button>
+                        <button style={styles.actionBtn} onClick={() => window.location.href = '/approve-photo'}>
+                            <span className="material-icons">photo_library</span>
+                            <span>Approve Photos</span>
+                        </button>
+                        <button style={styles.actionBtn} onClick={() => window.location.href = '/reports'}>
+                            <span className="material-icons">flag</span>
+                            <span>View Reports</span>
+                        </button>
                     </div>
                 </div>
             </div>
@@ -111,11 +206,66 @@ const Dashboard = () => {
     );
 };
 
+
 const styles = {
+    loadingContainer: {
+        display: 'flex',
+        flexDirection: 'column',
+        justifyContent: 'center',
+        alignItems: 'center',
+        height: '400px',
+    },
+    spinner: {
+        border: '4px solid #333',
+        borderTop: '4px solid #a607d6',
+        borderRadius: '50%',
+        width: '50px',
+        height: '50px',
+        animation: 'spin 1s linear infinite',
+    },
+    errorContainer: {
+        display: 'flex',
+        flexDirection: 'column',
+        justifyContent: 'center',
+        alignItems: 'center',
+        height: '400px',
+    },
+    retryBtn: {
+        marginTop: '20px',
+        padding: '10px 20px',
+        backgroundColor: '#a607d6',
+        border: 'none',
+        borderRadius: '8px',
+        color: '#fff',
+        cursor: 'pointer',
+        fontSize: '14px',
+        fontWeight: '500',
+        transition: 'background 0.2s',
+    },
+    header: {
+        display: 'flex',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        marginBottom: '20px',
+    },
     pageTitle: {
         fontSize: '24px',
         fontWeight: 'bold',
-        marginBottom: '20px',
+        margin: 0,
+    },
+    refreshBtn: {
+        display: 'flex',
+        alignItems: 'center',
+        gap: '8px',
+        padding: '10px 16px',
+        backgroundColor: '#2a2a2a',
+        border: '1px solid #333',
+        borderRadius: '8px',
+        color: '#fff',
+        cursor: 'pointer',
+        fontSize: '14px',
+        fontWeight: '500',
+        transition: 'all 0.2s',
     },
     statsGrid: {
         display: 'grid',
@@ -128,33 +278,65 @@ const styles = {
         padding: '20px',
         borderRadius: '12px',
         border: '1px solid #333',
+        transition: 'transform 0.2s, box-shadow 0.2s',
+        cursor: 'default',
     },
     statTitle: {
         color: '#a0a0a0',
         fontSize: '14px',
-        marginBottom: '5px',
-    },
-    statValue: {
-        fontSize: '24px',
-        fontWeight: 'bold',
+        marginBottom: '8px',
         margin: 0,
     },
+    statValue: {
+        fontSize: '28px',
+        fontWeight: 'bold',
+        margin: '5px 0',
+    },
+    statSubtitle: {
+        color: '#666',
+        fontSize: '12px',
+        margin: '5px 0 0 0',
+    },
     iconBox: {
-        width: '40px',
-        height: '40px',
-        borderRadius: '10px',
+        width: '48px',
+        height: '48px',
+        borderRadius: '12px',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
+        fontSize: '24px',
     },
-    statChange: {
-        marginTop: '15px',
+    additionalStats: {
+        marginBottom: '30px',
+    },
+    statsRow: {
+        display: 'grid',
+        gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
+        gap: '20px',
+        marginTop: '20px',
+    },
+    statItem: {
         display: 'flex',
         alignItems: 'center',
+        padding: '15px',
+        backgroundColor: '#2a2a2a',
+        borderRadius: '10px',
+        border: '1px solid #333',
+    },
+    statItemLabel: {
+        color: '#a0a0a0',
+        fontSize: '12px',
+        margin: '0 0 5px 0',
+    },
+    statItemValue: {
+        color: '#fff',
+        fontSize: '18px',
+        fontWeight: 'bold',
+        margin: 0,
     },
     sectionGrid: {
         display: 'grid',
-        gridTemplateColumns: '2fr 1fr',
+        gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))',
         gap: '20px',
     },
     card: {
@@ -163,64 +345,62 @@ const styles = {
         borderRadius: '12px',
         border: '1px solid #333',
     },
-    cardHeader: {
-        display: 'flex',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        marginBottom: '20px',
-    },
     cardTitle: {
         fontSize: '18px',
         fontWeight: '600',
-        margin: 0,
-    },
-    viewAllBtn: {
-        background: 'none',
-        border: 'none',
-        color: '#a607d6',
-        cursor: 'pointer',
-        fontSize: '14px',
-    },
-    table: {
-        width: '100%',
-        borderCollapse: 'collapse',
-    },
-    th: {
-        textAlign: 'left',
-        padding: '12px',
-        color: '#a0a0a0',
-        fontSize: '12px',
-        fontWeight: '500',
-        borderBottom: '1px solid #333',
-    },
-    td: {
-        padding: '12px',
-        borderBottom: '1px solid #2a2a2a',
-        fontSize: '14px',
-    },
-    tr: {},
-    statusBadge: {
-        padding: '4px 8px',
-        borderRadius: '12px',
-        backgroundColor: 'rgba(255, 68, 68, 0.1)',
-        color: '#ff4444',
-        fontSize: '12px',
-        fontWeight: '500',
+        margin: '0 0 15px 0',
     },
     statusList: {
         display: 'flex',
         flexDirection: 'column',
-        gap: '15px',
+        gap: '12px',
         marginTop: '15px',
     },
     statusItem: {
         display: 'flex',
         justifyContent: 'space-between',
         alignItems: 'center',
-        padding: '10px',
+        padding: '12px',
         backgroundColor: '#2a2a2a',
         borderRadius: '8px',
+        border: '1px solid #333',
+    },
+    actionsList: {
+        display: 'flex',
+        flexDirection: 'column',
+        gap: '12px',
+        marginTop: '15px',
+    },
+    actionBtn: {
+        display: 'flex',
+        alignItems: 'center',
+        gap: '12px',
+        padding: '14px 16px',
+        backgroundColor: '#2a2a2a',
+        border: '1px solid #333',
+        borderRadius: '8px',
+        color: '#fff',
+        cursor: 'pointer',
+        fontSize: '14px',
+        fontWeight: '500',
+        transition: 'all 0.2s',
+        textAlign: 'left',
     },
 };
 
+// Add keyframes for spinner animation
+const styleSheet = document.styleSheets[0];
+const keyframes = `
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+`;
+try {
+    styleSheet.insertRule(keyframes, styleSheet.cssRules.length);
+} catch (e) {
+    // Ignore if already exists
+}
+
 export default Dashboard;
+
