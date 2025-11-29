@@ -21,6 +21,8 @@ import SearchResults from './pages/SearchResults';
 import ForgotPassword from './pages/ForgotPassword';
 import ResetPassword from './pages/ResetPassword';
 import LocationTracker from './components/LocationTracker';
+import AdManager from './components/AdManager';
+import SafetyPolicy from './pages/SafetyPolicy';
 
 const MainLayout = () => {
   return (
@@ -40,6 +42,7 @@ function App() {
       <SocketProvider>
         <LocationTracker />
         <Router>
+          <AdManager />
           <Routes>
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
@@ -49,6 +52,7 @@ function App() {
             <Route element={<MainLayout />}>
               {/* Public route - Home only */}
               <Route path="/" element={<Home />} />
+              <Route path="/safety-policy" element={<SafetyPolicy />} />
 
               {/* Protected routes */}
               <Route path="/favourites" element={<PrivateRoute><Favourites /></PrivateRoute>} />

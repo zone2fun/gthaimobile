@@ -284,7 +284,12 @@ const UserProfile = ({ userId }) => {
             <div className="profile-content">
                 <div className="profile-header">
                     <div className="profile-avatar" style={{ position: 'relative' }}>
-                        <img src={user.img} alt={user.name} />
+                        <img
+                            src={user.img}
+                            alt={user.name}
+                            onClick={() => openLightbox(0, 'avatar')}
+                            style={{ cursor: 'pointer' }}
+                        />
                         <div className={`status-dot ${user.isOnline ? 'online' : 'offline'}`}></div>
                         {currentUser && (user._id === currentUser._id || user.id === currentUser._id) && user.pendingImg && (
                             <div style={{
@@ -558,18 +563,26 @@ const UserProfile = ({ userId }) => {
                     <button className="lightbox-close" onClick={closeLightbox}>
                         <span className="material-icons">close</span>
                     </button>
-                    <button className="lightbox-nav prev" onClick={prevImage}>
-                        <span className="material-icons">chevron_left</span>
-                    </button>
+                    {lightboxSource !== 'avatar' && (
+                        <button className="lightbox-nav prev" onClick={prevImage}>
+                            <span className="material-icons">chevron_left</span>
+                        </button>
+                    )}
                     <div className="lightbox-content" onClick={(e) => e.stopPropagation()}>
                         <img
-                            src={lightboxSource === 'private' ? user.privateAlbum[currentImageIndex] : user.gallery[currentImageIndex]}
+                            src={
+                                lightboxSource === 'avatar' ? user.img :
+                                    lightboxSource === 'private' ? user.privateAlbum[currentImageIndex] :
+                                        user.gallery[currentImageIndex]
+                            }
                             alt="Full screen"
                         />
                     </div>
-                    <button className="lightbox-nav next" onClick={nextImage}>
-                        <span className="material-icons">chevron_right</span>
-                    </button>
+                    {lightboxSource !== 'avatar' && (
+                        <button className="lightbox-nav next" onClick={nextImage}>
+                            <span className="material-icons">chevron_right</span>
+                        </button>
+                    )}
                 </div>
             )}
 

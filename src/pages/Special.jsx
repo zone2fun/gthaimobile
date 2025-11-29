@@ -56,10 +56,24 @@ const Special = () => {
                 }
             };
 
+            const handlePostApproved = (approvedPost) => {
+                setPosts(prevPosts => prevPosts.map(post =>
+                    post._id === approvedPost._id ? { ...post, isApproved: true } : post
+                ));
+            };
+
+            const handlePostRejected = (data) => {
+                setPosts(prevPosts => prevPosts.filter(post => post._id !== data.postId));
+            };
+
             socket.on('photo approved', handlePhotoApproved);
+            socket.on('post_approved', handlePostApproved);
+            socket.on('post_rejected', handlePostRejected);
 
             return () => {
                 socket.off('photo approved', handlePhotoApproved);
+                socket.off('post_approved', handlePostApproved);
+                socket.off('post_rejected', handlePostRejected);
             };
         }
     }, [socket]);
@@ -341,13 +355,52 @@ const Special = () => {
                                         <img src={post.image} alt="Post content" />
                                     </div>
                                 )}
+
+                                {/* Pending Approval Badge */}
+                                {!post.isApproved && user?._id === post.user._id && (
+                                    <div style={{
+                                        marginTop: '15px',
+                                        padding: '12px 16px',
+                                        background: 'linear-gradient(135deg, rgba(255, 165, 0, 0.1) 0%, rgba(255, 140, 0, 0.05) 100%)',
+                                        border: '2px solid rgba(255, 165, 0, 0.3)',
+                                        borderRadius: '12px',
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        gap: '12px'
+                                    }}>
+                                        <span className="material-icons" style={{
+                                            color: '#ffa500',
+                                            fontSize: '24px',
+                                            animation: 'pulse 2s ease-in-out infinite'
+                                        }}>
+                                            schedule
+                                        </span>
+                                        <div>
+                                            <div style={{
+                                                color: '#ffa500',
+                                                fontWeight: '600',
+                                                fontSize: '14px',
+                                                marginBottom: '4px'
+                                            }}>
+                                                รอการอนุมัติ (Pending Approval)
+                                            </div>
+                                            <div style={{
+                                                color: '#888',
+                                                fontSize: '12px',
+                                                lineHeight: '1.4'
+                                            }}>
+                                                โพสต์ที่มีรูปภาพต้องได้รับการอนุมัติจาก Admin ก่อนจะแสดงต่อผู้ใช้อื่น
+                                            </div>
+                                        </div>
+                                    </div>
+                                )}
                             </div>
 
                             <div className="post-stats">
-                                <div className="post-stat-item" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                <div className="post-stat-item" style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
                                     {post.likes && post.likes.length > 0 && (
                                         <div style={{ display: 'flex', alignItems: 'center' }}>
-                                            <div style={{ display: 'flex', marginRight: '5px' }}>
+                                            <div style={{ display: 'flex' }}>
                                                 {post.likes.slice(0, 10).map((likeUser, index) => (
                                                     <img
                                                         key={likeUser._id || index}
@@ -393,7 +446,7 @@ const Special = () => {
                                             fontSize: '14px',
                                             color: '#888',
                                             cursor: post.likes.length > 0 ? 'pointer' : 'default',
-                                            marginLeft: '5px'
+                                            marginLeft: '2px'
                                         }}
                                         onClick={() => {
                                             if (post.likes.length > 0) {

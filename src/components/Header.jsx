@@ -88,14 +88,22 @@ const Header = () => {
                 }
             };
 
+            const handleAccountBanned = (data) => {
+                disconnectSocket();
+                logout();
+                navigate('/login');
+            };
+
             socket.on('new notification', handleNewNotification);
             socket.on('photo approved', handlePhotoApproved);
+            socket.on('account_banned', handleAccountBanned);
             console.log('✅ Header: Socket listeners registered');
 
             return () => {
                 console.log('🔴 Header: Cleaning up socket listeners');
                 socket.off('new notification', handleNewNotification);
                 socket.off('photo approved', handlePhotoApproved);
+                socket.off('account_banned', handleAccountBanned);
             };
         } else {
             console.log('⚠️ Header: Socket is null, skipping listener registration');
@@ -130,10 +138,19 @@ const Header = () => {
         setShowNotifications(false);
 
         if (notification.post) {
-            const postId = notification.post._id || notification.post;
+            // Handle both populated object and ID string
+            const postId = typeof notification.post === 'object' ? notification.post._id : notification.post;
+
+            if (!postId) return; // Post might be deleted
+
             // If it's a comment notification, navigate to post with comment hash
             if (notification.type === 'comment_post' && notification.comment) {
-                navigate(`/post/${postId}#comment-${notification.comment}`);
+                const commentId = typeof notification.comment === 'object' ? notification.comment._id : notification.comment;
+                navigate(`/post/${postId}#comment-${commentId}`);
+            } else if (notification.type === 'post_approved') {
+                navigate(`/post/${postId}`);
+            } else if (notification.type === 'post_rejected') {
+                // Do nothing or maybe show a toast
             } else {
                 navigate(`/post/${postId}`);
             }
@@ -474,11 +491,11 @@ const Header = () => {
                                                 gap: '10px'
                                             }}
                                         >
-                                            {notification.type === 'photo_approved' ? (
+                                            {notification.type === 'photo_approved' || notification.type === 'post_approved' ? (
                                                 <div style={{ width: '40px', height: '40px', borderRadius: '50%', backgroundColor: 'rgba(76, 175, 80, 0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                                                     <span className="material-icons" style={{ color: '#4CAF50' }}>check_circle</span>
                                                 </div>
-                                            ) : notification.type === 'photo_denied' ? (
+                                            ) : notification.type === 'photo_denied' || notification.type === 'post_rejected' ? (
                                                 <div style={{ width: '40px', height: '40px', borderRadius: '50%', backgroundColor: 'rgba(244, 67, 54, 0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                                                     <span className="material-icons" style={{ color: '#F44336' }}>cancel</span>
                                                 </div>
@@ -493,9 +510,9 @@ const Header = () => {
                                                 <div style={{ fontSize: '14px' }}>
                                                     {notification.type === 'admin_notification' ? (
                                                         <span style={{ color: '#ff4444' }}>{notification.message}</span>
-                                                    ) : notification.type === 'photo_approved' ? (
+                                                    ) : notification.type === 'photo_approved' || notification.type === 'post_approved' ? (
                                                         <span style={{ color: '#4CAF50' }}>{notification.message}</span>
-                                                    ) : notification.type === 'photo_denied' ? (
+                                                    ) : notification.type === 'photo_denied' || notification.type === 'post_rejected' ? (
                                                         <span style={{ color: '#F44336' }}>{notification.message}</span>
                                                     ) : (
                                                         <>
@@ -546,10 +563,16 @@ const Header = () => {
                                 <div style={{ padding: '10px 15px', borderBottom: '1px solid #333', fontSize: '14px', color: '#888' }}>
                                     Signed in as <strong>{user.name}</strong>
                                 </div>
-                                <button className="dropdown-item" onClick={() => { setShowMenu(false); navigate('/blocked-users'); }}>
+                                <button className="dropdown-item" onClick={() => { setShowMenu(false); navigate('/safety-policy'); }} style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                    <span className="material-icons" style={{ fontSize: '20px', color: '#a607d6' }}>security</span>
+                                    Safety Policy
+                                </button>
+                                <button className="dropdown-item" onClick={() => { setShowMenu(false); navigate('/blocked-users'); }} style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                    <span className="material-icons" style={{ fontSize: '20px', color: '#a607d6' }}>block</span>
                                     Block Listing
                                 </button>
-                                <button className="dropdown-item" onClick={handleLogout}>
+                                <button className="dropdown-item" onClick={handleLogout} style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                    <span className="material-icons" style={{ fontSize: '20px', color: '#a607d6' }}>logout</span>
                                     Logout
                                 </button>
                             </>
@@ -558,7 +581,12 @@ const Header = () => {
                                 <div style={{ padding: '10px 15px', borderBottom: '1px solid #333', fontSize: '14px', color: '#888' }}>
                                     Signed in as <strong>Guest</strong>
                                 </div>
-                                <button className="dropdown-item" onClick={() => navigate('/login')}>
+                                <button className="dropdown-item" onClick={() => { setShowMenu(false); navigate('/safety-policy'); }} style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                    <span className="material-icons" style={{ fontSize: '20px', color: '#a607d6' }}>security</span>
+                                    Safety Policy
+                                </button>
+                                <button className="dropdown-item" onClick={() => navigate('/login')} style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                    <span className="material-icons" style={{ fontSize: '20px', color: '#a607d6' }}>login</span>
                                     Login
                                 </button>
                             </>

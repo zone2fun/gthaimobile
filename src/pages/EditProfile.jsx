@@ -68,7 +68,16 @@ const EditProfile = () => {
     }, [user, token]);
 
     const handleChange = (e) => {
-        setFormData({ ...formData, [e.target.name]: e.target.value });
+        const { name, value } = e.target;
+
+        // Validate age in real-time
+        if (name === 'age' && value && parseInt(value) < 18) {
+            setError('You must be at least 18 years old to use this service');
+        } else if (name === 'age' && error.includes('18 years old')) {
+            setError(''); // Clear age error if valid
+        }
+
+        setFormData({ ...formData, [name]: value });
     };
 
     const handleLookingForChange = (option) => {
@@ -146,6 +155,14 @@ const EditProfile = () => {
         e.preventDefault();
         setLoading(true);
         setError('');
+
+        // Validate age
+        if (formData.age && parseInt(formData.age) < 18) {
+            setError('You must be at least 18 years old to use this service');
+            setLoading(false);
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+            return;
+        }
 
         const data = new FormData();
         Object.keys(formData).forEach(key => {
@@ -291,8 +308,34 @@ const EditProfile = () => {
 
                 <div style={{ display: 'flex', gap: '10px', marginBottom: '15px' }}>
                     <div style={{ flex: 1 }}>
-                        <label style={labelStyle}>Age</label>
-                        <input type="number" name="age" value={formData.age} onChange={handleChange} style={inputStyle} />
+                        <label style={labelStyle}>Age (18+)</label>
+                        <input
+                            type="number"
+                            name="age"
+                            value={formData.age}
+                            onChange={handleChange}
+                            style={{
+                                ...inputStyle,
+                                border: formData.age && parseInt(formData.age) < 18 ? '2px solid #ff4444' : 'none',
+                                boxShadow: formData.age && parseInt(formData.age) < 18 ? '0 0 10px rgba(255, 68, 68, 0.3)' : 'none'
+                            }}
+                            min="18"
+                            max="120"
+                            placeholder="18+"
+                        />
+                        {formData.age && parseInt(formData.age) < 18 && (
+                            <div style={{
+                                color: '#ff4444',
+                                fontSize: '12px',
+                                marginTop: '5px',
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: '4px'
+                            }}>
+                                <span className="material-icons" style={{ fontSize: '14px' }}>warning</span>
+                                Must be 18+
+                            </div>
+                        )}
                     </div>
                     <div style={{ flex: 1 }}>
                         <label style={labelStyle}>Country</label>

@@ -9,6 +9,7 @@ import Reports from './pages/Reports';
 import Announcements from './pages/Announcements';
 import Settings from './pages/Settings';
 import ApprovePhoto from './pages/ApprovePhoto';
+import ApprovePosts from './pages/ApprovePosts';
 
 // Protected Route Component
 const ProtectedRoute = ({ children, requiredRole }) => {
@@ -46,6 +47,7 @@ function App() {
                     <Route path="reports" element={<Reports />} />
                     <Route path="announcements" element={<Announcements />} />
                     <Route path="approve-photo" element={<ApprovePhoto />} />
+                    <Route path="approve-posts" element={<ApprovePosts />} />
                     <Route path="settings" element={
                         <ProtectedRoute requiredRole="admin">
                             <Settings />

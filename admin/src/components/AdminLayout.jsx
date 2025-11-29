@@ -17,6 +17,7 @@ const AdminLayout = () => {
         { path: '/reports', icon: 'flag', label: 'Reports', allowedRoles: ['admin', 'editor'] },
         { path: '/announcements', icon: 'campaign', label: 'Announcements', allowedRoles: ['admin', 'editor'] },
         { path: '/approve-photo', icon: 'photo_library', label: 'Approve Photo', allowedRoles: ['admin', 'editor'] },
+        { path: '/approve-posts', icon: 'article', label: 'Approve Posts', allowedRoles: ['admin', 'editor'] },
         { path: '/settings', icon: 'settings', label: 'System Settings', allowedRoles: ['admin'] },
     ];
 

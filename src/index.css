@@ -263,7 +263,7 @@ body {
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
     overflow: hidden;
     z-index: 200;
-    min-width: 150px;
+    min-width: 220px;
 }
 
 .dropdown-item {
@@ -2116,4 +2116,101 @@ body {
 
 .confirm-btn:hover {
     opacity: 0.9;
+}
+
+/* AdSense Styles */
+.ad-desktop {
+    position: fixed;
+    top: var(--header-height);
+    bottom: 0;
+    width: 160px;
+    /* Standard Skyscraper width */
+    z-index: 90;
+    /* Below modals but above content background */
+    display: none;
+    /* Hidden by default (mobile) */
+    align-items: center;
+    justify-content: center;
+    pointer-events: none;
+    /* Let clicks pass through empty space */
+}
+
+.ad-desktop>* {
+    pointer-events: auto;
+    /* Re-enable clicks on the ad itself */
+}
+
+.ad-left {
+    left: 10px;
+}
+
+.ad-right {
+    right: 10px;
+}
+
+.ad-mobile-bottom {
+    position: fixed;
+    bottom: var(--nav-height);
+    /* Sit on top of bottom nav */
+    left: 0;
+    width: 100%;
+    height: 60px;
+    /* Standard mobile banner height approx */
+    z-index: 95;
+    display: flex;
+    /* Visible by default (mobile) */
+    align-items: center;
+    justify-content: center;
+    background-color: rgba(0, 0, 0, 0.5);
+    /* Optional backdrop */
+    pointer-events: none;
+}
+
+.ad-mobile-bottom>* {
+    pointer-events: auto;
+}
+
+.ad-placeholder-vertical {
+    width: 160px;
+    height: 600px;
+    background-color: #2a2a2a;
+    border: 1px dashed #555;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #888;
+    font-size: 14px;
+}
+
+.ad-placeholder-horizontal {
+    width: 320px;
+    height: 50px;
+    background-color: #2a2a2a;
+    border: 1px dashed #555;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #888;
+    font-size: 14px;
+}
+
+/* Responsive Logic */
+@media (min-width: 1200px) {
+    .ad-desktop {
+        display: flex;
+    }
+
+    .ad-mobile-bottom {
+        display: none;
+    }
+}
+
+@media (max-width: 1199px) {
+    .ad-desktop {
+        display: none;
+    }
+
+    .ad-mobile-bottom {
+        display: flex;
+    }
 }
