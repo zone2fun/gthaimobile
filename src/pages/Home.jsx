@@ -8,6 +8,7 @@ const Home = () => {
     const [favourites, setFavourites] = useState(null);
     const [nearby, setNearby] = useState(null);
     const [showOnlineOnly, setShowOnlineOnly] = useState(false);
+    const [showVerifiedOnly, setShowVerifiedOnly] = useState(false);
     const { token, user } = useContext(AuthContext);
 
     useEffect(() => {
@@ -37,43 +38,77 @@ const Home = () => {
         fetchData();
     }, [token, user]);
 
-    // Filter users based on online status
-    const filterOnline = (users) => {
-        if (!showOnlineOnly || !users) return users;
-        return users.filter(u => u.isOnline);
+    // Filter users based on online status and verification status
+    const filterUsers = (users) => {
+        if (!users) return users;
+        let filtered = users;
+        if (showOnlineOnly) {
+            filtered = filtered.filter(u => u.isOnline);
+        }
+        if (showVerifiedOnly) {
+            filtered = filtered.filter(u => u.isVerified);
+        }
+        return filtered;
     };
 
     return (
         <div className="home-page">
-            {/* Online Filter Toggle */}
+            {/* Filter Toggles */}
             <div style={{
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'flex-end',
                 padding: '10px 15px',
-                gap: '10px'
+                gap: '15px'
             }}>
-                <span style={{
-                    fontSize: '14px',
-                    color: showOnlineOnly ? 'var(--online-color)' : 'var(--secondary-text)',
-                    fontWeight: '500',
-                    transition: 'color 0.3s'
-                }}>
-                    Online Only
-                </span>
-                <label className="toggle-switch">
-                    <input
-                        type="checkbox"
-                        checked={showOnlineOnly}
-                        onChange={(e) => setShowOnlineOnly(e.target.checked)}
-                    />
-                    <span className="toggle-slider"></span>
-                </label>
+                {/* Online Toggle */}
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <span style={{
+                        fontSize: '14px',
+                        color: showOnlineOnly ? 'var(--online-color)' : 'var(--secondary-text)',
+                        fontWeight: '500',
+                        transition: 'color 0.3s'
+                    }}>
+                        Online
+                    </span>
+                    <label className="toggle-switch">
+                        <input
+                            type="checkbox"
+                            checked={showOnlineOnly}
+                            onChange={(e) => setShowOnlineOnly(e.target.checked)}
+                        />
+                        <span className="toggle-slider"></span>
+                    </label>
+                </div>
+
+                {/* Verified Toggle */}
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <span style={{
+                        fontSize: '14px',
+                        color: showVerifiedOnly ? '#1DA1F2' : 'var(--secondary-text)',
+                        fontWeight: '500',
+                        transition: 'color 0.3s',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '4px'
+                    }}>
+                        Verify
+                        {showVerifiedOnly && <span className="material-icons" style={{ fontSize: '14px' }}>verified</span>}
+                    </span>
+                    <label className="toggle-switch">
+                        <input
+                            type="checkbox"
+                            checked={showVerifiedOnly}
+                            onChange={(e) => setShowVerifiedOnly(e.target.checked)}
+                        />
+                        <span className="toggle-slider"></span>
+                    </label>
+                </div>
             </div>
 
-            <Section title="Fresh Faces" items={filterOnline(freshFaces)} />
-            {token && user && <Section title="Favourites" items={filterOnline(favourites)} />}
-            <Section title="Nearby" items={filterOnline(nearby)} isGrid={true} />
+            <Section title="Fresh Faces" items={filterUsers(freshFaces)} />
+            {token && user && <Section title="Favourites" items={filterUsers(favourites)} />}
+            <Section title="Nearby" items={filterUsers(nearby)} isGrid={true} />
         </div>
     );
 };

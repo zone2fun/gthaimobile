@@ -8,6 +8,7 @@ const UserManagement = () => {
     const [filterStatus, setFilterStatus] = useState('all');
     const [filterVerified, setFilterVerified] = useState('all');
     const [filterCountry, setFilterCountry] = useState('all');
+    const [hideFakeUsers, setHideFakeUsers] = useState(false);
     const [currentPage, setCurrentPage] = useState(1);
     const [totalPages, setTotalPages] = useState(1);
     const [total, setTotal] = useState(0);
@@ -27,7 +28,7 @@ const UserManagement = () => {
         setLoading(true);
         try {
             const response = await fetch(
-                `${API_URL}/users?page=${currentPage}&limit=10&search=${searchTerm}&status=${filterStatus}&verified=${filterVerified}&country=${filterCountry}`,
+                `${API_URL}/users?page=${currentPage}&limit=10&search=${searchTerm}&status=${filterStatus}&verified=${filterVerified}&country=${filterCountry}&hideFake=${hideFakeUsers}`,
                 {
                     headers: {
                         'Authorization': `Bearer ${token}`
@@ -69,7 +70,7 @@ const UserManagement = () => {
     useEffect(() => {
         fetchUsers();
         fetchStats();
-    }, [currentPage, searchTerm, filterStatus, filterVerified, filterCountry]);
+    }, [currentPage, searchTerm, filterStatus, filterVerified, filterCountry, hideFakeUsers]);
 
     // Toggle ban user
     const handleToggleBan = (userId, currentBanStatus) => {
@@ -234,6 +235,22 @@ const UserManagement = () => {
                         style={styles.searchInput}
                     />
                 </div>
+                <button
+                    onClick={() => setHideFakeUsers(!hideFakeUsers)}
+                    style={{
+                        ...styles.filterBtn,
+                        backgroundColor: hideFakeUsers ? '#a607d6' : '#2a2a2a',
+                        color: hideFakeUsers ? '#fff' : '#a0a0a0',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '8px'
+                    }}
+                >
+                    <span className="material-icons" style={{ fontSize: '18px' }}>
+                        {hideFakeUsers ? 'visibility_off' : 'visibility'}
+                    </span>
+                    Hide Fake Users
+                </button>
                 <select
                     value={filterStatus}
                     onChange={(e) => {
@@ -244,6 +261,7 @@ const UserManagement = () => {
                 >
                     <option value="all">All Status</option>
                     <option value="active">Active</option>
+                    <option value="online">Online</option>
                     <option value="banned">Banned</option>
                 </select>
                 <select
@@ -688,6 +706,15 @@ const styles = {
     detailRow: {
         padding: '10px 0',
         borderBottom: '1px solid #2a2a2a',
+    },
+    filterBtn: {
+        padding: '10px 16px',
+        border: 'none',
+        borderRadius: '8px',
+        cursor: 'pointer',
+        fontSize: '14px',
+        fontWeight: '500',
+        transition: 'all 0.2s',
     },
 };
 

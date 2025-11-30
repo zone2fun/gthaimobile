@@ -10,6 +10,7 @@ import Announcements from './pages/Announcements';
 import Settings from './pages/Settings';
 import ApprovePhoto from './pages/ApprovePhoto';
 import ApprovePosts from './pages/ApprovePosts';
+import VerifiedRequests from './pages/VerifiedRequests';
 
 // Protected Route Component
 const ProtectedRoute = ({ children, requiredRole }) => {
@@ -45,9 +46,11 @@ function App() {
                     <Route path="users" element={<UserManagement />} />
                     <Route path="moderation" element={<ContentModeration />} />
                     <Route path="reports" element={<Reports />} />
+                    <Route path="report" element={<Navigate to="/reports" replace />} />
                     <Route path="announcements" element={<Announcements />} />
                     <Route path="approve-photo" element={<ApprovePhoto />} />
                     <Route path="approve-posts" element={<ApprovePosts />} />
+                    <Route path="verified-requests" element={<VerifiedRequests />} />
                     <Route path="settings" element={
                         <ProtectedRoute requiredRole="admin">
                             <Settings />

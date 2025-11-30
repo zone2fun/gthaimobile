@@ -1,6 +1,7 @@
 import { useNavigate } from 'react-router-dom';
 import { useContext } from 'react';
 import AuthContext from '../context/AuthContext';
+import VerifiedAvatar from './VerifiedAvatar';
 
 const ProfileCard = ({ user, isGrid }) => {
     const navigate = useNavigate();
@@ -25,7 +26,12 @@ const ProfileCard = ({ user, isGrid }) => {
             <div className="profile-info">
                 <div className={`status-dot ${user.isOnline ? 'online' : 'offline'}`}></div>
                 <div style={{ display: 'flex', flexDirection: 'column' }}>
-                    <span className="profile-name">{displayName}</span>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                        <span className="profile-name">{displayName}</span>
+                        {user.isVerified && (
+                            <span className="material-icons" style={{ fontSize: '12px', color: '#1DA1F2' }}>verified</span>
+                        )}
+                    </div>
                     {user.distance !== undefined && user.distance !== null && (
                         <span style={{ fontSize: '10px', color: '#ccc' }}>
                             {(user.distance / 1000).toFixed(1)} km

@@ -3,6 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { getUser, toggleFavorite, blockUser, unblockUser, getMe, createReport, checkAlbumAccess, requestAlbumAccess } from '../services/api';
 import AuthContext from '../context/AuthContext';
 import SocketContext from '../context/SocketContext';
+import VerifiedAvatar from '../components/VerifiedAvatar';
 
 const UserProfile = ({ userId }) => {
     const { id } = useParams();
@@ -284,11 +285,19 @@ const UserProfile = ({ userId }) => {
             <div className="profile-content">
                 <div className="profile-header">
                     <div className="profile-avatar" style={{ position: 'relative' }}>
-                        <img
+                        <VerifiedAvatar
                             src={user.img}
                             alt={user.name}
+                            isVerified={user.isVerified}
+                            size={100}
                             onClick={() => openLightbox(0, 'avatar')}
-                            style={{ cursor: 'pointer' }}
+                            style={{
+                                cursor: 'pointer',
+                                width: '100px',
+                                height: '100px',
+                                borderRadius: '50%',
+                                border: '2px solid var(--card-bg)'
+                            }}
                         />
                         <div className={`status-dot ${user.isOnline ? 'online' : 'offline'}`}></div>
                         {currentUser && (user._id === currentUser._id || user.id === currentUser._id) && user.pendingImg && (

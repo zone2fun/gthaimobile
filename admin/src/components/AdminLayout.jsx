@@ -6,18 +6,79 @@ const AdminLayout = () => {
     const navigate = useNavigate();
     const [isSidebarOpen, setIsSidebarOpen] = useState(true);
 
+    const [counts, setCounts] = useState({ moderation: 0, photos: 0, posts: 0, verifications: 0 });
+
     // Get admin user from localStorage
     const adminUser = JSON.parse(localStorage.getItem('adminUser') || '{}');
     const isAdmin = adminUser.role === 'admin';
+    const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+
+    // Fetch counts
+    const fetchCounts = async () => {
+        try {
+            const token = localStorage.getItem('adminToken');
+            if (!token) return;
+
+            const response = await fetch(`${API_URL}/api/admin/pending-counts`, {
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            });
+
+            if (response.ok) {
+                const data = await response.json();
+                setCounts({
+                    moderation: data.reports || 0,
+                    photos: data.photos || 0,
+                    posts: data.posts || 0,
+                    verifications: data.verifications || 0
+                });
+            }
+        } catch (error) {
+            console.error('Error fetching counts:', error);
+        }
+    };
+
+    React.useEffect(() => {
+        fetchCounts();
+        // Poll every 30 seconds
+        const interval = setInterval(fetchCounts, 30000);
+        return () => clearInterval(interval);
+    }, []);
 
     const menuItems = [
         { path: '/', icon: 'dashboard', label: 'Dashboard', allowedRoles: ['admin', 'editor'] },
         { path: '/users', icon: 'people', label: 'User Management', allowedRoles: ['admin', 'editor'] },
-        { path: '/moderation', icon: 'gavel', label: 'Content Moderation', allowedRoles: ['admin', 'editor'] },
+        {
+            path: '/moderation',
+            icon: 'gavel',
+            label: 'Content Moderation',
+            allowedRoles: ['admin', 'editor'],
+            count: counts.moderation
+        },
         { path: '/reports', icon: 'flag', label: 'Reports', allowedRoles: ['admin', 'editor'] },
         { path: '/announcements', icon: 'campaign', label: 'Announcements', allowedRoles: ['admin', 'editor'] },
-        { path: '/approve-photo', icon: 'photo_library', label: 'Approve Photo', allowedRoles: ['admin', 'editor'] },
-        { path: '/approve-posts', icon: 'article', label: 'Approve Posts', allowedRoles: ['admin', 'editor'] },
+        {
+            path: '/approve-photo',
+            icon: 'photo_library',
+            label: 'Approve Photo',
+            allowedRoles: ['admin', 'editor'],
+            count: counts.photos
+        },
+        {
+            path: '/approve-posts',
+            icon: 'article',
+            label: 'Approve Posts',
+            allowedRoles: ['admin', 'editor'],
+            count: counts.posts
+        },
+        {
+            path: '/verified-requests',
+            icon: 'verified_user',
+            label: 'Verified Requests',
+            allowedRoles: ['admin', 'editor'],
+            count: counts.verifications
+        },
         { path: '/settings', icon: 'settings', label: 'System Settings', allowedRoles: ['admin'] },
     ];
 
@@ -54,12 +115,49 @@ const AdminLayout = () => {
                                 backgroundColor: location.pathname === item.path ? 'rgba(166, 7, 214, 0.15)' : 'transparent',
                                 color: location.pathname === item.path ? '#a607d6' : '#a0a0a0',
                                 borderLeft: location.pathname === item.path ? '3px solid #a607d6' : '3px solid transparent',
+                                position: 'relative'
                             }}
                         >
-                            <span className="material-icons" style={{ fontSize: '24px', minWidth: '40px', textAlign: 'center' }}>
-                                {item.icon}
-                            </span>
-                            {isSidebarOpen && <span style={styles.navLabel}>{item.label}</span>}
+                            <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
+                                <span className="material-icons" style={{ fontSize: '24px', minWidth: '40px', textAlign: 'center' }}>
+                                    {item.icon}
+                                </span>
+                                {!isSidebarOpen && item.count > 0 && (
+                                    <span style={{
+                                        position: 'absolute',
+                                        top: '-5px',
+                                        right: '0',
+                                        backgroundColor: '#ff4444',
+                                        color: 'white',
+                                        fontSize: '10px',
+                                        fontWeight: 'bold',
+                                        padding: '2px 5px',
+                                        borderRadius: '10px',
+                                        minWidth: '16px',
+                                        textAlign: 'center'
+                                    }}>
+                                        {item.count > 99 ? '99+' : item.count}
+                                    </span>
+                                )}
+                            </div>
+                            {isSidebarOpen && (
+                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%' }}>
+                                    <span style={styles.navLabel}>{item.label}</span>
+                                    {item.count > 0 && (
+                                        <span style={{
+                                            backgroundColor: '#ff4444',
+                                            color: 'white',
+                                            fontSize: '11px',
+                                            fontWeight: 'bold',
+                                            padding: '2px 8px',
+                                            borderRadius: '10px',
+                                            marginLeft: '10px'
+                                        }}>
+                                            {item.count > 99 ? '99+' : item.count}
+                                        </span>
+                                    )}
+                                </div>
+                            )}
                         </Link>
                     ))}
                 </nav>

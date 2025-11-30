@@ -66,6 +66,13 @@ const Dashboard = () => {
             color: '#ff4444',
             subtitle: 'Suspended accounts'
         },
+        {
+            title: 'Fake Users',
+            value: formatNumber(stats.fakeUsers),
+            icon: 'smart_toy',
+            color: '#ff9800',
+            subtitle: 'Generated accounts'
+        },
     ] : [];
 
     if (loading) {

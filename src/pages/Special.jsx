@@ -5,6 +5,7 @@ import AuthContext from '../context/AuthContext';
 import { getPosts, createPost, likePost, deletePost, addComment, deleteComment, createReport } from '../services/api';
 import SocketContext from '../context/SocketContext';
 import SkeletonPost from '../components/SkeletonPost';
+import VerifiedAvatar from '../components/VerifiedAvatar';
 
 const Special = () => {
     const [posts, setPosts] = useState([]);
@@ -216,7 +217,13 @@ const Special = () => {
             {/* Create Post Box */}
             <div className="create-post-card">
                 <div className="create-post-header">
-                    <img src={user?.img || '/user_avatar.png'} alt="User" className="post-avatar" />
+                    <VerifiedAvatar
+                        src={user?.img}
+                        alt="User"
+                        isVerified={user?.isVerified}
+                        size={40}
+                        className="post-avatar"
+                    />
                     <textarea
                         placeholder={`What's on your mind, ${user?.name}?`}
                         value={newPostContent}
@@ -331,7 +338,13 @@ const Special = () => {
                             <div className="post-header">
                                 <div className="post-author-info" onClick={() => navigate(`/user/${post.user._id}`)}>
                                     <div className="post-avatar-wrapper">
-                                        <img src={post.user.img} alt={post.user.name} className="post-avatar" />
+                                        <VerifiedAvatar
+                                            src={post.user.img}
+                                            alt={post.user.name}
+                                            isVerified={post.user.isVerified}
+                                            size={40}
+                                            className="post-avatar"
+                                        />
                                         <div className={`status-dot ${post.user.isOnline ? 'online' : 'offline'}`}></div>
                                     </div>
                                     <div>

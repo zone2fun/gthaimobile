@@ -3,6 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import AuthContext from '../context/AuthContext';
 import { getPost, likePost, addComment, deleteComment, deletePost } from '../services/api';
 import SkeletonPost from '../components/SkeletonPost';
+import VerifiedAvatar from '../components/VerifiedAvatar';
 
 const PostDetail = () => {
     const { id } = useParams();
@@ -103,7 +104,13 @@ const PostDetail = () => {
                 <div className="post-header">
                     <div className="post-author-info" onClick={() => navigate(`/user/${post.user._id}`)}>
                         <div className="post-avatar-wrapper">
-                            <img src={post.user.img} alt={post.user.name} className="post-avatar" />
+                            <VerifiedAvatar
+                                src={post.user.img}
+                                alt={post.user.name}
+                                isVerified={post.user.isVerified}
+                                size={40}
+                                className="post-avatar"
+                            />
                             <div className={`status-dot ${post.user.isOnline ? 'online' : 'offline'}`}></div>
                         </div>
                         <div>

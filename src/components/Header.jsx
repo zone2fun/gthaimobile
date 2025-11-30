@@ -3,6 +3,7 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import AuthContext from '../context/AuthContext';
 import SocketContext from '../context/SocketContext';
 import { getNotifications, markNotificationAsRead } from '../services/api';
+import VerifiedAvatar from './VerifiedAvatar';
 
 const Header = () => {
     const [showMenu, setShowMenu] = useState(false);
@@ -156,6 +157,8 @@ const Header = () => {
             }
         } else if (notification.type === 'photo_approved' || notification.type === 'photo_denied') {
             navigate(`/user/${user._id || user.id}`);
+        } else if (notification.type === 'verification_approved' || notification.type === 'verification_denied') {
+            navigate(`/edit-profile`);
         }
     };
 
@@ -491,11 +494,13 @@ const Header = () => {
                                                 gap: '10px'
                                             }}
                                         >
-                                            {notification.type === 'photo_approved' || notification.type === 'post_approved' ? (
+                                            {notification.type === 'photo_approved' || notification.type === 'post_approved' || notification.type === 'verification_approved' ? (
                                                 <div style={{ width: '40px', height: '40px', borderRadius: '50%', backgroundColor: 'rgba(76, 175, 80, 0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                                                    <span className="material-icons" style={{ color: '#4CAF50' }}>check_circle</span>
+                                                    <span className="material-icons" style={{ color: '#4CAF50' }}>
+                                                        {notification.type === 'verification_approved' ? 'verified' : 'check_circle'}
+                                                    </span>
                                                 </div>
-                                            ) : notification.type === 'photo_denied' || notification.type === 'post_rejected' ? (
+                                            ) : notification.type === 'photo_denied' || notification.type === 'post_rejected' || notification.type === 'verification_denied' ? (
                                                 <div style={{ width: '40px', height: '40px', borderRadius: '50%', backgroundColor: 'rgba(244, 67, 54, 0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                                                     <span className="material-icons" style={{ color: '#F44336' }}>cancel</span>
                                                 </div>
@@ -510,9 +515,9 @@ const Header = () => {
                                                 <div style={{ fontSize: '14px' }}>
                                                     {notification.type === 'admin_notification' ? (
                                                         <span style={{ color: '#ff4444' }}>{notification.message}</span>
-                                                    ) : notification.type === 'photo_approved' || notification.type === 'post_approved' ? (
+                                                    ) : notification.type === 'photo_approved' || notification.type === 'post_approved' || notification.type === 'verification_approved' ? (
                                                         <span style={{ color: '#4CAF50' }}>{notification.message}</span>
-                                                    ) : notification.type === 'photo_denied' || notification.type === 'post_rejected' ? (
+                                                    ) : notification.type === 'photo_denied' || notification.type === 'post_rejected' || notification.type === 'verification_denied' ? (
                                                         <span style={{ color: '#F44336' }}>{notification.message}</span>
                                                     ) : (
                                                         <>
@@ -541,15 +546,15 @@ const Header = () => {
 
                 <button className="menu-btn" onClick={() => setShowMenu(!showMenu)} style={{ padding: 0, background: 'none', border: 'none' }}>
                     {user ? (
-                        <img
-                            src={user.img || '/user_avatar.png'}
+                        <VerifiedAvatar
+                            src={user.img}
                             alt={user.name}
-                            onError={(e) => { e.target.src = '/user_avatar.png'; }}
+                            isVerified={user.isVerified}
+                            size={40}
                             className="avatar"
                             style={{
                                 border: '2px solid #a607d6',
-                                cursor: 'pointer',
-                                display: 'block'
+                                cursor: 'pointer'
                             }}
                         />
                     ) : (

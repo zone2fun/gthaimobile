@@ -2,6 +2,7 @@ import React, { useState, useEffect, useContext } from 'react';
 import { useNavigate } from 'react-router-dom';
 import AuthContext from '../context/AuthContext';
 import { updateProfile, changePassword, deleteAccount } from '../services/api';
+import VerificationModal from '../components/VerificationModal';
 
 const EditProfile = () => {
     const { user, token, setUser } = useContext(AuthContext);
@@ -28,8 +29,21 @@ const EditProfile = () => {
     const [isPublic, setIsPublic] = useState(true);
     const [showPasswordModal, setShowPasswordModal] = useState(false);
     const [showDeleteModal, setShowDeleteModal] = useState(false);
+    const [showVerificationModal, setShowVerificationModal] = useState(false);
+    const [verificationStream, setVerificationStream] = useState(null);
+    const [verificationPhoto, setVerificationPhoto] = useState(null);
+    const [submittingVerification, setSubmittingVerification] = useState(false);
     const [passwordData, setPasswordData] = useState({ current: '', new: '', confirm: '' });
     const [passwordError, setPasswordError] = useState('');
+
+    // Alert modal state
+    const [alertModal, setAlertModal] = useState({
+        isOpen: false,
+        type: 'success',
+        title: '',
+        message: ''
+    });
+
 
     useEffect(() => {
         const fetchUserProfile = async () => {
@@ -65,6 +79,49 @@ const EditProfile = () => {
         };
 
         fetchUserProfile();
+    }, [user, token]);
+
+    // Refresh user data to get latest verification status
+    const refreshUserData = async () => {
+        if (user && token) {
+            try {
+                const response = await fetch(`${import.meta.env.VITE_API_URL}/api/users/${user._id}`, {
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                    },
+                });
+                const fullUserData = await response.json();
+
+                // Update user context with latest data
+                const updatedUser = {
+                    ...user,
+                    isVerified: fullUserData.isVerified,
+                    verificationStatus: fullUserData.verificationStatus
+                };
+                setUser(updatedUser);
+                localStorage.setItem('user', JSON.stringify(updatedUser));
+            } catch (error) {
+                console.error('Error refreshing user data:', error);
+            }
+        }
+    };
+
+    // Cleanup camera stream when modal closes
+    useEffect(() => {
+        return () => {
+            if (verificationStream) {
+                verificationStream.getTracks().forEach(track => track.stop());
+            }
+        };
+    }, [verificationStream]);
+
+    // Periodically refresh user data to check verification status
+    useEffect(() => {
+        const interval = setInterval(() => {
+            refreshUserData();
+        }, 5000); // Check every 5 seconds
+
+        return () => clearInterval(interval);
     }, [user, token]);
 
     const handleChange = (e) => {
@@ -232,7 +289,12 @@ const EditProfile = () => {
             if (res.message === 'Password updated successfully') {
                 setShowPasswordModal(false);
                 setPasswordData({ current: '', new: '', confirm: '' });
-                alert('Password changed successfully');
+                setAlertModal({
+                    isOpen: true,
+                    type: 'success',
+                    title: 'Success!',
+                    message: 'Password changed successfully'
+                });
             } else {
                 setPasswordError(res.message || 'Failed to change password');
             }
@@ -250,8 +312,133 @@ const EditProfile = () => {
             navigate('/login');
         } catch (err) {
             console.error(err);
-            alert('Failed to delete account');
+            setAlertModal({
+                isOpen: true,
+                type: 'error',
+                title: 'Error',
+                message: 'Failed to delete account'
+            });
         }
+    };
+
+    const openVerificationCamera = async () => {
+        try {
+            const stream = await navigator.mediaDevices.getUserMedia({
+                video: { facingMode: 'user' },
+                audio: false
+            });
+            setVerificationStream(stream);
+            setShowVerificationModal(true);
+        } catch (err) {
+            console.error('Camera access error:', err);
+            setAlertModal({
+                isOpen: true,
+                type: 'error',
+                title: 'Camera Access Denied',
+                message: 'Unable to access camera. Please check permissions.'
+            });
+        }
+    };
+
+    const captureVerificationPhoto = () => {
+        const video = document.getElementById('verification-video');
+        const canvas = document.createElement('canvas');
+        canvas.width = video.videoWidth;
+        canvas.height = video.videoHeight;
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(video, 0, 0);
+
+        canvas.toBlob((blob) => {
+            setVerificationPhoto(blob);
+        }, 'image/jpeg', 0.9);
+    };
+
+    const submitVerificationRequest = async () => {
+        if (!verificationPhoto) {
+            setAlertModal({
+                isOpen: true,
+                type: 'warning',
+                title: 'No Photo',
+                message: 'Please take a photo first'
+            });
+            return;
+        }
+
+        setSubmittingVerification(true);
+        try {
+            const formData = new FormData();
+            formData.append('verificationImage', verificationPhoto, 'verification.jpg');
+
+            const response = await fetch(`${import.meta.env.VITE_API_URL}/api/users/verification-request`, {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                },
+                body: formData
+            });
+
+            const data = await response.json();
+
+            if (response.ok) {
+                setAlertModal({
+                    isOpen: true,
+                    type: 'success',
+                    title: 'Request Submitted!',
+                    message: 'Verification request submitted successfully! Please wait for admin approval.'
+                });
+                closeVerificationModal();
+                // Update user context
+                const updatedUser = { ...user, verificationStatus: 'pending' };
+                setUser(updatedUser);
+                localStorage.setItem('user', JSON.stringify(updatedUser));
+            } else {
+                setAlertModal({
+                    isOpen: true,
+                    type: 'error',
+                    title: 'Submission Failed',
+                    message: data.message || 'Failed to submit verification request'
+                });
+            }
+        } catch (err) {
+            console.error('Verification submit error:', err);
+            setAlertModal({
+                isOpen: true,
+                type: 'error',
+                title: 'Error',
+                message: 'Failed to submit verification request'
+            });
+        } finally {
+            setSubmittingVerification(false);
+        }
+    };
+
+    const closeVerificationModal = () => {
+        if (verificationStream) {
+            verificationStream.getTracks().forEach(track => track.stop());
+            setVerificationStream(null);
+        }
+        setVerificationPhoto(null);
+        setShowVerificationModal(false);
+    };
+
+    const getVerificationButtonText = () => {
+        if (user?.isVerified) return 'Verified ✓';
+        if (user?.verificationStatus === 'pending') return 'Pending Verification';
+        if (user?.verificationStatus === 'rejected') return 'Verification Rejected';
+        return 'Verify Account';
+    };
+
+    const getVerificationButtonStyle = () => {
+        if (user?.isVerified) {
+            return { backgroundColor: '#2ecc71', cursor: 'default' };
+        }
+        if (user?.verificationStatus === 'pending') {
+            return { backgroundColor: '#f39c12', cursor: 'default' };
+        }
+        if (user?.verificationStatus === 'rejected') {
+            return { backgroundColor: '#e74c3c', cursor: 'pointer' };
+        }
+        return { backgroundColor: '#a607d6', cursor: 'pointer' };
     };
 
     return (
@@ -284,8 +471,8 @@ const EditProfile = () => {
                 </div>
 
                 {/* Avatar Image */}
-                <div style={{ marginBottom: '20px', display: 'flex', justifyContent: 'center' }}>
-                    <div style={{ position: 'relative', width: '100px', height: '100px' }}>
+                <div style={{ marginBottom: '20px', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                    <div style={{ position: 'relative', width: '100px', height: '100px', marginBottom: '10px' }}>
                         <div style={{ width: '100%', height: '100%', borderRadius: '50%', overflow: 'hidden', border: '2px solid #333' }}>
                             {imgPreview && <img src={imgPreview} alt="Avatar Preview" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />}
                         </div>
@@ -299,6 +486,31 @@ const EditProfile = () => {
                             <span className="material-icons" style={{ color: 'white', fontSize: '16px' }}>edit</span>
                         </div>
                     </div>
+
+                    {/* Verification Button */}
+                    <button
+                        type="button"
+                        onClick={user?.isVerified || user?.verificationStatus === 'pending' ? null : openVerificationCamera}
+                        disabled={user?.isVerified || user?.verificationStatus === 'pending'}
+                        style={{
+                            ...getVerificationButtonStyle(),
+                            border: 'none',
+                            color: 'white',
+                            padding: '8px 16px',
+                            borderRadius: '20px',
+                            fontSize: '12px',
+                            fontWeight: 'bold',
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '5px',
+                            opacity: (user?.isVerified || user?.verificationStatus === 'pending') ? 0.7 : 1
+                        }}
+                    >
+                        <span className="material-icons" style={{ fontSize: '16px' }}>
+                            {user?.isVerified ? 'verified' : 'camera_alt'}
+                        </span>
+                        {getVerificationButtonText()}
+                    </button>
                 </div>
 
                 <div style={{ marginBottom: '15px' }}>
@@ -650,6 +862,121 @@ const EditProfile = () => {
                     </div>
                 </div>
             )}
+
+            {/* Verification Camera Modal */}
+            {showVerificationModal && (
+                <div style={{
+                    position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
+                    backgroundColor: 'rgba(0,0,0,0.95)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000, flexDirection: 'column'
+                }}>
+                    <div style={{ backgroundColor: '#1a1a1a', padding: '20px', borderRadius: '12px', width: '90%', maxWidth: '500px' }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '15px' }}>
+                            <h3 style={{ color: 'white', margin: 0 }}>Verification Photo</h3>
+                            <button onClick={closeVerificationModal} style={{ background: 'none', border: 'none', color: '#fff', cursor: 'pointer' }}>
+                                <span className="material-icons">close</span>
+                            </button>
+                        </div>
+
+                        <p style={{ color: '#a0a0a0', fontSize: '14px', marginBottom: '15px' }}>
+                            Take a clear photo of your face for verification. This will be reviewed by our admin team.
+                        </p>
+
+                        {!verificationPhoto ? (
+                            <>
+                                <video
+                                    id="verification-video"
+                                    autoPlay
+                                    playsInline
+                                    ref={(video) => {
+                                        if (video && verificationStream) {
+                                            video.srcObject = verificationStream;
+                                        }
+                                    }}
+                                    style={{
+                                        width: '100%',
+                                        borderRadius: '8px',
+                                        marginBottom: '15px',
+                                        backgroundColor: '#000'
+                                    }}
+                                />
+                                <button
+                                    onClick={captureVerificationPhoto}
+                                    style={{
+                                        width: '100%',
+                                        padding: '12px',
+                                        borderRadius: '8px',
+                                        border: 'none',
+                                        backgroundColor: '#a607d6',
+                                        color: 'white',
+                                        fontWeight: 'bold',
+                                        cursor: 'pointer',
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        justifyContent: 'center',
+                                        gap: '8px'
+                                    }}
+                                >
+                                    <span className="material-icons">camera</span>
+                                    Capture Photo
+                                </button>
+                            </>
+                        ) : (
+                            <>
+                                <img
+                                    src={URL.createObjectURL(verificationPhoto)}
+                                    alt="Verification preview"
+                                    style={{
+                                        width: '100%',
+                                        borderRadius: '8px',
+                                        marginBottom: '15px'
+                                    }}
+                                />
+                                <div style={{ display: 'flex', gap: '10px' }}>
+                                    <button
+                                        onClick={() => setVerificationPhoto(null)}
+                                        style={{
+                                            flex: 1,
+                                            padding: '10px',
+                                            borderRadius: '8px',
+                                            border: '1px solid #666',
+                                            backgroundColor: 'transparent',
+                                            color: '#ccc',
+                                            cursor: 'pointer'
+                                        }}
+                                    >
+                                        Retake
+                                    </button>
+                                    <button
+                                        onClick={submitVerificationRequest}
+                                        disabled={submittingVerification}
+                                        style={{
+                                            flex: 1,
+                                            padding: '10px',
+                                            borderRadius: '8px',
+                                            border: 'none',
+                                            backgroundColor: '#2ecc71',
+                                            color: 'white',
+                                            cursor: submittingVerification ? 'not-allowed' : 'pointer',
+                                            opacity: submittingVerification ? 0.7 : 1
+                                        }}
+                                    >
+                                        {submittingVerification ? 'Submitting...' : 'Submit'}
+                                    </button>
+                                </div>
+                            </>
+                        )}
+                    </div>
+                </div>
+            )}
+
+            {/* Alert Modal */}
+            <VerificationModal
+                isOpen={alertModal.isOpen}
+                type={alertModal.type}
+                title={alertModal.title}
+                message={alertModal.message}
+                onClose={() => setAlertModal({ ...alertModal, isOpen: false })}
+            />
         </div>
     );
 };

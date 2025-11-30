@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { getConversations } from '../services/api';
 import AuthContext from '../context/AuthContext';
 import SocketContext from '../context/SocketContext';
+import VerifiedAvatar from '../components/VerifiedAvatar';
 
 const Chat = () => {
     const [conversations, setConversations] = useState([]);
@@ -84,7 +85,13 @@ const Chat = () => {
                     conversations.map((conv) => (
                         <div key={conv.user._id} className="chat-list-item" onClick={() => navigate(`/chat/${conv.user._id}`)}>
                             <div className="chat-avatar">
-                                <img src={conv.user.img} alt={conv.user.name} />
+                                <VerifiedAvatar
+                                    src={conv.user.img}
+                                    alt={conv.user.name}
+                                    isVerified={conv.user.isVerified}
+                                    size={50}
+                                    style={{ width: '50px', height: '50px' }}
+                                />
                                 <div className={`status-dot ${conv.user.isOnline ? 'online' : 'offline'}`}></div>
                             </div>
                             <div className="chat-info">
