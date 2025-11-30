@@ -281,7 +281,7 @@ const Header = () => {
 
     return (
         <header className="app-header">
-            <img src="/logo.png" alt="Logo" className="logo" style={{ marginRight: '15px' }} />
+            <img onClick={() => navigate('/')} src="/logo.png" alt="Logo" className="logo" style={{ marginRight: '15px', cursor: 'pointer' }} />
 
             {/* Mobile Search Icon */}
             <div className="mobile-search-icon" onClick={() => setShowMobileSearch(!showMobileSearch)}>
