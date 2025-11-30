@@ -1,10 +1,12 @@
 import React, { useState, useEffect, useContext } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import AuthContext from '../context/AuthContext';
 import { updateProfile, changePassword, deleteAccount } from '../services/api';
 import VerificationModal from '../components/VerificationModal';
 
 const EditProfile = () => {
+    const { t } = useTranslation();
     const { user, token, setUser } = useContext(AuthContext);
     const navigate = useNavigate();
     const [formData, setFormData] = useState({
@@ -129,7 +131,7 @@ const EditProfile = () => {
 
         // Validate age in real-time
         if (name === 'age' && value && parseInt(value) < 18) {
-            setError('You must be at least 18 years old to use this service');
+            setError(t('editProfile.errors.age'));
         } else if (name === 'age' && error.includes('18 years old')) {
             setError(''); // Clear age error if valid
         }
@@ -163,7 +165,7 @@ const EditProfile = () => {
         const totalImages = galleryImages.length + newGalleryFiles.length + files.length;
 
         if (totalImages > 5) {
-            setError('Maximum 5 gallery images allowed');
+            setError(t('editProfile.errors.galleryMax'));
             return;
         }
 
@@ -184,7 +186,7 @@ const EditProfile = () => {
         const totalImages = privateAlbum.length + newPrivateFiles.length + files.length;
 
         if (totalImages > 3) {
-            setError('Private album can only have 3 photos');
+            setError(t('editProfile.errors.privateMax'));
             return;
         }
 
@@ -215,7 +217,7 @@ const EditProfile = () => {
 
         // Validate age
         if (formData.age && parseInt(formData.age) < 18) {
-            setError('You must be at least 18 years old to use this service');
+            setError(t('editProfile.errors.age'));
             setLoading(false);
             window.scrollTo({ top: 0, behavior: 'smooth' });
             return;
@@ -277,11 +279,11 @@ const EditProfile = () => {
         e.preventDefault();
         setPasswordError('');
         if (passwordData.new !== passwordData.confirm) {
-            setPasswordError('New passwords do not match');
+            setPasswordError(t('editProfile.errors.passwordMismatch'));
             return;
         }
         if (passwordData.new.length < 8) {
-            setPasswordError('Password must be at least 8 characters');
+            setPasswordError(t('editProfile.errors.passwordLength'));
             return;
         }
         try {
@@ -292,14 +294,14 @@ const EditProfile = () => {
                 setAlertModal({
                     isOpen: true,
                     type: 'success',
-                    title: 'Success!',
-                    message: 'Password changed successfully'
+                    title: t('editProfile.errors.success'),
+                    message: t('editProfile.errors.passwordSuccess')
                 });
             } else {
-                setPasswordError(res.message || 'Failed to change password');
+                setPasswordError(res.message || t('editProfile.errors.passwordFail'));
             }
         } catch (err) {
-            setPasswordError('An error occurred');
+            setPasswordError(t('editProfile.errors.errorOccurred'));
         }
     };
 
@@ -315,8 +317,8 @@ const EditProfile = () => {
             setAlertModal({
                 isOpen: true,
                 type: 'error',
-                title: 'Error',
-                message: 'Failed to delete account'
+                title: t('editProfile.errors.error'),
+                message: t('editProfile.errors.deleteFail')
             });
         }
     };
@@ -334,8 +336,8 @@ const EditProfile = () => {
             setAlertModal({
                 isOpen: true,
                 type: 'error',
-                title: 'Camera Access Denied',
-                message: 'Unable to access camera. Please check permissions.'
+                title: t('editProfile.errors.cameraDenied'),
+                message: t('editProfile.errors.cameraPermission')
             });
         }
     };
@@ -358,8 +360,8 @@ const EditProfile = () => {
             setAlertModal({
                 isOpen: true,
                 type: 'warning',
-                title: 'No Photo',
-                message: 'Please take a photo first'
+                title: t('editProfile.errors.noPhoto'),
+                message: t('editProfile.errors.takePhotoFirst')
             });
             return;
         }
@@ -383,8 +385,8 @@ const EditProfile = () => {
                 setAlertModal({
                     isOpen: true,
                     type: 'success',
-                    title: 'Request Submitted!',
-                    message: 'Verification request submitted successfully! Please wait for admin approval.'
+                    title: t('editProfile.errors.requestSubmitted'),
+                    message: t('editProfile.errors.verificationSuccess')
                 });
                 closeVerificationModal();
                 // Update user context
@@ -395,8 +397,8 @@ const EditProfile = () => {
                 setAlertModal({
                     isOpen: true,
                     type: 'error',
-                    title: 'Submission Failed',
-                    message: data.message || 'Failed to submit verification request'
+                    title: t('editProfile.errors.submissionFailed'),
+                    message: data.message || t('editProfile.errors.verificationFail')
                 });
             }
         } catch (err) {
@@ -404,8 +406,8 @@ const EditProfile = () => {
             setAlertModal({
                 isOpen: true,
                 type: 'error',
-                title: 'Error',
-                message: 'Failed to submit verification request'
+                title: t('editProfile.errors.error'),
+                message: t('editProfile.errors.verificationFail')
             });
         } finally {
             setSubmittingVerification(false);
@@ -422,10 +424,10 @@ const EditProfile = () => {
     };
 
     const getVerificationButtonText = () => {
-        if (user?.isVerified) return 'Verified ✓';
-        if (user?.verificationStatus === 'pending') return 'Pending Verification';
-        if (user?.verificationStatus === 'rejected') return 'Verification Rejected';
-        return 'Verify Account';
+        if (user?.isVerified) return t('editProfile.verified');
+        if (user?.verificationStatus === 'pending') return t('editProfile.pendingVerification');
+        if (user?.verificationStatus === 'rejected') return t('editProfile.verificationRejected');
+        return t('editProfile.verifyAccount');
     };
 
     const getVerificationButtonStyle = () => {
@@ -447,7 +449,7 @@ const EditProfile = () => {
                 <button onClick={() => navigate(-1)} style={{ background: 'none', border: 'none', color: 'white', marginRight: '10px', cursor: 'pointer' }}>
                     <span className="material-icons">arrow_back</span>
                 </button>
-                <h2 style={{ margin: 0 }}>Edit Profile</h2>
+                <h2 style={{ margin: 0 }}>{t('editProfile.title')}</h2>
             </div>
 
             {error && <p style={{ color: 'red', marginBottom: '10px' }}>{error}</p>}
@@ -455,7 +457,7 @@ const EditProfile = () => {
             <form onSubmit={handleSubmit}>
                 {/* Cover Image */}
                 <div style={{ marginBottom: '20px' }}>
-                    <label style={{ display: 'block', marginBottom: '5px', color: '#a0a0a0' }}>Cover Image</label>
+                    <label style={{ display: 'block', marginBottom: '5px', color: '#a0a0a0' }}>{t('editProfile.coverImage')}</label>
                     <div style={{ position: 'relative', height: '150px', backgroundColor: '#333', borderRadius: '8px', overflow: 'hidden', marginBottom: '10px' }}>
                         {coverPreview && <img src={coverPreview} alt="Cover Preview" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />}
                         <input
@@ -514,13 +516,13 @@ const EditProfile = () => {
                 </div>
 
                 <div style={{ marginBottom: '15px' }}>
-                    <label style={labelStyle}>Display Name</label>
+                    <label style={labelStyle}>{t('editProfile.displayName')}</label>
                     <input type="text" name="name" value={formData.name} onChange={handleChange} style={inputStyle} required />
                 </div>
 
                 <div style={{ display: 'flex', gap: '10px', marginBottom: '15px' }}>
                     <div style={{ flex: 1 }}>
-                        <label style={labelStyle}>Age (18+)</label>
+                        <label style={labelStyle}>{t('editProfile.age')}</label>
                         <input
                             type="number"
                             name="age"
@@ -545,14 +547,14 @@ const EditProfile = () => {
                                 gap: '4px'
                             }}>
                                 <span className="material-icons" style={{ fontSize: '14px' }}>warning</span>
-                                Must be 18+
+                                {t('editProfile.errors.mustBe18')}
                             </div>
                         )}
                     </div>
                     <div style={{ flex: 1 }}>
-                        <label style={labelStyle}>Country</label>
+                        <label style={labelStyle}>{t('editProfile.country')}</label>
                         <select name="country" value={formData.country} onChange={handleChange} style={inputStyle}>
-                            <option value="">Select Country</option>
+                            <option value="">{t('editProfile.selectCountry')}</option>
                             <option value="Thailand">Thailand</option>
                             <option value="United States">United States</option>
                             <option value="United Kingdom">United Kingdom</option>
@@ -581,17 +583,17 @@ const EditProfile = () => {
 
                 <div style={{ display: 'flex', gap: '10px', marginBottom: '15px' }}>
                     <div style={{ flex: 1 }}>
-                        <label style={labelStyle}>Height (cm)</label>
+                        <label style={labelStyle}>{t('editProfile.height')}</label>
                         <input type="number" name="height" value={formData.height} onChange={handleChange} style={inputStyle} />
                     </div>
                     <div style={{ flex: 1 }}>
-                        <label style={labelStyle}>Weight (kg)</label>
+                        <label style={labelStyle}>{t('editProfile.weight')}</label>
                         <input type="number" name="weight" value={formData.weight} onChange={handleChange} style={inputStyle} />
                     </div>
                 </div>
 
                 <div style={{ marginBottom: '20px' }}>
-                    <label style={labelStyle}>Looking For</label>
+                    <label style={labelStyle}>{t('editProfile.lookingFor')}</label>
                     <div style={{ display: 'flex', flexWrap: 'wrap', gap: '10px', marginTop: '10px' }}>
                         {['Friend', 'Chat', 'Dating', 'Lover'].map(option => (
                             <label key={option} style={{ display: 'flex', alignItems: 'center', color: '#ccc', cursor: 'pointer' }}>
@@ -608,12 +610,12 @@ const EditProfile = () => {
                 </div>
 
                 <div style={{ marginBottom: '20px' }}>
-                    <label style={labelStyle}>About Me (แนะนำตัว)</label>
+                    <label style={labelStyle}>{t('editProfile.aboutMe')}</label>
                     <textarea
                         name="bio"
                         value={formData.bio}
                         onChange={handleChange}
-                        placeholder="เขียนประโยคสั้นๆ แนะนำตัวเอง (สูงสุด 200 ตัวอักษร)"
+                        placeholder={t('editProfile.aboutMePlaceholder')}
                         maxLength={200}
                         rows={3}
                         style={{
@@ -630,7 +632,7 @@ const EditProfile = () => {
 
                 {/* Gallery Section */}
                 <div style={{ marginBottom: '20px' }}>
-                    <label style={labelStyle}>Gallery (Max 5 images)</label>
+                    <label style={labelStyle}>{t('editProfile.gallery')}</label>
                     <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '10px', marginTop: '10px' }}>
                         {/* Existing gallery images */}
                         {galleryImages.map((img, index) => (
@@ -680,7 +682,7 @@ const EditProfile = () => {
 
                 {/* Private Album Section */}
                 <div style={{ marginBottom: '20px' }}>
-                    <label style={labelStyle}>Private Album (Max 3 images)</label>
+                    <label style={labelStyle}>{t('editProfile.privateAlbum')}</label>
                     <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '10px', marginTop: '10px' }}>
                         {/* Existing private album images */}
                         {privateAlbum.map((img, index) => (
@@ -727,23 +729,23 @@ const EditProfile = () => {
                         )}
                     </div>
                     <p style={{ fontSize: '12px', color: '#888', marginTop: '5px' }}>
-                        รูปในอัลบั้มส่วนตัวจะเห็นได้เฉพาะคนที่คุณอนุญาตเท่านั้น
+                        {t('editProfile.privateAlbumHint')}
                     </p>
                 </div>
 
                 <button type="submit" disabled={loading} style={{ width: '100%', padding: '12px', borderRadius: '8px', border: 'none', backgroundColor: '#a607d6', color: 'white', fontWeight: 'bold', cursor: loading ? 'not-allowed' : 'pointer', opacity: loading ? 0.7 : 1 }}>
-                    {loading ? 'Saving...' : 'Save Changes'}
+                    {loading ? t('editProfile.saving') : t('editProfile.saveChanges')}
                 </button>
             </form>
 
             {/* Privacy Section */}
             <div style={{ marginTop: '30px', borderTop: '1px solid #444', paddingTop: '20px' }}>
-                <h3 style={{ color: 'white', marginBottom: '15px' }}>Privacy & Security</h3>
+                <h3 style={{ color: 'white', marginBottom: '15px' }}>{t('editProfile.privacySecurity')}</h3>
 
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
                     <div>
-                        <div style={{ color: 'white', fontWeight: 'bold' }}>Public Profile</div>
-                        <div style={{ color: '#888', fontSize: '12px' }}>Open visibility to general public who are not members</div>
+                        <div style={{ color: 'white', fontWeight: 'bold' }}>{t('editProfile.publicProfile')}</div>
+                        <div style={{ color: '#888', fontSize: '12px' }}>{t('editProfile.publicProfileDesc')}</div>
                     </div>
                     <label className="toggle-switch">
                         <input
@@ -760,7 +762,7 @@ const EditProfile = () => {
                     onClick={() => setShowPasswordModal(true)}
                     style={{ width: '100%', padding: '12px', borderRadius: '8px', border: '1px solid #a607d6', backgroundColor: 'transparent', color: '#a607d6', fontWeight: 'bold', marginBottom: '10px', cursor: 'pointer' }}
                 >
-                    Change Password
+                    {t('editProfile.changePassword')}
                 </button>
 
                 <button
@@ -768,7 +770,7 @@ const EditProfile = () => {
                     onClick={() => setShowDeleteModal(true)}
                     style={{ width: '100%', padding: '12px', borderRadius: '8px', border: '1px solid #ff4444', backgroundColor: 'transparent', color: '#ff4444', fontWeight: 'bold', cursor: 'pointer' }}
                 >
-                    Delete Account
+                    {t('editProfile.deleteAccount')}
                 </button>
             </div>
 
@@ -779,11 +781,11 @@ const EditProfile = () => {
                     backgroundColor: 'rgba(0,0,0,0.8)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000
                 }}>
                     <div style={{ backgroundColor: '#1a1a1a', padding: '20px', borderRadius: '12px', width: '90%', maxWidth: '400px' }}>
-                        <h3 style={{ color: 'white', marginBottom: '20px', textAlign: 'center' }}>Change Password</h3>
+                        <h3 style={{ color: 'white', marginBottom: '20px', textAlign: 'center' }}>{t('editProfile.changePassword')}</h3>
                         {passwordError && <p style={{ color: 'red', marginBottom: '10px', fontSize: '14px' }}>{passwordError}</p>}
                         <form onSubmit={handlePasswordSubmit}>
                             <div style={{ marginBottom: '15px' }}>
-                                <label style={labelStyle}>Current Password</label>
+                                <label style={labelStyle}>{t('editProfile.currentPassword')}</label>
                                 <input
                                     type="password"
                                     value={passwordData.current}
@@ -793,7 +795,7 @@ const EditProfile = () => {
                                 />
                             </div>
                             <div style={{ marginBottom: '15px' }}>
-                                <label style={labelStyle}>New Password</label>
+                                <label style={labelStyle}>{t('editProfile.newPassword')}</label>
                                 <input
                                     type="password"
                                     value={passwordData.new}
@@ -803,7 +805,7 @@ const EditProfile = () => {
                                 />
                             </div>
                             <div style={{ marginBottom: '20px' }}>
-                                <label style={labelStyle}>Confirm New Password</label>
+                                <label style={labelStyle}>{t('editProfile.confirmNewPassword')}</label>
                                 <input
                                     type="password"
                                     value={passwordData.confirm}
@@ -818,13 +820,13 @@ const EditProfile = () => {
                                     onClick={() => setShowPasswordModal(false)}
                                     style={{ flex: 1, padding: '10px', borderRadius: '8px', border: '1px solid #666', backgroundColor: 'transparent', color: '#ccc', cursor: 'pointer' }}
                                 >
-                                    Cancel
+                                    {t('editProfile.cancel')}
                                 </button>
                                 <button
                                     type="submit"
                                     style={{ flex: 1, padding: '10px', borderRadius: '8px', border: 'none', backgroundColor: '#a607d6', color: 'white', cursor: 'pointer' }}
                                 >
-                                    Save
+                                    {t('editProfile.save')}
                                 </button>
                             </div>
                         </form>
@@ -839,9 +841,9 @@ const EditProfile = () => {
                     backgroundColor: 'rgba(0,0,0,0.8)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000
                 }}>
                     <div style={{ backgroundColor: '#1a1a1a', padding: '20px', borderRadius: '12px', width: '90%', maxWidth: '400px' }}>
-                        <h3 style={{ color: '#ff4444', marginBottom: '15px', textAlign: 'center' }}>Delete Account</h3>
+                        <h3 style={{ color: '#ff4444', marginBottom: '15px', textAlign: 'center' }}>{t('editProfile.deleteAccount')}</h3>
                         <p style={{ color: '#ccc', marginBottom: '20px', textAlign: 'center', lineHeight: '1.5' }}>
-                            Are you sure you want to delete your account? This action cannot be undone.
+                            {t('editProfile.deleteAccountConfirm')}
                         </p>
                         <div style={{ display: 'flex', gap: '10px' }}>
                             <button
@@ -849,14 +851,14 @@ const EditProfile = () => {
                                 onClick={() => setShowDeleteModal(false)}
                                 style={{ flex: 1, padding: '10px', borderRadius: '8px', border: '1px solid #666', backgroundColor: 'transparent', color: '#ccc', cursor: 'pointer' }}
                             >
-                                Cancel
+                                {t('editProfile.cancel')}
                             </button>
                             <button
                                 type="button"
                                 onClick={handleDeleteAccount}
                                 style={{ flex: 1, padding: '10px', borderRadius: '8px', border: 'none', backgroundColor: '#ff4444', color: 'white', cursor: 'pointer' }}
                             >
-                                Delete
+                                {t('editProfile.delete')}
                             </button>
                         </div>
                     </div>
@@ -871,14 +873,14 @@ const EditProfile = () => {
                 }}>
                     <div style={{ backgroundColor: '#1a1a1a', padding: '20px', borderRadius: '12px', width: '90%', maxWidth: '500px' }}>
                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '15px' }}>
-                            <h3 style={{ color: 'white', margin: 0 }}>Verification Photo</h3>
+                            <h3 style={{ color: 'white', margin: 0 }}>{t('editProfile.verificationPhoto')}</h3>
                             <button onClick={closeVerificationModal} style={{ background: 'none', border: 'none', color: '#fff', cursor: 'pointer' }}>
                                 <span className="material-icons">close</span>
                             </button>
                         </div>
 
                         <p style={{ color: '#a0a0a0', fontSize: '14px', marginBottom: '15px' }}>
-                            Take a clear photo of your face for verification. This will be reviewed by our admin team.
+                            {t('editProfile.verificationDesc')}
                         </p>
 
                         {!verificationPhoto ? (
@@ -917,7 +919,7 @@ const EditProfile = () => {
                                     }}
                                 >
                                     <span className="material-icons">camera</span>
-                                    Capture Photo
+                                    {t('editProfile.capturePhoto')}
                                 </button>
                             </>
                         ) : (
@@ -944,7 +946,7 @@ const EditProfile = () => {
                                             cursor: 'pointer'
                                         }}
                                     >
-                                        Retake
+                                        {t('editProfile.retake')}
                                     </button>
                                     <button
                                         onClick={submitVerificationRequest}
@@ -960,7 +962,7 @@ const EditProfile = () => {
                                             opacity: submittingVerification ? 0.7 : 1
                                         }}
                                     >
-                                        {submittingVerification ? 'Submitting...' : 'Submit'}
+                                        {submittingVerification ? t('editProfile.submitting') : t('editProfile.submit')}
                                     </button>
                                 </div>
                             </>

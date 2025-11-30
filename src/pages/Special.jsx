@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useContext, useRef } from 'react';
 import EmojiPicker from 'emoji-picker-react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
+import { useTranslation, Trans } from 'react-i18next';
 import AuthContext from '../context/AuthContext';
 import { getPosts, createPost, likePost, deletePost, addComment, deleteComment, createReport } from '../services/api';
 import SocketContext from '../context/SocketContext';
@@ -8,6 +9,7 @@ import SkeletonPost from '../components/SkeletonPost';
 import VerifiedAvatar from '../components/VerifiedAvatar';
 
 const Special = () => {
+    const { t } = useTranslation();
     const [posts, setPosts] = useState([]);
     const [newPostContent, setNewPostContent] = useState('');
     const [newPostImage, setNewPostImage] = useState(null);
@@ -212,7 +214,7 @@ const Special = () => {
 
     return (
         <div className="app-content" style={{ paddingBottom: '80px' }}>
-            <h2 className="section-title">Community Feed</h2>
+            <h2 className="section-title">{t('special.title')}</h2>
 
             {/* Create Post Box */}
             <div className="create-post-card">
@@ -225,7 +227,7 @@ const Special = () => {
                         className="post-avatar"
                     />
                     <textarea
-                        placeholder={`What's on your mind, ${user?.name}?`}
+                        placeholder={t('special.createPost.placeholder', { name: user?.name })}
                         value={newPostContent}
                         onChange={(e) => setNewPostContent(e.target.value)}
                         className="post-input"
@@ -282,10 +284,10 @@ const Special = () => {
                         {isPosting ? (
                             <>
                                 <span className="material-icons" style={{ fontSize: '18px', animation: 'spin 1s linear infinite' }}>refresh</span>
-                                Posting...
+                                {t('special.createPost.posting')}
                             </>
                         ) : (
-                            'Post'
+                            t('special.createPost.post')
                         )}
                     </button>
                 </div>
@@ -317,7 +319,7 @@ const Special = () => {
                 {hashtag && (
                     <div className="search-summary-card">
                         <span className="material-icons" style={{ color: '#a607d6', marginRight: '8px' }}>search</span>
-                        <span style={{ color: '#888', fontSize: '14px' }}>กำลังค้นหา: </span>
+                        <span style={{ color: '#888', fontSize: '14px' }}>{t('special.feed.searching')} </span>
                         <span style={{ color: '#fff', fontSize: '14px', fontWeight: '500', marginLeft: '5px' }}>
                             {hashtag.split(',').map(tag => `#${tag.trim()}`).join(', ')}
                         </span>
@@ -331,7 +333,7 @@ const Special = () => {
                         <SkeletonPost />
                     </>
                 ) : posts.length === 0 ? (
-                    <div style={{ textAlign: 'center', color: '#888', marginTop: '20px' }}>No posts yet. Be the first to share!</div>
+                    <div style={{ textAlign: 'center', color: '#888', marginTop: '20px' }}>{t('special.feed.noPosts')}</div>
                 ) : (
                     posts.map(post => (
                         <div key={post._id} className="post-card">
@@ -395,14 +397,14 @@ const Special = () => {
                                                 fontSize: '14px',
                                                 marginBottom: '4px'
                                             }}>
-                                                รอการอนุมัติ (Pending Approval)
+                                                {t('special.feed.pendingApproval')}
                                             </div>
                                             <div style={{
                                                 color: '#888',
                                                 fontSize: '12px',
                                                 lineHeight: '1.4'
                                             }}>
-                                                โพสต์ที่มีรูปภาพต้องได้รับการอนุมัติจาก Admin ก่อนจะแสดงต่อผู้ใช้อื่น
+                                                {t('special.feed.pendingDesc')}
                                             </div>
                                         </div>
                                     </div>
@@ -474,7 +476,7 @@ const Special = () => {
                                             e.target.style.textDecoration = 'none';
                                         }}
                                     >
-                                        {post.likes.length} Likes
+                                        {post.likes.length} {t('special.feed.likes')}
                                     </span>
                                 </div>
                             </div>
@@ -485,15 +487,15 @@ const Special = () => {
                                     onClick={() => handleLike(post._id)}
                                 >
                                     <span className="material-icons">{post.likes.some(like => like._id === user?._id) ? 'thumb_up' : 'thumb_up_off_alt'}</span>
-                                    Like
+                                    {t('special.feed.like')}
                                 </button>
                                 <button className="post-action-btn" onClick={() => toggleComments(post._id)}>
                                     <span className="material-icons">chat_bubble_outline</span>
-                                    Comment ({post.comments?.length || 0})
+                                    {t('special.feed.comment')} ({post.comments?.length || 0})
                                 </button>
                                 <button className="post-action-btn" onClick={() => handleReport(post._id)} style={{ color: '#ff6b6b' }}>
                                     <span className="material-icons">flag</span>
-                                    Report
+                                    {t('special.feed.report')}
                                 </button>
                             </div>
 
@@ -551,7 +553,7 @@ const Special = () => {
                                             </div>
                                         ))}
                                         {(!post.comments || post.comments.length === 0) && (
-                                            <div style={{ color: '#888', fontSize: '13px', textAlign: 'center', padding: '10px' }}>No comments yet.</div>
+                                            <div style={{ color: '#888', fontSize: '13px', textAlign: 'center', padding: '10px' }}>{t('special.comments.noComments')}</div>
                                         )}
                                     </div>
                                     <div className="add-comment-box" style={{ display: 'flex', alignItems: 'center' }}>
@@ -559,7 +561,7 @@ const Special = () => {
                                         <div style={{ flex: 1, position: 'relative', display: 'flex', alignItems: 'center', backgroundColor: '#333', borderRadius: '20px', padding: '5px 10px' }}>
                                             <input
                                                 type="text"
-                                                placeholder="Write a comment..."
+                                                placeholder={t('special.comments.placeholder')}
                                                 value={commentText}
                                                 onChange={(e) => setCommentText(e.target.value)}
                                                 onKeyPress={(e) => e.key === 'Enter' && handleCommentSubmit(post._id)}
@@ -611,7 +613,7 @@ const Special = () => {
                         onClick={(e) => e.stopPropagation()}
                     >
                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '15px' }}>
-                            <h3 style={{ margin: 0 }}>Likes ({selectedPostLikes.length})</h3>
+                            <h3 style={{ margin: 0 }}>{t('special.modals.likes.title')} ({selectedPostLikes.length})</h3>
                             <button
                                 onClick={() => setShowLikesModal(false)}
                                 style={{ background: 'none', border: 'none', color: 'white', cursor: 'pointer' }}
@@ -688,9 +690,9 @@ const Special = () => {
                         <div style={{ marginBottom: '20px' }}>
                             <span className="material-icons" style={{ fontSize: '48px', color: '#ff4444' }}>delete_outline</span>
                         </div>
-                        <h3 style={{ margin: '0 0 10px 0', fontSize: '20px' }}>Delete Post?</h3>
+                        <h3 style={{ margin: '0 0 10px 0', fontSize: '20px' }}>{t('special.modals.delete.title')}</h3>
                         <p style={{ color: '#888', marginBottom: '25px', fontSize: '14px' }}>
-                            Are you sure you want to delete this post? This action cannot be undone.
+                            {t('special.modals.delete.message')}
                         </p>
                         <div style={{ display: 'flex', gap: '10px', justifyContent: 'center' }}>
                             <button
@@ -706,7 +708,7 @@ const Special = () => {
                                     fontWeight: '500'
                                 }}
                             >
-                                Cancel
+                                {t('special.modals.delete.cancel')}
                             </button>
                             <button
                                 onClick={confirmDelete}
@@ -721,7 +723,7 @@ const Special = () => {
                                     fontWeight: '500'
                                 }}
                             >
-                                Delete
+                                {t('special.modals.delete.confirm')}
                             </button>
                         </div>
                     </div>
@@ -758,7 +760,7 @@ const Special = () => {
                         onClick={(e) => e.stopPropagation()}
                     >
                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
-                            <h3 style={{ margin: 0, fontSize: '20px' }}>รายงานโพสต์</h3>
+                            <h3 style={{ margin: 0, fontSize: '20px' }}>{t('special.modals.report.title')}</h3>
                             <button
                                 onClick={() => setShowReportModal(false)}
                                 style={{ background: 'none', border: 'none', color: 'white', cursor: 'pointer' }}
@@ -768,20 +770,20 @@ const Special = () => {
                         </div>
 
                         <p style={{ color: '#888', marginBottom: '20px', fontSize: '14px' }}>
-                            กรุณาเลือกเหตุผลที่คุณต้องการรายงานโพสต์นี้
+                            {t('special.modals.report.selectReason')}
                         </p>
 
                         <div style={{ marginBottom: '20px' }}>
-                            {['spam', 'อนาจาร', 'กล่าวร้ายผู้อื่น', 'แอบอ้าง', 'หลอกลวง'].map((reason) => (
+                            {['spam', 'inappropriate', 'harassment', 'impersonation', 'fraud'].map((reasonKey) => (
                                 <div
-                                    key={reason}
-                                    onClick={() => setReportReason(reason)}
+                                    key={reasonKey}
+                                    onClick={() => setReportReason(reasonKey)}
                                     style={{
                                         padding: '15px',
                                         marginBottom: '10px',
                                         borderRadius: '10px',
-                                        border: `2px solid ${reportReason === reason ? '#a607d6' : '#333'}`,
-                                        backgroundColor: reportReason === reason ? 'rgba(166, 7, 214, 0.1)' : 'transparent',
+                                        border: `2px solid ${reportReason === reasonKey ? '#a607d6' : '#333'}`,
+                                        backgroundColor: reportReason === reasonKey ? 'rgba(166, 7, 214, 0.1)' : 'transparent',
                                         cursor: 'pointer',
                                         transition: 'all 0.2s',
                                         display: 'flex',
@@ -793,29 +795,29 @@ const Special = () => {
                                         width: '20px',
                                         height: '20px',
                                         borderRadius: '50%',
-                                        border: `2px solid ${reportReason === reason ? '#a607d6' : '#666'}`,
-                                        backgroundColor: reportReason === reason ? '#a607d6' : 'transparent',
+                                        border: `2px solid ${reportReason === reasonKey ? '#a607d6' : '#666'}`,
+                                        backgroundColor: reportReason === reasonKey ? '#a607d6' : 'transparent',
                                         display: 'flex',
                                         alignItems: 'center',
                                         justifyContent: 'center'
                                     }}>
-                                        {reportReason === reason && (
+                                        {reportReason === reasonKey && (
                                             <span className="material-icons" style={{ fontSize: '14px', color: 'white' }}>check</span>
                                         )}
                                     </div>
-                                    <span>{reason}</span>
+                                    <span>{t(`special.modals.report.reasons.${reasonKey}`)}</span>
                                 </div>
                             ))}
                         </div>
 
                         <div style={{ marginBottom: '20px' }}>
                             <label style={{ display: 'block', marginBottom: '8px', fontSize: '14px', color: '#888' }}>
-                                รายละเอียดเพิ่มเติม (ถ้ามี)
+                                {t('special.modals.report.additionalInfo')}
                             </label>
                             <textarea
                                 value={reportAdditionalInfo}
                                 onChange={(e) => setReportAdditionalInfo(e.target.value)}
-                                placeholder="อธิบายเพิ่มเติมเกี่ยวกับปัญหา..."
+                                placeholder={t('special.modals.report.additionalInfoPlaceholder')}
                                 style={{
                                     width: '100%',
                                     minHeight: '80px',
@@ -843,7 +845,7 @@ const Special = () => {
                                     fontWeight: '500'
                                 }}
                             >
-                                ยกเลิก
+                                {t('special.modals.report.cancel')}
                             </button>
                             <button
                                 onClick={confirmReport}
@@ -858,7 +860,7 @@ const Special = () => {
                                     fontWeight: '500'
                                 }}
                             >
-                                ส่งรายงาน
+                                {t('special.modals.report.submit')}
                             </button>
                         </div>
                     </div>
@@ -917,7 +919,7 @@ const Special = () => {
                             margin: '0 0 12px 0',
                             fontSize: '24px',
                             fontWeight: '600'
-                        }}>ส่งรายงานสำเร็จ</h3>
+                        }}>{t('special.modals.reportSuccess.title')}</h3>
 
                         <p style={{
                             color: '#888',
@@ -925,8 +927,7 @@ const Special = () => {
                             fontSize: '15px',
                             lineHeight: '1.6'
                         }}>
-                            ขอบคุณที่แจ้งให้เราทราบ<br />
-                            ทีมงานจะตรวจสอบและดำเนินการโดยเร็วที่สุด
+                            <Trans i18nKey="special.modals.reportSuccess.message" components={{ br: <br /> }} />
                         </p>
 
                         <button
@@ -955,7 +956,7 @@ const Special = () => {
                                 e.target.style.boxShadow = '0 4px 12px rgba(166, 7, 214, 0.3)';
                             }}
                         >
-                            เข้าใจแล้ว
+                            {t('special.modals.reportSuccess.gotIt')}
                         </button>
                     </div>
                 </div>

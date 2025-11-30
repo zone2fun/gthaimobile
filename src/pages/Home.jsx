@@ -1,10 +1,12 @@
 import React, { useState, useEffect, useContext } from 'react';
+import { useTranslation } from 'react-i18next';
 import Section from '../components/Section';
 import AnnouncementModal from '../components/AnnouncementModal';
 import { getUsers, getFreshFaces, getUser } from '../services/api';
 import AuthContext from '../context/AuthContext';
 
 const Home = () => {
+    const { t } = useTranslation();
     const [freshFaces, setFreshFaces] = useState(null);
     const [favourites, setFavourites] = useState(null);
     const [nearby, setNearby] = useState(null);
@@ -134,7 +136,7 @@ const Home = () => {
                         fontWeight: '500',
                         transition: 'color 0.3s'
                     }}>
-                        Online
+                        {t('home.online')}
                     </span>
                     <label className="toggle-switch">
                         <input
@@ -157,7 +159,7 @@ const Home = () => {
                         alignItems: 'center',
                         gap: '4px'
                     }}>
-                        Verify
+                        {t('home.verify')}
                         {showVerifiedOnly && <span className="material-icons" style={{ fontSize: '14px' }}>verified</span>}
                     </span>
                     <label className="toggle-switch">
@@ -171,9 +173,9 @@ const Home = () => {
                 </div>
             </div>
 
-            <Section title="Fresh Faces" items={filterUsers(freshFaces)} />
-            {token && user && <Section title="Favourites" items={filterUsers(favourites)} />}
-            <Section title="Nearby" items={filterUsers(nearby)} isGrid={true} />
+            <Section title={t('home.freshFaces')} items={filterUsers(freshFaces)} />
+            {token && user && <Section title={t('home.favourites')} items={filterUsers(favourites)} />}
+            <Section title={t('home.nearby')} items={filterUsers(nearby)} isGrid={true} />
 
             {/* Announcement Modal */}
             {showAnnouncementModal && currentAnnouncement && (

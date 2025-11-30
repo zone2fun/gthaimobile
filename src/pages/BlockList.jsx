@@ -1,9 +1,11 @@
 import React, { useState, useEffect, useContext } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { getBlockedUsers, unblockUser } from '../services/api';
 import AuthContext from '../context/AuthContext';
 
 const BlockList = () => {
+    const { t } = useTranslation();
     const [blockedUsers, setBlockedUsers] = useState([]);
     const [loading, setLoading] = useState(true);
     const { token } = useContext(AuthContext);
@@ -40,7 +42,7 @@ const BlockList = () => {
     };
 
     if (loading) {
-        return <div className="app-content" style={{ padding: '20px', textAlign: 'center' }}>Loading...</div>;
+        return <div className="app-content" style={{ padding: '20px', textAlign: 'center' }}>{t('common.loading')}</div>;
     }
 
     return (
@@ -52,13 +54,13 @@ const BlockList = () => {
                 >
                     <span className="material-icons" style={{ color: 'white', fontSize: '28px' }}>arrow_back</span>
                 </button>
-                <h1 style={{ margin: 0 }}>Blocked Users</h1>
+                <h1 style={{ margin: 0 }}>{t('profile.blockedUsers')}</h1>
             </div>
 
             {blockedUsers.length === 0 ? (
                 <div style={{ textAlign: 'center', color: '#888', marginTop: '40px' }}>
                     <span className="material-icons" style={{ fontSize: '64px', marginBottom: '10px' }}>block</span>
-                    <p>No blocked users</p>
+                    <p>{t('profile.blockedUsers')}: 0</p>
                 </div>
             ) : (
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
@@ -105,7 +107,7 @@ const BlockList = () => {
                                     cursor: 'pointer'
                                 }}
                             >
-                                Unblock
+                                {t('profile.unblock')}
                             </button>
                         </div>
                     ))}

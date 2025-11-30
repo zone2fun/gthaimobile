@@ -1,11 +1,13 @@
 import React, { useState, useEffect, useContext } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { getConversations } from '../services/api';
 import AuthContext from '../context/AuthContext';
 import SocketContext from '../context/SocketContext';
 import VerifiedAvatar from '../components/VerifiedAvatar';
 
 const Chat = () => {
+    const { t } = useTranslation();
     const [conversations, setConversations] = useState([]);
     const { token, user: currentUser } = useContext(AuthContext);
     const { socket, resetUnreadCount } = useContext(SocketContext);
@@ -64,6 +66,7 @@ const Chat = () => {
                 }
                 return newConvs;
             });
+
         };
 
         socket.on('message received', handleMessageReceived);
@@ -75,11 +78,11 @@ const Chat = () => {
 
     return (
         <div className="app-content">
-            <h2 className="section-title">แชท</h2>
+            <h2 className="section-title">{t('chat.conversations')}</h2>
             <div className="chat-list">
                 {conversations.length === 0 ? (
                     <div style={{ padding: '20px', textAlign: 'center', color: '#a0a0a0' }}>
-                        <p>ยังไม่มีข้อความ</p>
+                        <p>{t('chat.noMessages')}</p>
                     </div>
                 ) : (
                     conversations.map((conv) => (
@@ -109,8 +112,34 @@ const Chat = () => {
                                 <p className="chat-last-message">
                                     {conv.lastMessage && (
                                         <>
-                                            {(conv.lastMessage.sender._id === currentUser?._id || conv.lastMessage.sender === currentUser?._id) && 'You: '}
-                                            {conv.lastMessage.image ? 'ส่งรูปภาพ' : (conv.lastMessage.text || '')}
+                                            {(conv.lastMessage.sender._id === currentUser?._id || conv.lastMessage.sender === currentUser?._id) && `${t('chat.you')}: `}
+                                            {(() => {
+                                                // Debug logging
+                                                if (!conv.lastMessage.type) {
+                                                    console.log('Last message missing type:', conv.lastMessage);
+                                                }
+
+
+                                                const msgType = conv.lastMessage.type;
+                                                const text = conv.lastMessage.text || '';
+
+                                                if (conv.lastMessage.image) return t('chat.sentImage');
+                                                if (msgType === 'request_album_access') return t('chat.accessRequestText');
+
+                                                // Check type OR text content for album access response
+                                                if (msgType === 'album_access_response' ||
+                                                    text.includes('ACCESS_APPROVED') ||
+                                                    text.includes('ACCESS_REJECTED')) {
+
+                                                    if (text === 'ACCESS_APPROVED' || text.includes('ACCESS_APPROVED') || text.includes('อนุมัติ') || text.includes('Approved')) {
+                                                        return t('chat.accessApproved');
+                                                    }
+                                                    if (text === 'ACCESS_REJECTED' || text.includes('ACCESS_REJECTED') || text.includes('ปฏิเสธ') || text.includes('Rejected')) {
+                                                        return t('chat.accessRejected');
+                                                    }
+                                                }
+                                                return conv.lastMessage.text || '';
+                                            })()}
                                         </>
                                     )}
                                 </p>

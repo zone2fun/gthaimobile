@@ -1,0 +1,307 @@
+{
+    "nav": {
+        "home": "Home",
+        "favourites": "Favourites",
+        "special": "Community",
+        "chat": "Chat",
+        "profile": "Profile"
+    },
+    "home": {
+        "freshFaces": "New Members",
+        "favourites": "Favourites",
+        "nearby": "Nearby",
+        "online": "Online",
+        "verify": "Verified",
+        "noFavourites": "No favourites yet"
+    },
+    "profile": {
+        "editProfile": "Edit Profile",
+        "settings": "Settings",
+        "logout": "Logout",
+        "login": "Login",
+        "register": "Register",
+        "blockedUsers": "Blocked Users",
+        "safetyPolicy": "Safety Policy",
+        "wait": "Wait",
+        "offline": "Offline",
+        "age": "Age",
+        "height": "Height",
+        "weight": "Weight",
+        "lookingFor": "Looking for:",
+        "aboutMe": "About Me",
+        "share": "Share",
+        "favorited": "Favourited",
+        "favorite": "Favourite",
+        "unblock": "Unblock",
+        "block": "Block",
+        "report": "Report",
+        "photos": "Photos",
+        "pendingPhotos": "Pending Photos",
+        "privateAlbum": "Private Album",
+        "noPrivatePhotos": "No private photos",
+        "requestAccessDesc": "Request access to view photos",
+        "requestSent": "Request sent",
+        "requestAccess": "Request Access"
+    },
+    "chat": {
+        "conversations": "Chats",
+        "noMessages": "No messages yet",
+        "typeMessage": "Type a message...",
+        "you": "You",
+        "sentImage": "Sent an image",
+        "requestAlbumAccess": "Request album access",
+        "allowAccess": "Allow access",
+        "waitingForApproval": "Waiting for owner's approval...",
+        "approved": "Approved",
+        "rejected": "Rejected",
+        "accessRequestText": "Request access to private album",
+        "accessApproved": "Album access approved",
+        "accessRejected": "Album access rejected"
+    },
+    "report": {
+        "title": "Report User",
+        "selectReason": "Please choose a reason to report this user",
+        "reasons": {
+            "spam": "Spam",
+            "inappropriate": "Inappropriate content",
+            "harassment": "Harassment",
+            "impersonation": "Impersonation",
+            "fraud": "Fraud",
+            "fakeProfile": "Fake Profile",
+            "violation": "Violation of rules"
+        },
+        "additionalInfo": "Additional details (optional)",
+        "additionalInfoPlaceholder": "Describe the issue...",
+        "submit": "Submit Report",
+        "successTitle": "Report Submitted",
+        "successMessage": "Thank you! Our team will review and take action as soon as possible.",
+        "gotIt": "Got it"
+    },
+    "common": {
+        "loading": "Loading...",
+        "save": "Save",
+        "cancel": "Cancel",
+        "delete": "Delete",
+        "edit": "Edit",
+        "send": "Send",
+        "search": "Search",
+        "searchHashtag": "Search hashtag",
+        "searchAboutMe": "Search About Me",
+        "notifications": "Notifications",
+        "noNotifications": "No notifications",
+        "close": "Close",
+        "confirm": "Confirm",
+        "noData": "No data"
+    },
+    "auth": {
+        "username": "Username",
+        "password": "Password",
+        "email": "Email",
+        "name": "Name",
+        "signedInAs": "Signed in as",
+        "guest": "Guest",
+        "forgotPassword": "Forgot password?",
+        "dontHaveAccount": "Don't have an account?",
+        "alreadyHaveAccount": "Already have an account?",
+        "loginWithGoogle": "Login with Google"
+    },
+    "language": {
+        "select": "Select Language",
+        "th": "Thai",
+        "en": "English",
+        "zh": "Chinese",
+        "ja": "Japanese"
+    },
+    "editProfile": {
+        "title": "Edit Profile",
+        "coverImage": "Cover Image",
+        "displayName": "Display Name",
+        "age": "Age (18+)",
+        "country": "Country",
+        "selectCountry": "Select Country",
+        "height": "Height (cm)",
+        "weight": "Weight (kg)",
+        "lookingFor": "Looking For",
+        "aboutMe": "About Me",
+        "aboutMePlaceholder": "Write a short intro about yourself (max 200 characters)",
+        "gallery": "Gallery (max 5 photos)",
+        "privateAlbum": "Private Album (max 3 photos)",
+        "privateAlbumHint": "Private album photos are visible only to users you approve",
+        "saveChanges": "Save Changes",
+        "saving": "Saving...",
+        "privacySecurity": "Privacy & Security",
+        "publicProfile": "Public Profile",
+        "publicProfileDesc": "Allow non-members to view your profile",
+        "changePassword": "Change Password",
+        "deleteAccount": "Delete Account",
+        "currentPassword": "Current Password",
+        "newPassword": "New Password",
+        "confirmNewPassword": "Confirm New Password",
+        "cancel": "Cancel",
+        "save": "Save",
+        "delete": "Delete",
+        "deleteAccountConfirm": "Are you sure you want to delete your account? This action cannot be undone.",
+        "verificationPhoto": "Verification Photo",
+        "verificationDesc": "Take a front-facing photo to verify your identity. It will be reviewed by our team.",
+        "capturePhoto": "Capture Photo",
+        "retake": "Retake",
+        "submit": "Submit",
+        "submitting": "Submitting...",
+        "verified": "Verified ✓",
+        "pendingVerification": "Pending Verification",
+        "verificationRejected": "Verification Rejected",
+        "verifyAccount": "Verify Account",
+        "errors": {
+            "age": "You must be at least 18 years old to use this service",
+            "galleryMax": "Maximum 5 images allowed",
+            "privateMax": "Maximum 3 images allowed",
+            "passwordMismatch": "New passwords do not match",
+            "passwordLength": "Password must be at least 8 characters",
+            "passwordSuccess": "Password changed successfully",
+            "passwordFail": "Failed to change password",
+            "errorOccurred": "An error occurred",
+            "deleteFail": "Failed to delete account",
+            "cameraDenied": "Camera access denied",
+            "cameraPermission": "Unable to access camera. Please check permissions.",
+            "noPhoto": "No photo available",
+            "takePhotoFirst": "Please take a photo first",
+            "requestSubmitted": "Request submitted!",
+            "verificationSuccess": "Verification request submitted. Please wait for admin approval.",
+            "submissionFailed": "Submission failed",
+            "verificationFail": "Verification request failed",
+            "success": "Success!",
+            "error": "Error",
+            "mustBe18": "Must be 18+"
+        }
+    },
+    "safety": {
+        "title": "Safety & Community Policy",
+        "intro": "To keep GThaiLover safe for everyone, all users must follow the rules below.<br />Using our platform means you accept all terms in this policy.",
+        "sections": {
+            "1": {
+                "title": "1. Prohibited Content and Behaviour",
+                "sub1": {
+                    "title": "1.1 Sexual or Explicit Content",
+                    "text1": "Explicit or sexual content of any kind is prohibited",
+                    "text2": "Do not share, request, or discuss explicit sexual activities"
+                },
+                "sub2": {
+                    "title": "1.2 Drugs and Illegal Items",
+                    "text1": "Do not promote, sell, or request drugs or illegal substances"
+                },
+                "sub3": {
+                    "title": "1.3 Under 18 Prohibition",
+                    "text1": "Profiles, photos, or content involving anyone under 18 are strictly forbidden",
+                    "text2": "Do not claim to be under 18"
+                },
+                "sub4": {
+                    "title": "1.4 Sensitive Personal Information",
+                    "intro": "Do not share or request:",
+                    "list": [
+                        "Credit card information",
+                        "Bank account details",
+                        "Passwords or login information",
+                        "National ID number",
+                        "Any sensitive personal information"
+                    ]
+                },
+                "sub5": {
+                    "title": "1.5 Impersonation and Use of Others’ Photos",
+                    "text1": "Do not use someone else’s photos",
+                    "text2": "Do not impersonate real people",
+                    "text3": "AI-generated realistic images without permission are not allowed"
+                },
+                "sub6": {
+                    "title": "1.6 Financial Scams / Investments / Gambling",
+                    "text1": "Do not promote investment schemes or financial assistance",
+                    "text2": "Gambling or betting activities are prohibited",
+                    "text3": "Do not solicit money, donations, or investments"
+                },
+                "sub7": {
+                    "title": "1.7 Illegal Activity",
+                    "text1": "Any activity illegal under applicable law is strictly prohibited"
+                }
+            },
+            "2": {
+                "title": "2. Warning & Ban Policy",
+                "intro": "To maintain community safety:",
+                "sub1": {
+                    "title": "2.1 General Violations",
+                    "text": "If a user receives <1>3 warnings</1> and does not correct the issue, the account will be automatically banned"
+                },
+                "sub2": {
+                    "title": "2.2 Invalid / Forbidden Images",
+                    "text": "If a user receives <1>10 image-related warnings</1> (feed or profile), the account will be banned automatically"
+                }
+            },
+            "3": {
+                "title": "3. Legal Responsibility",
+                "text1": "GThaiLover is not involved in or responsible for any illegal activities committed by users",
+                "text2": "Any unlawful behaviour conducted through the platform is the sole responsibility of the user",
+                "text3": "Using GThaiLover confirms that you accept this responsibility"
+            },
+            "4": {
+                "title": "4. Agreement",
+                "text": "Creating an account or using GThaiLover means you agree to follow all rules above. Violations may result in warnings, content removal, or permanent account bans."
+            }
+        }
+    },
+    "special": {
+        "title": "Community",
+        "createPost": {
+            "placeholder": "What are you thinking, {{name}}?",
+            "post": "Post",
+            "posting": "Posting...",
+            "addImage": "Add Image",
+            "addEmoji": "Add Emoji",
+            "addLocation": "Add Location",
+            "addHashtag": "Add Hashtag"
+        },
+        "feed": {
+            "searching": "Searching:",
+            "noPosts": "No posts yet. Be the first to share!",
+            "pendingApproval": "Pending Approval",
+            "pendingDesc": "Posts with images must be approved by an admin before visible to others",
+            "likes": "Likes",
+            "like": "Like",
+            "comment": "Comment",
+            "report": "Report",
+            "delete": "Delete"
+        },
+        "comments": {
+            "noComments": "No comments yet",
+            "placeholder": "Write a comment..."
+        },
+        "modals": {
+            "likes": {
+                "title": "Likes"
+            },
+            "delete": {
+                "title": "Delete Post?",
+                "message": "Are you sure you want to delete this post? This action cannot be undone.",
+                "cancel": "Cancel",
+                "confirm": "Delete"
+            },
+            "report": {
+                "title": "Report Post",
+                "selectReason": "Please choose a reason to report this post",
+                "reasons": {
+                    "spam": "Spam",
+                    "inappropriate": "Inappropriate Content",
+                    "harassment": "Harassment",
+                    "impersonation": "Impersonation",
+                    "fraud": "Fraud"
+                },
+                "additionalInfo": "Additional details (optional)",
+                "additionalInfoPlaceholder": "Describe the issue...",
+                "cancel": "Cancel",
+                "submit": "Submit"
+            },
+            "reportSuccess": {
+                "title": "Report Submitted",
+                "message": "Thank you for letting us know.<br />Our team will review it as soon as possible.",
+                "gotIt": "Got it"
+            }
+        }
+    }
+}

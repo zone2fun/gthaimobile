@@ -1,18 +1,21 @@
-import React, { useState, useContext, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useContext, useRef } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import AuthContext from '../context/AuthContext';
 import SocketContext from '../context/SocketContext';
 import { getNotifications, markNotificationAsRead } from '../services/api';
 import VerifiedAvatar from './VerifiedAvatar';
+import LanguageSelector, { LanguageSelectorMobile } from './LanguageSelector';
+import { useTranslation } from 'react-i18next';
 
 const Header = () => {
+    const { t } = useTranslation();
     const [showMenu, setShowMenu] = useState(false);
     const [searchQuery, setSearchQuery] = useState('');
-    const [searchResults, setSearchResults] = useState([]);
     const [showDropdown, setShowDropdown] = useState(false);
     const [searchTags, setSearchTags] = useState([]);
     const [chipsWidth, setChipsWidth] = useState(0);
     const [showMobileSearch, setShowMobileSearch] = useState(false);
+    const [searchResults, setSearchResults] = useState([]);
     const { logout, user, setUser } = useContext(AuthContext);
     const { disconnectSocket } = useContext(SocketContext);
     const navigate = useNavigate();
@@ -295,7 +298,7 @@ const Header = () => {
 
                     <input
                         type="text"
-                        placeholder={isSpecialPage && searchTags.length > 0 ? "" : (isSpecialPage ? "ค้นหา Hashtag" : "ค้นหาจาก About Me")}
+                        placeholder={isSpecialPage && searchTags.length > 0 ? "" : (isSpecialPage ? t('common.searchHashtag') : t('common.searchAboutMe'))}
                         value={searchQuery}
                         onChange={(e) => setSearchQuery(e.target.value)}
                         onFocus={() => !isSpecialPage && searchResults.length > 0 && setShowDropdown(true)}
@@ -380,7 +383,7 @@ const Header = () => {
                         <form className="mobile-search-form" onSubmit={(e) => { handleSearch(e); setShowMobileSearch(false); }}>
                             <input
                                 type="text"
-                                placeholder={isSpecialPage && searchTags.length > 0 ? "" : (isSpecialPage ? "ค้นหา Hashtag" : "ค้นหาจาก About Me")}
+                                placeholder={isSpecialPage && searchTags.length > 0 ? "" : (isSpecialPage ? t('common.searchHashtag') : t('common.searchAboutMe'))}
                                 value={searchQuery}
                                 onChange={(e) => setSearchQuery(e.target.value)}
                                 onKeyDown={handleKeyDown}
@@ -436,6 +439,9 @@ const Header = () => {
             )}
 
             <div className="menu-container" style={{ position: 'relative', display: 'flex', alignItems: 'center', gap: '15px' }}>
+                <div className="desktop-only">
+                    <LanguageSelector />
+                </div>
                 {user && (
                     <div ref={notificationRef} style={{ position: 'relative' }}>
                         <div
@@ -473,11 +479,11 @@ const Header = () => {
                                 padding: '0'
                             }}>
                                 <div style={{ padding: '10px 15px', borderBottom: '1px solid #333', fontWeight: 'bold' }}>
-                                    Notifications
+                                    {t('common.notifications')}
                                 </div>
                                 {notifications.length === 0 ? (
                                     <div style={{ padding: '20px', textAlign: 'center', color: '#888' }}>
-                                        No notifications
+                                        {t('common.noNotifications')}
                                     </div>
                                 ) : (
                                     notifications.map(notification => (
@@ -566,33 +572,39 @@ const Header = () => {
                         {user ? (
                             <>
                                 <div style={{ padding: '10px 15px', borderBottom: '1px solid #333', fontSize: '14px', color: '#888' }}>
-                                    Signed in as <strong>{user.name}</strong>
+                                    {t('auth.signedInAs')} <strong>{user.name}</strong>
                                 </div>
                                 <button className="dropdown-item" onClick={() => { setShowMenu(false); navigate('/safety-policy'); }} style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                                     <span className="material-icons" style={{ fontSize: '20px', color: '#a607d6' }}>security</span>
-                                    Safety Policy
+                                    {t('profile.safetyPolicy')}
                                 </button>
                                 <button className="dropdown-item" onClick={() => { setShowMenu(false); navigate('/blocked-users'); }} style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                                     <span className="material-icons" style={{ fontSize: '20px', color: '#a607d6' }}>block</span>
-                                    Block Listing
+                                    {t('profile.blockedUsers')}
                                 </button>
+                                <div className="mobile-only" style={{ borderTop: '1px solid #333' }}>
+                                    <LanguageSelectorMobile />
+                                </div>
                                 <button className="dropdown-item" onClick={handleLogout} style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                                     <span className="material-icons" style={{ fontSize: '20px', color: '#a607d6' }}>logout</span>
-                                    Logout
+                                    {t('profile.logout')}
                                 </button>
                             </>
                         ) : (
                             <>
                                 <div style={{ padding: '10px 15px', borderBottom: '1px solid #333', fontSize: '14px', color: '#888' }}>
-                                    Signed in as <strong>Guest</strong>
+                                    {t('auth.signedInAs')} <strong>{t('auth.guest')}</strong>
                                 </div>
                                 <button className="dropdown-item" onClick={() => { setShowMenu(false); navigate('/safety-policy'); }} style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                                     <span className="material-icons" style={{ fontSize: '20px', color: '#a607d6' }}>security</span>
-                                    Safety Policy
+                                    {t('profile.safetyPolicy')}
                                 </button>
+                                <div className="mobile-only" style={{ borderTop: '1px solid #333' }}>
+                                    <LanguageSelectorMobile />
+                                </div>
                                 <button className="dropdown-item" onClick={() => navigate('/login')} style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                                     <span className="material-icons" style={{ fontSize: '20px', color: '#a607d6' }}>login</span>
-                                    Login
+                                    {t('profile.login')}
                                 </button>
                             </>
                         )}

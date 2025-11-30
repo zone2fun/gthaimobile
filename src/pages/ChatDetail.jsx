@@ -3,8 +3,10 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { getUser, getMessages, sendMessage, deleteMessage, markAsRead, updateAlbumAccessRequest, blockUser, unblockUser, createReport, getMe } from '../services/api';
 import AuthContext from '../context/AuthContext';
 import SocketContext from '../context/SocketContext';
+import { useTranslation } from 'react-i18next';
 
 const ChatDetail = () => {
+    const { t } = useTranslation();
     const { id } = useParams();
     const navigate = useNavigate();
     const { token, user: currentUser } = useContext(AuthContext);
@@ -304,13 +306,33 @@ const ChatDetail = () => {
     };
 
     const renderMessageContent = (msg) => {
-        if (msg.type === 'request_album_access') {
+        const msgType = msg.type;
+        const text = String(msg.text || '');
+
+        if (msgType === 'request_album_access') {
             return <AccessRequestMessage msg={msg} />;
-        } else if (msg.type === 'album_access_response') {
+        }
+
+        // Check type OR text content for album access response
+        else if (msgType === 'album_access_response' ||
+            text.includes('ACCESS_APPROVED') ||
+            text.includes('ACCESS_REJECTED')) {
+
+            let displayText = text;
+            let isApproved = false;
+
+            if (text === 'ACCESS_APPROVED' || text.includes('ACCESS_APPROVED') || text.includes('อนุมัติ') || text.includes('Approved')) {
+                displayText = t('chat.accessApproved');
+                isApproved = true;
+            } else if (text === 'ACCESS_REJECTED' || text.includes('ACCESS_REJECTED') || text.includes('ปฏิเสธ') || text.includes('Rejected')) {
+                displayText = t('chat.accessRejected');
+                isApproved = false;
+            }
+
             return (
                 <div style={{ padding: '10px', textAlign: 'center' }}>
-                    <div style={{ fontWeight: 'bold', color: msg.text.includes('อนุมัติ') ? '#4CAF50' : '#ff4444' }}>
-                        {msg.text}
+                    <div style={{ fontWeight: 'bold', color: isApproved ? '#4CAF50' : '#ff4444' }}>
+                        {displayText}
                     </div>
                 </div>
             );

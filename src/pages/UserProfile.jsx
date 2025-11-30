@@ -1,11 +1,13 @@
 import React, { useState, useEffect, useContext } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { getUser, toggleFavorite, blockUser, unblockUser, getMe, createReport, checkAlbumAccess, requestAlbumAccess } from '../services/api';
 import AuthContext from '../context/AuthContext';
 import SocketContext from '../context/SocketContext';
 import VerifiedAvatar from '../components/VerifiedAvatar';
 
 const UserProfile = ({ userId }) => {
+    const { t } = useTranslation();
     const { id } = useParams();
     const targetId = userId || id;
     const navigate = useNavigate();
@@ -99,40 +101,29 @@ const UserProfile = ({ userId }) => {
 
                         // Also update global user state if it's an avatar
                         if (data.photoType === 'Avatar' || data.photoType === 'avatar' || data.isAvatar) {
-                            console.log('🖼️ UserProfile: Updating global user avatar to', data.photoUrl);
                             setCurrentUser(prev => ({ ...prev, img: data.photoUrl }));
                         }
                     });
                 }
             };
 
-            const handlePhotoDenied = (data) => {
-                console.log('❌ Photo denied event received:', data);
-                // Refresh user data to remove pending photos
-                if (currentUser && (user._id === currentUser._id || user.id === currentUser._id)) {
-                    getUser(targetId, token).then(userData => setUser(userData));
-                }
-            };
-
-            socket.on('user status', handleUserStatus);
-            socket.on('album access response', handleAlbumAccessResponse);
+            socket.on('user_status', handleUserStatus);
+            socket.on('album_access_response', handleAlbumAccessResponse);
             socket.on('photo approved', handlePhotoApproved);
-            socket.on('photo denied', handlePhotoDenied);
 
             return () => {
-                socket.off('user status', handleUserStatus);
-                socket.off('album access response', handleAlbumAccessResponse);
+                socket.off('user_status', handleUserStatus);
+                socket.off('album_access_response', handleAlbumAccessResponse);
                 socket.off('photo approved', handlePhotoApproved);
-                socket.off('photo denied', handlePhotoDenied);
             };
         }
-    }, [socket, user, currentUser, targetId, token]);
+    }, [socket, user, targetId, token]);
 
     const handleFavorite = async () => {
         if (!token) return navigate('/login');
         try {
-            const res = await toggleFavorite(user._id || user.id, token);
-            setIsFavorite(res.isFavorite);
+            await toggleFavorite(user._id || user.id, token);
+            setIsFavorite(!isFavorite);
         } catch (error) {
             console.error("Error toggling favorite:", error);
         }
@@ -140,12 +131,14 @@ const UserProfile = ({ userId }) => {
 
     const handleBlock = async () => {
         if (!token) return navigate('/login');
-        try {
-            await blockUser(user._id || user.id, token);
-            setIsBlocked(true);
-            navigate('/'); // Go back home
-        } catch (error) {
-            console.error("Error blocking user:", error);
+        if (window.confirm(`Are you sure you want to block ${user.name}?`)) {
+            try {
+                await blockUser(user._id || user.id, token);
+                setIsBlocked(true);
+                alert("User blocked");
+            } catch (error) {
+                console.error("Error blocking user:", error);
+            }
         }
     };
 
@@ -154,6 +147,7 @@ const UserProfile = ({ userId }) => {
         try {
             await unblockUser(user._id || user.id, token);
             setIsBlocked(false);
+            alert("User unblocked");
         } catch (error) {
             console.error("Error unblocking user:", error);
         }
@@ -161,24 +155,28 @@ const UserProfile = ({ userId }) => {
 
     const handleReport = () => {
         if (!token) return navigate('/login');
-        setReportReason('');
-        setReportAdditionalInfo('');
         setShowReportModal(true);
     };
 
-    const confirmReport = async () => {
+    const submitReport = async () => {
         if (!reportReason) {
+            alert('Please select a reason');
             return;
         }
 
         try {
-            await createReport(null, user._id || user.id, reportReason, reportAdditionalInfo, 'user', token);
+            await createReport({
+                targetId: user._id || user.id,
+                reason: reportReason,
+                additionalInfo: reportAdditionalInfo
+            }, token);
             setShowReportModal(false);
+            setShowReportSuccessModal(true);
             setReportReason('');
             setReportAdditionalInfo('');
-            setShowReportSuccessModal(true);
         } catch (error) {
             console.error('Error reporting user:', error);
+            alert('Failed to submit report');
         }
     };
 
@@ -189,12 +187,55 @@ const UserProfile = ({ userId }) => {
             setAlbumAccess(prev => ({ ...prev, hasPendingRequest: true }));
             setShowAccessRequestModal(true);
         } catch (error) {
-            console.error('Error requesting album access:', error);
+            console.error('Error requesting access:', error);
+            alert('Failed to request access');
         }
     };
 
-    const handleShare = () => {
-        setShowShareModal(true);
+    const openLightbox = (index, source = 'public') => {
+        setCurrentImageIndex(index);
+        setLightboxSource(source);
+        setLightboxOpen(true);
+        document.body.style.overflow = 'hidden';
+    };
+
+    const closeLightbox = () => {
+        setLightboxOpen(false);
+        document.body.style.overflow = 'auto';
+    };
+
+    const nextImage = (e) => {
+        e.stopPropagation();
+        const gallery = lightboxSource === 'private' ? user.privateAlbum : user.gallery;
+        setCurrentImageIndex((prev) => (prev + 1) % gallery.length);
+    };
+
+    const prevImage = (e) => {
+        e.stopPropagation();
+        const gallery = lightboxSource === 'private' ? user.privateAlbum : user.gallery;
+        setCurrentImageIndex((prev) => (prev - 1 + gallery.length) % gallery.length);
+    };
+
+    const handleShare = async () => {
+        if (navigator.share) {
+            try {
+                await navigator.share({
+                    title: `Check out ${user.name}'s profile on GTHAI`,
+                    text: `I found this profile on GTHAI: ${user.name}`,
+                    url: window.location.href,
+                });
+            } catch (error) {
+                console.log('Error sharing:', error);
+            }
+        } else {
+            setShowShareModal(true);
+        }
+    };
+
+    const copyToClipboard = () => {
+        navigator.clipboard.writeText(window.location.href);
+        alert('Link copied to clipboard!');
+        setShowShareModal(false);
     };
 
     const shareToLine = () => {
@@ -209,50 +250,13 @@ const UserProfile = ({ userId }) => {
         setShowShareModal(false);
     };
 
-    const copyLink = () => {
-        navigator.clipboard.writeText(window.location.href);
-        alert('Link copied to clipboard!');
-        setShowShareModal(false);
-    };
-
-    const openLightbox = (index, source = 'public') => {
-        setCurrentImageIndex(index);
-        setLightboxSource(source);
-        setLightboxOpen(true);
-    };
-
-    const closeLightbox = () => {
-        setLightboxOpen(false);
-    };
-
-    const nextImage = (e) => {
-        e.stopPropagation();
-        const images = lightboxSource === 'private' ? user.privateAlbum : user.gallery;
-        if (images && images.length > 0) {
-            setCurrentImageIndex((prev) => (prev + 1) % images.length);
-        }
-    };
-
-    const prevImage = (e) => {
-        e.stopPropagation();
-        const images = lightboxSource === 'private' ? user.privateAlbum : user.gallery;
-        if (images && images.length > 0) {
-            setCurrentImageIndex((prev) => (prev - 1 + images.length) % images.length);
-        }
-    };
-
-    if (loading) {
-        return <div style={{ color: 'white', textAlign: 'center', marginTop: '50px' }}>Loading...</div>;
-    }
-
-    if (!user) {
-        return <div className="app-content" style={{ color: 'white', textAlign: 'center', marginTop: '50px' }}>User not found</div>;
-    }
+    if (loading) return <div className="loading-spinner">{t('common.loading')}</div>;
+    if (!user) return <div className="error-message">User not found</div>;
 
     return (
         <div className="user-profile-page">
             <div className="profile-cover">
-                <img src={user.cover} alt="Cover" />
+                <img src={user.cover || 'https://via.placeholder.com/600x200'} alt="Cover" />
                 <div className="profile-cover-overlay"></div>
                 {currentUser && (user._id === currentUser._id || user.id === currentUser._id) && user.pendingCover && (
                     <div style={{
@@ -272,7 +276,7 @@ const UserProfile = ({ userId }) => {
                         zIndex: 2
                     }}>
                         <span className="material-icons" style={{ fontSize: '18px' }}>hourglass_empty</span>
-                        Wait Approve
+                        {t('profile.wait')}
                     </div>
                 )}
                 {!userId && (
@@ -318,7 +322,7 @@ const UserProfile = ({ userId }) => {
                                 zIndex: 2
                             }}>
                                 <span className="material-icons" style={{ fontSize: '14px' }}>hourglass_empty</span>
-                                Wait
+                                {t('profile.wait')}
                             </div>
                         )}
                     </div>
@@ -342,22 +346,22 @@ const UserProfile = ({ userId }) => {
                                     display: 'inline-block'
                                 }}
                             ></span>
-                            {user.isOnline ? 'Online' : 'Offline'}
+                            {user.isOnline ? t('home.online') : t('profile.offline')}
                         </span>
                     </div>
                 </div>
 
                 <div className="profile-stats">
                     <div className="stat-item">
-                        <span className="stat-label">AGE</span>
+                        <span className="stat-label">{t('profile.age')}</span>
                         <span className="stat-value">{user.age}</span>
                     </div>
                     <div className="stat-item">
-                        <span className="stat-label">HEIGHT</span>
+                        <span className="stat-label">{t('profile.height')}</span>
                         <span className="stat-value">{user.height} cm</span>
                     </div>
                     <div className="stat-item">
-                        <span className="stat-label">WEIGHT</span>
+                        <span className="stat-label">{t('profile.weight')}</span>
                         <span className="stat-value">{user.weight} kg</span>
                     </div>
                 </div>
@@ -369,13 +373,13 @@ const UserProfile = ({ userId }) => {
                     </div>
                     <div className="detail-row">
                         <span className="material-icons">search</span>
-                        <span>Looking for: {user.lookingFor ? user.lookingFor.join(', ') : ''}</span>
+                        <span>{t('profile.lookingFor')} {user.lookingFor ? user.lookingFor.join(', ') : ''}</span>
                     </div>
                 </div>
 
                 {user.bio && (
                     <div className="profile-bio">
-                        <h3 className="section-title" style={{ marginLeft: 0, fontSize: '16px', marginBottom: '10px' }}>About Me</h3>
+                        <h3 className="section-title" style={{ marginLeft: 0, fontSize: '16px', marginBottom: '10px' }}>{t('profile.aboutMe')}</h3>
                         <p style={{ color: 'var(--secondary-text)', lineHeight: '1.6' }}>{user.bio}</p>
                     </div>
                 )}
@@ -384,31 +388,31 @@ const UserProfile = ({ userId }) => {
                     {currentUser && (user._id === currentUser._id || user.id === currentUser._id) ? (
                         <button className="action-btn edit" style={{ width: '100%', backgroundColor: '#333' }} onClick={() => navigate('/edit-profile')}>
                             <span className="material-icons">edit</span>
-                            Edit My Profile
+                            {t('profile.editProfile')}
                         </button>
                     ) : (
                         <>
                             {user.isPublic && (
                                 <button className="action-btn" onClick={handleShare} style={{ backgroundColor: '#00C300', flex: 1 }}>
                                     <span className="material-icons">share</span>
-                                    Share
+                                    {t('profile.share')}
                                 </button>
                             )}
                             <button className="action-btn chat" onClick={() => token ? navigate(`/chat/${user._id || user.id}`) : navigate('/login')}>
                                 <span className="material-icons">chat_bubble</span>
-                                Chat
+                                {t('nav.chat')}
                             </button>
                             <button className={`action-btn favorite ${isFavorite ? 'active' : ''}`} onClick={handleFavorite}>
                                 <span className="material-icons">{isFavorite ? 'star' : 'star_border'}</span>
-                                {isFavorite ? 'Favorited' : 'Favorite'}
+                                {isFavorite ? t('profile.favorited') : t('profile.favorite')}
                             </button>
                             <button className="action-btn block" onClick={isBlocked ? handleUnblock : handleBlock} style={isBlocked ? { backgroundColor: '#a607d6' } : {}}>
                                 <span className="material-icons">{isBlocked ? 'check_circle' : 'block'}</span>
-                                {isBlocked ? 'Unblock' : 'Block'}
+                                {isBlocked ? t('profile.unblock') : t('profile.block')}
                             </button>
                             <button className="action-btn" onClick={handleReport} style={{ backgroundColor: '#ff4444' }}>
                                 <span className="material-icons">flag</span>
-                                Report
+                                {t('profile.report')}
                             </button>
                         </>
                     )}
@@ -416,7 +420,7 @@ const UserProfile = ({ userId }) => {
 
                 {user.gallery && user.gallery.length > 0 && (
                     <div className="gallery-section">
-                        <h3 className="section-title" style={{ marginTop: '20px', marginLeft: 0 }}>Photos</h3>
+                        <h3 className="section-title" style={{ marginTop: '20px', marginLeft: 0 }}>{t('profile.photos')}</h3>
                         <div className="gallery-grid">
                             {user.gallery.map((img, index) => (
                                 <div key={index} className="gallery-item" onClick={() => openLightbox(index, 'public')}>
@@ -432,7 +436,7 @@ const UserProfile = ({ userId }) => {
                     <div className="gallery-section">
                         <h3 className="section-title" style={{ marginTop: '20px', marginLeft: 0, display: 'flex', alignItems: 'center', gap: '8px' }}>
                             <span className="material-icons" style={{ fontSize: '20px', color: '#FFC107' }}>hourglass_empty</span>
-                            Pending Photos
+                            {t('profile.pendingPhotos')}
                         </h3>
                         <div className="gallery-grid">
                             {user.pendingGallery.map((img, index) => (
@@ -461,7 +465,7 @@ const UserProfile = ({ userId }) => {
                 {/* Private Album Section */}
                 <div className="gallery-section">
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '20px' }}>
-                        <h3 className="section-title" style={{ margin: 0 }}>Private Album</h3>
+                        <h3 className="section-title" style={{ margin: 0 }}>{t('profile.privateAlbum')}</h3>
                         {/* Only show lock icon if not owner and no access */}
                         {(!currentUser || (user._id !== currentUser._id && user.id !== currentUser._id)) && !albumAccess.hasAccess && (
                             <span className="material-icons" style={{ color: '#888' }}>lock</span>
@@ -484,7 +488,7 @@ const UserProfile = ({ userId }) => {
                             </div>
                         ) : (
                             <div style={{ padding: '20px', textAlign: 'center', color: '#666', backgroundColor: '#1a1a1a', borderRadius: '10px', marginTop: '10px' }}>
-                                No photos in private album
+                                {t('profile.noPrivatePhotos')}
                             </div>
                         )
                     ) : (
@@ -501,7 +505,7 @@ const UserProfile = ({ userId }) => {
                                 </div>
                             ) : (
                                 <div style={{ padding: '20px', textAlign: 'center', color: '#666', backgroundColor: '#1a1a1a', borderRadius: '10px', marginTop: '10px' }}>
-                                    No photos in private album
+                                    {t('profile.noPrivatePhotos')}
                                 </div>
                             )
                         ) : (
@@ -529,8 +533,8 @@ const UserProfile = ({ userId }) => {
                                     <span className="material-icons" style={{ fontSize: '30px', color: '#a607d6' }}>lock</span>
                                 </div>
                                 <div>
-                                    <h4 style={{ margin: '0 0 5px 0' }}>Private Album</h4>
-                                    <p style={{ margin: 0, color: '#888', fontSize: '14px' }}>Request access to view photos</p>
+                                    <h4 style={{ margin: '0 0 5px 0' }}>{t('profile.privateAlbum')}</h4>
+                                    <p style={{ margin: 0, color: '#888', fontSize: '14px' }}>{t('profile.requestAccessDesc')}</p>
                                 </div>
                                 {albumAccess.hasPendingRequest ? (
                                     <button disabled style={{
@@ -545,7 +549,7 @@ const UserProfile = ({ userId }) => {
                                         gap: '5px'
                                     }}>
                                         <span className="material-icons" style={{ fontSize: '16px' }}>hourglass_empty</span>
-                                        Request Sent
+                                        {t('profile.requestSent')}
                                     </button>
                                 ) : (
                                     <button onClick={handleRequestAccess} style={{
@@ -557,7 +561,7 @@ const UserProfile = ({ userId }) => {
                                         cursor: 'pointer',
                                         fontWeight: '600'
                                     }}>
-                                        Request Access
+                                        {t('profile.requestAccess')}
                                     </button>
                                 )}
                             </div>
@@ -625,7 +629,7 @@ const UserProfile = ({ userId }) => {
                         onClick={(e) => e.stopPropagation()}
                     >
                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
-                            <h3 style={{ margin: 0, fontSize: '20px' }}>รายงานผู้ใช้</h3>
+                            <h3 style={{ margin: 0, fontSize: '20px' }}>{t('profile.report')}</h3>
                             <button
                                 onClick={() => setShowReportModal(false)}
                                 style={{ background: 'none', border: 'none', color: 'white', cursor: 'pointer' }}
@@ -635,11 +639,11 @@ const UserProfile = ({ userId }) => {
                         </div>
 
                         <p style={{ color: '#888', marginBottom: '20px', fontSize: '14px' }}>
-                            กรุณาเลือกเหตุผลที่คุณต้องการรายงานผู้ใช้นี้
+                            Please select a reason for reporting this user.
                         </p>
 
                         <div style={{ marginBottom: '20px' }}>
-                            {['spam', 'อนาจาร', 'กล่าวร้ายผู้อื่น', 'แอบอ้าง', 'หลอกลวง'].map((reason) => (
+                            {['spam', 'inappropriate', 'harassment', 'impersonation', 'scam'].map((reason) => (
                                 <div
                                     key={reason}
                                     onClick={() => setReportReason(reason)}
@@ -677,12 +681,12 @@ const UserProfile = ({ userId }) => {
 
                         <div style={{ marginBottom: '20px' }}>
                             <label style={{ display: 'block', marginBottom: '8px', fontSize: '14px', color: '#888' }}>
-                                รายละเอียดเพิ่มเติม (ถ้ามี)
+                                Additional Info (Optional)
                             </label>
                             <textarea
                                 value={reportAdditionalInfo}
                                 onChange={(e) => setReportAdditionalInfo(e.target.value)}
-                                placeholder="อธิบายเพิ่มเติมเกี่ยวกับปัญหา..."
+                                placeholder="Describe the issue..."
                                 style={{
                                     width: '100%',
                                     minHeight: '80px',
@@ -710,10 +714,10 @@ const UserProfile = ({ userId }) => {
                                     fontWeight: '500'
                                 }}
                             >
-                                ยกเลิก
+                                {t('common.cancel')}
                             </button>
                             <button
-                                onClick={confirmReport}
+                                onClick={submitReport}
                                 disabled={!reportReason}
                                 style={{
                                     padding: '12px 24px',
@@ -725,7 +729,7 @@ const UserProfile = ({ userId }) => {
                                     fontWeight: '500'
                                 }}
                             >
-                                ส่งรายงาน
+                                {t('profile.report')}
                             </button>
                         </div>
                     </div>
@@ -741,7 +745,7 @@ const UserProfile = ({ userId }) => {
                         </div>
                         <h3 style={{ margin: '0 0 10px 0' }}>Report Submitted</h3>
                         <p style={{ color: '#888', marginBottom: '20px' }}>Thank you for helping keep our community safe. We will review your report shortly.</p>
-                        <button onClick={() => setShowReportSuccessModal(false)} style={{ padding: '10px 20px', borderRadius: '10px', border: 'none', backgroundColor: '#a607d6', color: 'white', cursor: 'pointer' }}>Close</button>
+                        <button onClick={() => setShowReportSuccessModal(false)} style={{ padding: '10px 20px', borderRadius: '10px', border: 'none', backgroundColor: '#a607d6', color: 'white', cursor: 'pointer' }}>{t('common.close')}</button>
                     </div>
                 </div>
             )}
@@ -753,12 +757,12 @@ const UserProfile = ({ userId }) => {
                         <div style={{ width: '80px', height: '80px', borderRadius: '50%', backgroundColor: 'rgba(166, 7, 214, 0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 20px', animation: 'scaleIn 0.4s ease-out' }}>
                             <span className="material-icons" style={{ fontSize: '40px', color: '#a607d6' }}>send</span>
                         </div>
-                        <h3 style={{ margin: '0 0 12px 0', fontSize: '24px', fontWeight: '600' }}>ส่งคำขอเรียบร้อย</h3>
+                        <h3 style={{ margin: '0 0 12px 0', fontSize: '24px', fontWeight: '600' }}>{t('profile.requestSent')}</h3>
                         <p style={{ color: '#888', marginBottom: '30px', fontSize: '15px', lineHeight: '1.6' }}>
-                            เราได้แจ้งเตือนไปยังเจ้าของโปรไฟล์แล้ว<br />
-                            กรุณารอการอนุมัติเพื่อเข้าชมอัลบั้มส่วนตัว
+                            We have notified the profile owner.<br />
+                            Please wait for approval to view the private album.
                         </p>
-                        <button onClick={() => setShowAccessRequestModal(false)} style={{ width: '100%', padding: '14px 24px', borderRadius: '12px', border: 'none', backgroundColor: '#a607d6', color: 'white', cursor: 'pointer', fontWeight: '600', fontSize: '16px', transition: 'all 0.2s', boxShadow: '0 4px 12px rgba(166, 7, 214, 0.3)' }}>ตกลง</button>
+                        <button onClick={() => setShowAccessRequestModal(false)} style={{ width: '100%', padding: '14px 24px', borderRadius: '12px', border: 'none', backgroundColor: '#a607d6', color: 'white', cursor: 'pointer', fontWeight: '600', fontSize: '16px', transition: 'all 0.2s', boxShadow: '0 4px 12px rgba(166, 7, 214, 0.3)' }}>{t('common.confirm')}</button>
                     </div>
                 </div>
             )}
@@ -767,7 +771,7 @@ const UserProfile = ({ userId }) => {
             {showShareModal && (
                 <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(0, 0, 0, 0.8)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1001 }} onClick={() => setShowShareModal(false)}>
                     <div style={{ backgroundColor: '#1a1a1a', borderRadius: '20px', padding: '30px', maxWidth: '350px', width: '90%', textAlign: 'center' }} onClick={(e) => e.stopPropagation()}>
-                        <h3 style={{ margin: '0 0 20px 0' }}>Share Profile</h3>
+                        <h3 style={{ margin: '0 0 20px 0' }}>{t('profile.share')}</h3>
                         <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
                             <button onClick={shareToLine} style={{
                                 padding: '12px', borderRadius: '10px', border: 'none',
@@ -787,7 +791,7 @@ const UserProfile = ({ userId }) => {
                                 <span className="material-icons">message</span>
                                 Share to Messenger
                             </button>
-                            <button onClick={copyLink} style={{
+                            <button onClick={copyToClipboard} style={{
                                 padding: '12px', borderRadius: '10px', border: '1px solid #444',
                                 backgroundColor: '#333', color: 'white', cursor: 'pointer',
                                 display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px',
@@ -797,7 +801,7 @@ const UserProfile = ({ userId }) => {
                                 Copy Link
                             </button>
                         </div>
-                        <button onClick={() => setShowShareModal(false)} style={{ marginTop: '20px', background: 'none', border: 'none', color: '#888', cursor: 'pointer' }}>Cancel</button>
+                        <button onClick={() => setShowShareModal(false)} style={{ marginTop: '20px', background: 'none', border: 'none', color: '#888', cursor: 'pointer' }}>{t('common.cancel')}</button>
                     </div>
                 </div>
             )}
@@ -825,7 +829,7 @@ const UserProfile = ({ userId }) => {
                             </span>
                         </div>
                         <h3 style={{ margin: '0 0 12px 0', fontSize: '24px', fontWeight: '600' }}>
-                            {photoNotificationData.type === 'approved' ? 'รูปได้รับการอนุมัติ!' : 'รูปถูกปฏิเสธ'}
+                            {photoNotificationData.type === 'approved' ? 'Photo Approved!' : 'Photo Denied'}
                         </h3>
                         <p style={{ color: '#888', marginBottom: '30px', fontSize: '15px', lineHeight: '1.6' }}>
                             {photoNotificationData.message}
@@ -846,7 +850,7 @@ const UserProfile = ({ userId }) => {
                                 boxShadow: photoNotificationData.type === 'approved' ? '0 4px 12px rgba(76, 175, 80, 0.3)' : '0 4px 12px rgba(244, 67, 54, 0.3)'
                             }}
                         >
-                            เข้าใจแล้ว
+                            {t('common.close')}
                         </button>
                     </div>
                 </div>

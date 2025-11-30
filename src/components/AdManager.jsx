@@ -1,22 +1,42 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useLocation } from 'react-router-dom';
 
 const AdManager = () => {
     const location = useLocation();
-
-    // Configuration: Set to true to show ads/placeholders
-    const ENABLE_ADS = false;
-
-    // Don't show ads on Login or Register pages if desired (optional)
-    // const excludeRoutes = ['/login', '/register'];
-    // if (excludeRoutes.includes(location.pathname)) return null;
+    const [adsEnabled, setAdsEnabled] = useState(false);
+    const [maintenanceMode, setMaintenanceMode] = useState(false);
+    const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
 
     useEffect(() => {
-        // This is where you would initialize AdSense if needed
-        // e.g., (window.adsbygoogle = window.adsbygoogle || []).push({});
-    }, [location]);
+        const fetchSettings = async () => {
+            try {
+                const response = await fetch(`${API_URL}/api/settings/public`);
+                if (response.ok) {
+                    const data = await response.json();
+                    setAdsEnabled(data.adsenseEnabled);
+                    setMaintenanceMode(data.maintenanceMode);
+                }
+            } catch (error) {
+                console.error('Error fetching ad settings:', error);
+                setAdsEnabled(false);
+            }
+        };
 
-    if (!ENABLE_ADS) return null;
+        fetchSettings();
+    }, []);
+
+    useEffect(() => {
+        if (adsEnabled) {
+            // Initialize AdSense when ads are enabled and route changes
+            // try {
+            //     (window.adsbygoogle = window.adsbygoogle || []).push({});
+            // } catch (e) {
+            //     console.error('AdSense error:', e);
+            // }
+        }
+    }, [location, adsEnabled]);
+
+    if (!adsEnabled) return null;
 
     return (
         <>

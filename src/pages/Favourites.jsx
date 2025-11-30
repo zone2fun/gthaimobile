@@ -1,9 +1,11 @@
 import React, { useState, useEffect, useContext } from 'react';
+import { useTranslation } from 'react-i18next';
 import ProfileCard from '../components/ProfileCard';
 import { getUsers, getUser } from '../services/api';
 import AuthContext from '../context/AuthContext';
 
 const Favourites = () => {
+    const { t } = useTranslation();
     const [favourites, setFavourites] = useState([]);
     const { token, user } = useContext(AuthContext);
 
@@ -28,11 +30,17 @@ const Favourites = () => {
 
     return (
         <div className="app-content">
-            <h2 className="section-title">Favourites</h2>
+            <h2 className="section-title">{t('nav.favourites')}</h2>
             <div className="grid-container">
-                {favourites.map(user => (
-                    <ProfileCard key={user.id || user._id} user={user} />
-                ))}
+                {favourites.length > 0 ? (
+                    favourites.map(user => (
+                        <ProfileCard key={user.id || user._id} user={user} />
+                    ))
+                ) : (
+                    <div style={{ textAlign: 'center', color: '#888', marginTop: '20px', width: '100%' }}>
+                        {t('common.noData') || 'No favourites yet'}
+                    </div>
+                )}
             </div>
         </div>
     );

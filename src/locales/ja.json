@@ -1,0 +1,307 @@
+{
+    "nav": {
+        "home": "ホーム",
+        "favourites": "お気に入り",
+        "special": "コミュニティ",
+        "chat": "チャット",
+        "profile": "プロフィール"
+    },
+    "home": {
+        "freshFaces": "新しいメンバー",
+        "favourites": "お気に入り",
+        "nearby": "近くのユーザー",
+        "online": "オンライン",
+        "verify": "認証済み",
+        "noFavourites": "お気に入りはまだありません"
+    },
+    "profile": {
+        "editProfile": "プロフィール編集",
+        "settings": "設定",
+        "logout": "ログアウト",
+        "login": "ログイン",
+        "register": "登録",
+        "blockedUsers": "ブロックしたユーザー",
+        "safetyPolicy": "安全ポリシー",
+        "wait": "待機中",
+        "offline": "オフライン",
+        "age": "年齢",
+        "height": "身長",
+        "weight": "体重",
+        "lookingFor": "目的:",
+        "aboutMe": "自己紹介",
+        "share": "共有",
+        "favorited": "お気に入り済み",
+        "favorite": "お気に入り",
+        "unblock": "ブロック解除",
+        "block": "ブロック",
+        "report": "報告",
+        "photos": "写真",
+        "pendingPhotos": "承認待ちの写真",
+        "privateAlbum": "プライベートアルバム",
+        "noPrivatePhotos": "プライベートアルバムに写真がありません",
+        "requestAccessDesc": "写真を見るためのアクセス権をリクエスト",
+        "requestSent": "リクエスト送信済み",
+        "requestAccess": "アクセス権をリクエスト"
+    },
+    "chat": {
+        "conversations": "チャット",
+        "noMessages": "メッセージはまだありません",
+        "typeMessage": "メッセージを入力...",
+        "you": "あなた",
+        "sentImage": "画像を送信しました",
+        "requestAlbumAccess": "アルバムへのアクセスをリクエスト",
+        "allowAccess": "アクセスを許可",
+        "waitingForApproval": "所有者の承認待ち...",
+        "approved": "承認済み",
+        "rejected": "拒否されました",
+        "accessRequestText": "プライベートアルバムへのアクセスをリクエスト",
+        "accessApproved": "アルバムへのアクセスリクエストを承認しました",
+        "accessRejected": "アルバムへのアクセスリクエストを拒否しました"
+    },
+    "report": {
+        "title": "ユーザーを報告",
+        "selectReason": "このユーザーを報告する理由を選択してください",
+        "reasons": {
+            "spam": "スパム",
+            "inappropriate": "不適切なコンテンツ",
+            "harassment": "嫌がらせ",
+            "impersonation": "なりすまし",
+            "fraud": "詐欺",
+            "fakeProfile": "偽のプロフィール",
+            "violation": "違反行為"
+        },
+        "additionalInfo": "詳細情報（任意）",
+        "additionalInfoPlaceholder": "問題を説明してください...",
+        "submit": "報告を送信",
+        "successTitle": "報告を送信しました",
+        "successMessage": "ご報告ありがとうございます。チームが間もなく確認します。",
+        "gotIt": "了解"
+    },
+    "common": {
+        "loading": "読み込み中...",
+        "save": "保存",
+        "cancel": "キャンセル",
+        "delete": "削除",
+        "edit": "編集",
+        "send": "送信",
+        "search": "検索",
+        "searchHashtag": "ハッシュタグを検索",
+        "searchAboutMe": "自己紹介を検索",
+        "notifications": "通知",
+        "noNotifications": "通知はありません",
+        "close": "閉じる",
+        "confirm": "確認",
+        "noData": "データがありません"
+    },
+    "auth": {
+        "username": "ユーザー名",
+        "password": "パスワード",
+        "email": "メールアドレス",
+        "name": "名前",
+        "signedInAs": "ログイン中:",
+        "guest": "ゲスト",
+        "forgotPassword": "パスワードをお忘れですか？",
+        "dontHaveAccount": "アカウントをお持ちでないですか？",
+        "alreadyHaveAccount": "すでにアカウントをお持ちですか？",
+        "loginWithGoogle": "Googleでログイン"
+    },
+    "language": {
+        "select": "言語を選択",
+        "th": "ไทย",
+        "en": "English",
+        "zh": "中文",
+        "ja": "日本語"
+    },
+    "editProfile": {
+        "title": "プロフィール編集",
+        "coverImage": "カバー画像",
+        "displayName": "表示名",
+        "age": "年齢 (18歳以上)",
+        "country": "国",
+        "selectCountry": "国を選択",
+        "height": "身長 (cm)",
+        "weight": "体重 (kg)",
+        "lookingFor": "目的",
+        "aboutMe": "自己紹介",
+        "aboutMePlaceholder": "自分について短い文章を書いてください（最大200文字）",
+        "gallery": "ギャラリー（最大5枚）",
+        "privateAlbum": "プライベートアルバム（最大3枚）",
+        "privateAlbumHint": "プライベートアルバムの写真は、許可した人だけが見ることができます。",
+        "saveChanges": "変更を保存",
+        "saving": "保存中...",
+        "privacySecurity": "プライバシーとセキュリティ",
+        "publicProfile": "公開プロフィール",
+        "publicProfileDesc": "会員以外の一般公開",
+        "changePassword": "パスワードを変更",
+        "deleteAccount": "アカウントを削除",
+        "currentPassword": "現在のパスワード",
+        "newPassword": "新しいパスワード",
+        "confirmNewPassword": "新しいパスワード（確認）",
+        "cancel": "キャンセル",
+        "save": "保存",
+        "delete": "削除",
+        "deleteAccountConfirm": "本当にアカウントを削除しますか？この操作は取り消せません。",
+        "verificationPhoto": "本人確認写真",
+        "verificationDesc": "本人確認のため、顔がはっきりと写った写真を撮影してください。管理チームが確認します。",
+        "capturePhoto": "写真を撮る",
+        "retake": "撮り直す",
+        "submit": "送信",
+        "submitting": "送信中...",
+        "verified": "認証済み ✓",
+        "pendingVerification": "確認待ち",
+        "verificationRejected": "認証が拒否されました",
+        "verifyAccount": "アカウント認証",
+        "errors": {
+            "age": "このサービスを利用するには18歳以上である必要があります",
+            "galleryMax": "ギャラリー画像は最大5枚までです",
+            "privateMax": "プライベートアルバムは3枚までです",
+            "passwordMismatch": "新しいパスワードが一致しません",
+            "passwordLength": "パスワードは8文字以上である必要があります",
+            "passwordSuccess": "パスワードが正常に更新されました",
+            "passwordFail": "パスワードの変更に失敗しました",
+            "errorOccurred": "エラーが発生しました",
+            "deleteFail": "アカウントの削除に失敗しました",
+            "cameraDenied": "カメラへのアクセスが拒否されました",
+            "cameraPermission": "カメラにアクセスできません。権限を確認してください。",
+            "noPhoto": "写真がありません",
+            "takePhotoFirst": "先に写真を撮ってください",
+            "requestSubmitted": "リクエストを送信しました！",
+            "verificationSuccess": "認証リクエストが正常に送信されました！管理者の承認をお待ちください。",
+            "submissionFailed": "送信に失敗しました",
+            "verificationFail": "認証リクエストの送信に失敗しました",
+            "success": "成功！",
+            "error": "エラー",
+            "mustBe18": "18歳以上である必要があります"
+        }
+    },
+    "safety": {
+        "title": "コミュニティと安全ポリシー",
+        "intro": "GThaiLoverを誰にとっても安全で楽しい場所にするため、すべてのユーザーは以下のルールに従う必要があります。<br />当プラットフォームを使用することで、このポリシーのすべての項目に同意したものとみなされます。",
+        "sections": {
+            "1": {
+                "title": "1. 禁止されているコンテンツと行動",
+                "sub1": {
+                    "title": "1.1 性的または露骨なコンテンツ",
+                    "text1": "ポルノ、性的に露骨、またはわいせつなコンテンツはいかなる種類も禁止です。",
+                    "text2": "露骨な行為の共有、要求、または議論は禁止です。"
+                },
+                "sub2": {
+                    "title": "1.2 薬物と違法物質",
+                    "text1": "違法薬物や物質を宣伝、販売、または要求するコンテンツは禁止です。"
+                },
+                "sub3": {
+                    "title": "1.3 18歳未満は厳禁",
+                    "text1": "18歳未満の人物を含むプロフィール、写真、またはコンテンツは禁止です。",
+                    "text2": "18歳未満であると主張することは禁止です。"
+                },
+                "sub4": {
+                    "title": "1.4 個人の機密情報",
+                    "intro": "以下を共有または要求しないでください:",
+                    "list": [
+                        "クレジットカード情報",
+                        "銀行口座の詳細",
+                        "パスワードまたはログイン情報",
+                        "政府発行のID番号",
+                        "その他の個人的または機密情報"
+                    ]
+                },
+                "sub5": {
+                    "title": "1.5 なりすましと他人の写真の使用",
+                    "text1": "他人の写真を使用しないでください。",
+                    "text2": "他人になりすましたり、実在する別の個人であるふりをしないでください。",
+                    "text3": "許可なく実在の人物に似せたAI生成写真を使用することは許可されていません。"
+                },
+                "sub6": {
+                    "title": "1.6 金融詐欺 / 投資 / ギャンブル",
+                    "text1": "投資スキーム、資金援助、または送金を宣伝することは禁止です。",
+                    "text2": "ギャンブルや賭博行為は禁止です。",
+                    "text3": "ユーザーに投資、寄付、または送金を促すことは禁止です。"
+                },
+                "sub7": {
+                    "title": "1.7 違法行為",
+                    "text1": "適用される法律に基づく違法行為は厳重に禁止されています。"
+                }
+            },
+            "2": {
+                "title": "2. 警告と禁止ポリシー",
+                "intro": "コミュニティを安全に保つために:",
+                "sub1": {
+                    "title": "2.1 一般的な違反",
+                    "text": "ユーザーが<1>3回の警告</1>を受け取り、問題を修正しない場合、アカウントは自動的に禁止されます。"
+                },
+                "sub2": {
+                    "title": "2.2 不適切 / 禁止された写真",
+                    "text": "ユーザーが<1>10回の写真関連の警告</1>（フィードまたはプロフィール）を受け取った場合、アカウントは自動的に禁止されます。"
+                }
+            },
+            "3": {
+                "title": "3. 法的責任",
+                "text1": "GThaiLoverは、ユーザーが行ったいかなる違法行為にも関与または支持しません。",
+                "text2": "プラットフォームを通じて行われた違法行為は、ユーザーの単独責任です。",
+                "text3": "GThaiLoverを使用することで、ユーザーはこの責任を確認し、受け入れたものとします。"
+            },
+            "4": {
+                "title": "4. 合意",
+                "text": "アカウントを作成またはGThaiLoverを使用することで、上記のすべてのルールに従うことに同意したことになります。違反した場合、警告、コンテンツの削除、および永久的なアカウント禁止につながる可能性があります。"
+            }
+        }
+    },
+    "special": {
+        "title": "コミュニティ",
+        "createPost": {
+            "placeholder": "{{name}}さん、何を考えていますか？",
+            "post": "投稿",
+            "posting": "投稿中...",
+            "addImage": "画像を追加",
+            "addEmoji": "絵文字を追加",
+            "addLocation": "場所を追加",
+            "addHashtag": "ハッシュタグを追加"
+        },
+        "feed": {
+            "searching": "検索中:",
+            "noPosts": "まだ投稿がありません。最初の投稿をシェアしましょう！",
+            "pendingApproval": "承認待ち (Pending Approval)",
+            "pendingDesc": "画像付きの投稿は、他のユーザーに表示される前に管理者の承認が必要です。",
+            "likes": "いいね",
+            "like": "いいね",
+            "comment": "コメント",
+            "report": "報告",
+            "delete": "削除"
+        },
+        "comments": {
+            "noComments": "まだコメントがありません。",
+            "placeholder": "コメントを書く..."
+        },
+        "modals": {
+            "likes": {
+                "title": "いいねしたユーザー"
+            },
+            "delete": {
+                "title": "投稿を削除しますか？",
+                "message": "本当にこの投稿を削除しますか？この操作は取り消せません。",
+                "cancel": "キャンセル",
+                "confirm": "削除"
+            },
+            "report": {
+                "title": "投稿を報告",
+                "selectReason": "この投稿を報告する理由を選択してください",
+                "reasons": {
+                    "spam": "スパム",
+                    "inappropriate": "不適切なコンテンツ",
+                    "harassment": "嫌がらせ",
+                    "impersonation": "なりすまし",
+                    "fraud": "詐欺"
+                },
+                "additionalInfo": "詳細情報（任意）",
+                "additionalInfoPlaceholder": "問題について詳しく説明してください...",
+                "cancel": "キャンセル",
+                "submit": "報告を送信"
+            },
+            "reportSuccess": {
+                "title": "報告を送信しました",
+                "message": "ご報告ありがとうございます。<br />チームができるだけ早く確認し、対応いたします。",
+                "gotIt": "了解"
+            }
+        }
+    }
+}

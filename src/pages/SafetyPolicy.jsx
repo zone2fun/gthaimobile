@@ -1,8 +1,10 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation, Trans } from 'react-i18next';
 
 const SafetyPolicy = () => {
     const navigate = useNavigate();
+    const { t } = useTranslation();
 
     return (
         <div style={styles.container}>
@@ -17,101 +19,99 @@ const SafetyPolicy = () => {
                         <span className="material-icons" style={{ fontSize: '24px' }}>arrow_back</span>
                     </button>
                     <span className="material-icons" style={styles.icon}>security</span>
-                    <h1 style={styles.title}>Community & Safety Policy</h1>
+                    <h1 style={styles.title}>{t('safety.title')}</h1>
                 </div>
 
                 <div style={styles.card}>
                     <p style={styles.intro}>
-                        To keep GThaiLover safe and enjoyable for everyone, all users must follow the rules below.<br />
-                        By using our platform, you agree to all items in this policy.
+                        <Trans i18nKey="safety.intro" components={{ br: <br /> }} />
                     </p>
 
                     <div style={styles.section}>
-                        <h2 style={styles.sectionTitle}>1. Prohibited Content & Behavior</h2>
+                        <h2 style={styles.sectionTitle}>{t('safety.sections.1.title')}</h2>
 
                         <div style={styles.subSection}>
-                            <h3 style={styles.subSectionTitle}>1.1 Sexual or Explicit Content</h3>
-                            <p style={styles.text}>No pornographic, sexually explicit, or indecent content of any kind.</p>
-                            <p style={styles.text}>No sharing, requesting, or discussing explicit acts.</p>
+                            <h3 style={styles.subSectionTitle}>{t('safety.sections.1.sub1.title')}</h3>
+                            <p style={styles.text}>{t('safety.sections.1.sub1.text1')}</p>
+                            <p style={styles.text}>{t('safety.sections.1.sub1.text2')}</p>
                         </div>
 
                         <div style={styles.subSection}>
-                            <h3 style={styles.subSectionTitle}>1.2 Drugs & Illegal Substances</h3>
-                            <p style={styles.text}>No content promoting, selling, or requesting illegal drugs or substances.</p>
+                            <h3 style={styles.subSectionTitle}>{t('safety.sections.1.sub2.title')}</h3>
+                            <p style={styles.text}>{t('safety.sections.1.sub2.text1')}</p>
                         </div>
 
                         <div style={styles.subSection}>
-                            <h3 style={styles.subSectionTitle}>1.3 Under 18 is Strictly Prohibited</h3>
-                            <p style={styles.text}>No profiles, photos, or content involving anyone under 18.</p>
-                            <p style={styles.text}>Do not claim to be under 18.</p>
+                            <h3 style={styles.subSectionTitle}>{t('safety.sections.1.sub3.title')}</h3>
+                            <p style={styles.text}>{t('safety.sections.1.sub3.text1')}</p>
+                            <p style={styles.text}>{t('safety.sections.1.sub3.text2')}</p>
                         </div>
 
                         <div style={styles.subSection}>
-                            <h3 style={styles.subSectionTitle}>1.4 Personal Sensitive Information</h3>
-                            <p style={styles.text}>Do not share or request:</p>
+                            <h3 style={styles.subSectionTitle}>{t('safety.sections.1.sub4.title')}</h3>
+                            <p style={styles.text}>{t('safety.sections.1.sub4.intro')}</p>
                             <ul style={styles.list}>
-                                <li>Credit card information</li>
-                                <li>Bank account details</li>
-                                <li>Passwords or login credentials</li>
-                                <li>Government ID numbers</li>
-                                <li>Any private or sensitive information</li>
+                                {t('safety.sections.1.sub4.list', { returnObjects: true }).map((item, index) => (
+                                    <li key={index}>{item}</li>
+                                ))}
                             </ul>
                         </div>
 
                         <div style={styles.subSection}>
-                            <h3 style={styles.subSectionTitle}>1.5 Impersonation & Using Other People’s Photos</h3>
-                            <p style={styles.text}>Do not use photos of someone else.</p>
-                            <p style={styles.text}>Do not impersonate any person or pretend to be another real individual.</p>
-                            <p style={styles.text}>AI-generated looks-alike photos of real people without permission are not allowed.</p>
+                            <h3 style={styles.subSectionTitle}>{t('safety.sections.1.sub5.title')}</h3>
+                            <p style={styles.text}>{t('safety.sections.1.sub5.text1')}</p>
+                            <p style={styles.text}>{t('safety.sections.1.sub5.text2')}</p>
+                            <p style={styles.text}>{t('safety.sections.1.sub5.text3')}</p>
                         </div>
 
                         <div style={styles.subSection}>
-                            <h3 style={styles.subSectionTitle}>1.6 Financial Scams / Investment / Gambling</h3>
-                            <p style={styles.text}>No promoting investment schemes, financial help, or money transfers.</p>
-                            <p style={styles.text}>No gambling or betting activities.</p>
-                            <p style={styles.text}>No encouraging users to invest, donate, or send money.</p>
+                            <h3 style={styles.subSectionTitle}>{t('safety.sections.1.sub6.title')}</h3>
+                            <p style={styles.text}>{t('safety.sections.1.sub6.text1')}</p>
+                            <p style={styles.text}>{t('safety.sections.1.sub6.text2')}</p>
+                            <p style={styles.text}>{t('safety.sections.1.sub6.text3')}</p>
                         </div>
 
                         <div style={styles.subSection}>
-                            <h3 style={styles.subSectionTitle}>1.7 Illegal Activities</h3>
-                            <p style={styles.text}>Any illegal activity under any applicable laws is strictly prohibited.</p>
+                            <h3 style={styles.subSectionTitle}>{t('safety.sections.1.sub7.title')}</h3>
+                            <p style={styles.text}>{t('safety.sections.1.sub7.text1')}</p>
                         </div>
                     </div>
 
                     <div style={styles.section}>
-                        <h2 style={styles.sectionTitle}>2. Warning & Ban Policy</h2>
-                        <p style={styles.text}>To keep the community safe:</p>
+                        <h2 style={styles.sectionTitle}>{t('safety.sections.2.title')}</h2>
+                        <p style={styles.text}>{t('safety.sections.2.intro')}</p>
 
                         <div style={styles.subSection}>
-                            <h3 style={styles.subSectionTitle}>2.1 General Violations</h3>
+                            <h3 style={styles.subSectionTitle}>{t('safety.sections.2.sub1.title')}</h3>
                             <p style={styles.text}>
-                                If a user receives <span style={styles.highlight}>3 warnings</span> and does not correct the issue,
-                                the account will be automatically banned.
+                                <Trans
+                                    i18nKey="safety.sections.2.sub1.text"
+                                    components={{ 1: <span style={styles.highlight} /> }}
+                                />
                             </p>
                         </div>
 
                         <div style={styles.subSection}>
-                            <h3 style={styles.subSectionTitle}>2.2 Wrong / Prohibited Photos</h3>
+                            <h3 style={styles.subSectionTitle}>{t('safety.sections.2.sub2.title')}</h3>
                             <p style={styles.text}>
-                                If a user receives <span style={styles.highlight}>10 photo-related warnings</span> (feed or profile),
-                                the account will be automatically banned.
+                                <Trans
+                                    i18nKey="safety.sections.2.sub2.text"
+                                    components={{ 1: <span style={styles.highlight} /> }}
+                                />
                             </p>
                         </div>
                     </div>
 
                     <div style={styles.section}>
-                        <h2 style={styles.sectionTitle}>3. Legal Responsibility</h2>
-                        <p style={styles.text}>GThaiLover does not participate in or support any illegal actions performed by users.</p>
-                        <p style={styles.text}>Any illegal behavior done through the platform is the sole responsibility of the user.</p>
-                        <p style={styles.text}>By using GThaiLover, users confirm and accept this responsibility.</p>
+                        <h2 style={styles.sectionTitle}>{t('safety.sections.3.title')}</h2>
+                        <p style={styles.text}>{t('safety.sections.3.text1')}</p>
+                        <p style={styles.text}>{t('safety.sections.3.text2')}</p>
+                        <p style={styles.text}>{t('safety.sections.3.text3')}</p>
                     </div>
 
                     <div style={styles.section}>
-                        <h2 style={styles.sectionTitle}>4. Agreement</h2>
-                        <p style={styles.text}>
-                            By creating an account or using GThaiLover, you agree to follow all rules above.
-                            Violations may result in warnings, content removal, and permanent account ban.
-                        </p>
+                        <h2 style={styles.sectionTitle}>{t('safety.sections.4.title')}</h2>
+                        <p style={styles.text}>{t('safety.sections.4.text')}</p>
                     </div>
 
                 </div>

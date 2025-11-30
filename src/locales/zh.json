@@ -1,0 +1,307 @@
+{
+    "nav": {
+        "home": "首页",
+        "favourites": "收藏",
+        "special": "社区",
+        "chat": "聊天",
+        "profile": "个人资料"
+    },
+    "home": {
+        "freshFaces": "新面孔",
+        "favourites": "收藏",
+        "nearby": "附近",
+        "online": "在线",
+        "verify": "已验证",
+        "noFavourites": "暂无收藏"
+    },
+    "profile": {
+        "editProfile": "编辑资料",
+        "settings": "设置",
+        "logout": "退出登录",
+        "login": "登录",
+        "register": "注册",
+        "blockedUsers": "已屏蔽用户",
+        "safetyPolicy": "安全政策",
+        "wait": "等待",
+        "offline": "离线",
+        "age": "年龄",
+        "height": "身高",
+        "weight": "体重",
+        "lookingFor": "寻找：",
+        "aboutMe": "关于我",
+        "share": "分享",
+        "favorited": "已收藏",
+        "favorite": "收藏",
+        "unblock": "取消屏蔽",
+        "block": "屏蔽",
+        "report": "举报",
+        "photos": "照片",
+        "pendingPhotos": "待审核照片",
+        "privateAlbum": "私密相册",
+        "noPrivatePhotos": "私密相册暂无照片",
+        "requestAccessDesc": "申请查看照片权限",
+        "requestSent": "请求已发送",
+        "requestAccess": "申请访问"
+    },
+    "chat": {
+        "conversations": "聊天",
+        "noMessages": "暂无消息",
+        "typeMessage": "输入消息...",
+        "you": "你",
+        "sentImage": "发送了一张图片",
+        "requestAlbumAccess": "申请相册访问权限",
+        "allowAccess": "允许访问",
+        "waitingForApproval": "等待对方批准...",
+        "approved": "已批准",
+        "rejected": "已拒绝",
+        "accessRequestText": "申请访问私密相册",
+        "accessApproved": "已批准相册访问请求",
+        "accessRejected": "已拒绝相册访问请求"
+    },
+    "report": {
+        "title": "举报用户",
+        "selectReason": "请选择举报原因",
+        "reasons": {
+            "spam": "垃圾信息",
+            "inappropriate": "不当内容",
+            "harassment": "骚扰",
+            "impersonation": "冒充他人",
+            "fraud": "欺诈",
+            "fakeProfile": "虚假资料",
+            "violation": "违规行为"
+        },
+        "additionalInfo": "更多详情（可选）",
+        "additionalInfoPlaceholder": "请描述具体问题...",
+        "submit": "提交举报",
+        "successTitle": "举报已提交",
+        "successMessage": "感谢你的反馈。我们的团队将尽快审核。",
+        "gotIt": "知道了"
+    },
+    "common": {
+        "loading": "加载中...",
+        "save": "保存",
+        "cancel": "取消",
+        "delete": "删除",
+        "edit": "编辑",
+        "send": "发送",
+        "search": "搜索",
+        "searchHashtag": "搜索话题",
+        "searchAboutMe": "搜索关于我",
+        "notifications": "通知",
+        "noNotifications": "暂无通知",
+        "close": "关闭",
+        "confirm": "确认",
+        "noData": "暂无数据"
+    },
+    "auth": {
+        "username": "用户名",
+        "password": "密码",
+        "email": "邮箱",
+        "name": "姓名",
+        "signedInAs": "当前登录",
+        "guest": "访客",
+        "forgotPassword": "忘记密码？",
+        "dontHaveAccount": "还没有账号？",
+        "alreadyHaveAccount": "已有账号？",
+        "loginWithGoogle": "使用 Google 登录"
+    },
+    "language": {
+        "select": "选择语言",
+        "th": "ไทย",
+        "en": "English",
+        "zh": "中文",
+        "ja": "日本語"
+    },
+    "editProfile": {
+        "title": "编辑资料",
+        "coverImage": "封面图片",
+        "displayName": "显示名称",
+        "age": "年龄 (18+)",
+        "country": "国家/地区",
+        "selectCountry": "选择国家/地区",
+        "height": "身高 (cm)",
+        "weight": "体重 (kg)",
+        "lookingFor": "寻找",
+        "aboutMe": "关于我",
+        "aboutMePlaceholder": "写一段简短的自我介绍（最多200字）",
+        "gallery": "相册（最多5张）",
+        "privateAlbum": "私密相册（最多3张）",
+        "privateAlbumHint": "私密相册中的照片仅对你允许的人可见。",
+        "saveChanges": "保存更改",
+        "saving": "保存中...",
+        "privacySecurity": "隐私与安全",
+        "publicProfile": "公开资料",
+        "publicProfileDesc": "向非会员公开可见",
+        "changePassword": "修改密码",
+        "deleteAccount": "删除账号",
+        "currentPassword": "当前密码",
+        "newPassword": "新密码",
+        "confirmNewPassword": "确认新密码",
+        "cancel": "取消",
+        "save": "保存",
+        "delete": "删除",
+        "deleteAccountConfirm": "你确定要删除账号吗？此操作无法撤销。",
+        "verificationPhoto": "验证照片",
+        "verificationDesc": "请拍摄一张清晰的正面照用于验证。管理员将会进行审核。",
+        "capturePhoto": "拍照",
+        "retake": "重拍",
+        "submit": "提交",
+        "submitting": "提交中...",
+        "verified": "已验证 ✓",
+        "pendingVerification": "待验证",
+        "verificationRejected": "验证被拒绝",
+        "verifyAccount": "验证账号",
+        "errors": {
+            "age": "你必须年满18岁才能使用此服务",
+            "galleryMax": "最多允许上传5张相册图片",
+            "privateMax": "私密相册最多只能有3张照片",
+            "passwordMismatch": "新密码不匹配",
+            "passwordLength": "密码长度至少为8个字符",
+            "passwordSuccess": "密码修改成功",
+            "passwordFail": "密码修改失败",
+            "errorOccurred": "发生错误",
+            "deleteFail": "删除账号失败",
+            "cameraDenied": "相机访问被拒绝",
+            "cameraPermission": "无法访问相机，请检查权限设置。",
+            "noPhoto": "没有照片",
+            "takePhotoFirst": "请先拍照",
+            "requestSubmitted": "请求已提交！",
+            "verificationSuccess": "验证请求已提交！请等待管理员批准。",
+            "submissionFailed": "提交失败",
+            "verificationFail": "提交验证请求失败",
+            "success": "成功！",
+            "error": "错误",
+            "mustBe18": "必须年满18岁"
+        }
+    },
+    "safety": {
+        "title": "社区与安全政策",
+        "intro": "为了让 GThaiLover 成为一个对所有人都安全愉快的平台，所有用户必须遵守以下规则。<br />使用我们的平台即表示你同意本政策中的所有条款。",
+        "sections": {
+            "1": {
+                "title": "1. 禁止的内容与行为",
+                "sub1": {
+                    "title": "1.1 色情或露骨内容",
+                    "text1": "严禁任何形式的色情、露骨或不雅内容。",
+                    "text2": "禁止分享、索取或讨论露骨的性行为。"
+                },
+                "sub2": {
+                    "title": "1.2 毒品与违禁品",
+                    "text1": "禁止任何宣传、销售或索取毒品或违禁品的内容。"
+                },
+                "sub3": {
+                    "title": "1.3 严禁未成年人（18岁以下）",
+                    "text1": "禁止任何涉及18岁以下未成年人的个人资料、照片或内容。",
+                    "text2": "禁止声称自己未满18岁。"
+                },
+                "sub4": {
+                    "title": "1.4 个人敏感信息",
+                    "intro": "请勿分享或索取：",
+                    "list": [
+                        "信用卡信息",
+                        "银行账户详情",
+                        "密码或登录凭证",
+                        "身份证件号码",
+                        "任何隐私或敏感信息"
+                    ]
+                },
+                "sub5": {
+                    "title": "1.5 冒充他人与盗用照片",
+                    "text1": "禁止使用他人的照片。",
+                    "text2": "禁止冒充任何人或假装是另一个真实存在的人。",
+                    "text3": "未经许可，禁止使用AI生成的酷似真人的照片。"
+                },
+                "sub6": {
+                    "title": "1.6 金融诈骗 / 投资 / 赌博",
+                    "text1": "禁止推广投资计划、经济援助或转账汇款。",
+                    "text2": "禁止赌博或博彩活动。",
+                    "text3": "禁止怂恿用户投资、捐款或汇款。"
+                },
+                "sub7": {
+                    "title": "1.7 违法活动",
+                    "text1": "严禁任何违反适用法律的违法活动。"
+                }
+            },
+            "2": {
+                "title": "2. 警告与封禁政策",
+                "intro": "为了维护社区安全：",
+                "sub1": {
+                    "title": "2.1 一般违规",
+                    "text": "如果用户收到 <1>3次警告</1> 且未改正，账号将被自动封禁。"
+                },
+                "sub2": {
+                    "title": "2.2 错误/违禁照片",
+                    "text": "如果用户收到 <1>10次照片相关警告</1>（动态或个人资料），账号将被自动封禁。"
+                }
+            },
+            "3": {
+                "title": "3. 法律责任",
+                "text1": "GThaiLover 不参与也不支持用户进行的任何违法行为。",
+                "text2": "通过平台进行的任何违法行为均由用户自行承担全部责任。",
+                "text3": "使用 GThaiLover 即表示用户确认并接受此责任。"
+            },
+            "4": {
+                "title": "4. 协议",
+                "text": "创建账号或使用 GThaiLover 即表示你同意遵守以上所有规则。违规可能导致警告、内容移除以及永久封号。"
+            }
+        }
+    },
+    "special": {
+        "title": "社区动态",
+        "createPost": {
+            "placeholder": "{{name}}，你在想什么？",
+            "post": "发布",
+            "posting": "发布中...",
+            "addImage": "添加图片",
+            "addEmoji": "添加表情",
+            "addLocation": "添加位置",
+            "addHashtag": "添加话题"
+        },
+        "feed": {
+            "searching": "搜索中：",
+            "noPosts": "暂无动态，快来分享第一条吧！",
+            "pendingApproval": "待审核 (Pending Approval)",
+            "pendingDesc": "包含图片的帖子需经管理员审核后才会显示给其他用户。",
+            "likes": "点赞",
+            "like": "点赞",
+            "comment": "评论",
+            "report": "举报",
+            "delete": "删除"
+        },
+        "comments": {
+            "noComments": "暂无评论",
+            "placeholder": "写下你的评论..."
+        },
+        "modals": {
+            "likes": {
+                "title": "点赞列表"
+            },
+            "delete": {
+                "title": "删除帖子？",
+                "message": "你确定要删除这条帖子吗？此操作无法撤销。",
+                "cancel": "取消",
+                "confirm": "删除"
+            },
+            "report": {
+                "title": "举报帖子",
+                "selectReason": "请选择举报原因",
+                "reasons": {
+                    "spam": "垃圾信息",
+                    "inappropriate": "不当内容",
+                    "harassment": "骚扰",
+                    "impersonation": "冒充他人",
+                    "fraud": "欺诈/骗局"
+                },
+                "additionalInfo": "更多详情（可选）",
+                "additionalInfoPlaceholder": "请详细描述问题...",
+                "cancel": "取消",
+                "submit": "提交举报"
+            },
+            "reportSuccess": {
+                "title": "举报已提交",
+                "message": "感谢你的反馈。<br />我们的团队将尽快审核并采取行动。",
+                "gotIt": "知道了"
+            }
+        }
+    }
+}
