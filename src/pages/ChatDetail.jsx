@@ -237,14 +237,20 @@ const ChatDetail = () => {
         // unless we know otherwise.
         // Actually, the toggle should reflect the TRUE state.
         // Let's assume the user starts with 'pending' (false).
-        const [isApproved, setIsApproved] = useState(false);
+        // Initialize state from the populated relatedId object
+        const [isApproved, setIsApproved] = useState(msg.relatedId?.status === 'approved');
         const [loading, setLoading] = useState(false);
 
         const handleToggle = async () => {
+            if (!msg.relatedId) return;
+
             setLoading(true);
             const newStatus = isApproved ? 'rejected' : 'approved';
+            // Use _id if populated, otherwise use relatedId directly if it's a string
+            const requestId = msg.relatedId._id || msg.relatedId;
+
             try {
-                await updateAlbumAccessRequest(msg.relatedId, newStatus, token);
+                await updateAlbumAccessRequest(requestId, newStatus, token);
                 setIsApproved(!isApproved);
             } catch (error) {
                 console.error('Error updating access request:', error);
