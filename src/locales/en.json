@@ -51,12 +51,15 @@
         "sentImage": "Sent an image",
         "requestAlbumAccess": "Request album access",
         "allowAccess": "Allow access",
-        "waitingForApproval": "Waiting for owner's approval...",
+        "waitingForApproval": "Waiting for approval...",
         "approved": "Approved",
         "rejected": "Rejected",
         "accessRequestText": "Request access to private album",
-        "accessApproved": "Album access approved",
-        "accessRejected": "Album access rejected"
+        "accessApproved": "Album access request approved",
+        "accessRejected": "Album access request rejected",
+        "reportUser": "Report User",
+        "blockUser": "Block User",
+        "unblockUser": "Unblock User"
     },
     "report": {
         "title": "Report User",
@@ -236,8 +239,8 @@
                     ]
                 },
                 "sub5": {
-                    "title": "1.5 Impersonation and Use of Others’ Photos",
-                    "text1": "Do not use someone else’s photos",
+                    "title": "1.5 Impersonation and Use of Others' Photos",
+                    "text1": "Do not use someone else's photos",
                     "text2": "Do not impersonate real people",
                     "text3": "AI-generated realistic images without permission are not allowed"
                 },
@@ -291,7 +294,7 @@
             "searching": "Searching:",
             "noPosts": "No posts yet. Be the first to share!",
             "pendingApproval": "Pending Approval",
-            "pendingDesc": "Posts with images must be approved by an admin before visible to others",
+            "pendingDesc": "Posts with images must be approved by Admin before being shown to other users",
             "likes": "Likes",
             "like": "Like",
             "comment": "Comment",
@@ -314,29 +317,29 @@
             },
             "report": {
                 "title": "Report Post",
-                "selectReason": "Please choose a reason to report this post",
+                "selectReason": "Please select a reason for reporting this post",
                 "reasons": {
                     "spam": "Spam",
-                    "inappropriate": "Inappropriate Content",
+                    "inappropriate": "Inappropriate content",
                     "harassment": "Harassment",
                     "impersonation": "Impersonation",
-                    "fraud": "Fraud"
+                    "fraud": "Fraud/Scam"
                 },
                 "additionalInfo": "Additional details (optional)",
                 "additionalInfoPlaceholder": "Describe the issue...",
                 "cancel": "Cancel",
-                "submit": "Submit"
+                "submit": "Submit Report"
             },
             "reportSuccess": {
                 "title": "Report Submitted",
-                "message": "Thank you for letting us know.<br />Our team will review it as soon as possible.",
+                "message": "Thank you for letting us know<br />Our team will review and take action as soon as possible",
                 "gotIt": "Got it"
             }
-        },
-        "postDetail": {
-            "title": "Post",
-            "notFound": "Post not found",
-            "unknownUser": "Unknown User"
         }
+    },
+    "postDetail": {
+        "title": "Post",
+        "notFound": "Post not found",
+        "unknownUser": "Unknown user"
     }
 }

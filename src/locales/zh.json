@@ -56,7 +56,10 @@
         "rejected": "已拒绝",
         "accessRequestText": "申请访问私密相册",
         "accessApproved": "已批准相册访问请求",
-        "accessRejected": "已拒绝相册访问请求"
+        "accessRejected": "已拒绝相册访问请求",
+        "reportUser": "举报用户",
+        "blockUser": "屏蔽用户",
+        "unblockUser": "取消屏蔽用户"
     },
     "report": {
         "title": "举报用户",
@@ -113,7 +116,7 @@
             "title": "需要年龄验证",
             "content1": "本网站包含成人内容，仅供以下用户使用",
             "content2": "18岁或以上",
-            "content3": "点击“我接受”，即表示你确认已年满18岁并同意浏览成人内容。",
+            "content3": "点击我接受，即表示你确认已年满18岁并同意浏览成人内容。",
             "accept": "我接受",
             "decline": "我拒绝",
             "verifyFirst": "请先验证你的年龄"
@@ -289,54 +292,54 @@
         },
         "feed": {
             "searching": "搜索中：",
-            "noPosts": "暂无动态，快来分享第一条吧！",
-            "pendingApproval": "待审核 (Pending Approval)",
-            "pendingDesc": "包含图片的帖子需经管理员审核后才会显示给其他用户。",
-            "likes": "点赞",
-            "like": "点赞",
+            "noPosts": "暂无动态。快来发布第一条吧！",
+            "pendingApproval": "待审核",
+            "pendingDesc": "包含图片的动态需要管理员审核后才能展示给其他用户",
+            "likes": "赞",
+            "like": "赞",
             "comment": "评论",
             "report": "举报",
             "delete": "删除"
         },
         "comments": {
             "noComments": "暂无评论",
-            "placeholder": "写下你的评论..."
+            "placeholder": "写评论..."
         },
         "modals": {
             "likes": {
-                "title": "点赞列表"
+                "title": "赞"
             },
             "delete": {
-                "title": "删除帖子？",
-                "message": "你确定要删除这条帖子吗？此操作无法撤销。",
+                "title": "删除动态？",
+                "message": "确定要删除这条动态吗？此操作无法撤销。",
                 "cancel": "取消",
                 "confirm": "删除"
             },
             "report": {
-                "title": "举报帖子",
+                "title": "举报动态",
                 "selectReason": "请选择举报原因",
                 "reasons": {
                     "spam": "垃圾信息",
                     "inappropriate": "不当内容",
                     "harassment": "骚扰",
                     "impersonation": "冒充他人",
-                    "fraud": "欺诈/骗局"
+                    "fraud": "欺诈/诈骗"
                 },
                 "additionalInfo": "更多详情（可选）",
-                "additionalInfoPlaceholder": "请详细描述问题...",
+                "additionalInfoPlaceholder": "请描述具体问题...",
                 "cancel": "取消",
                 "submit": "提交举报"
             },
             "reportSuccess": {
                 "title": "举报已提交",
-                "message": "感谢你的反馈。<br />我们的团队将尽快审核并采取行动。",
+                "message": "感谢你的反馈<br />我们的团队将尽快审核并采取行动",
                 "gotIt": "知道了"
             }
-        },
-        "postDetail": {
-            "title": "帖子",
-            "notFound": "未找到帖子",
-            "unknownUser": "未知用户"
         }
+    },
+    "postDetail": {
+        "title": "动态",
+        "notFound": "动态不存在",
+        "unknownUser": "未知用户"
     }
 }

@@ -390,7 +390,7 @@ const ChatDetail = () => {
                                 }}
                             >
                                 <span className="material-icons" style={{ fontSize: '18px' }}>flag</span>
-                                Report User
+                                {t('chat.reportUser')}
                             </button>
                             <button
                                 onClick={isBlocked ? handleUnblock : handleBlock}
@@ -409,7 +409,7 @@ const ChatDetail = () => {
                                 }}
                             >
                                 <span className="material-icons" style={{ fontSize: '18px' }}>{isBlocked ? 'check_circle' : 'block'}</span>
-                                {isBlocked ? 'Unblock User' : 'Block User'}
+                                {isBlocked ? t('chat.unblockUser') : t('chat.blockUser')}
                             </button>
                         </div>
                     )}
@@ -471,7 +471,7 @@ const ChatDetail = () => {
                 <div className="input-wrapper">
                     <input
                         type="text"
-                        placeholder="พิมพ์ข้อความ..."
+                        placeholder={t('chat.typeMessage')}
                         value={inputText}
                         onChange={handleInputChange}
                         onKeyPress={handleKeyPress}
@@ -489,29 +489,29 @@ const ChatDetail = () => {
                     <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(0, 0, 0, 0.8)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000 }} onClick={() => setShowReportModal(false)}>
                         <div style={{ backgroundColor: '#1a1a1a', borderRadius: '15px', padding: '30px', maxWidth: '500px', width: '90%', maxHeight: '80vh', overflow: 'auto' }} onClick={(e) => e.stopPropagation()}>
                             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
-                                <h3 style={{ margin: 0, fontSize: '20px' }}>รายงานผู้ใช้</h3>
+                                <h3 style={{ margin: 0, fontSize: '20px' }}>{t('report.title')}</h3>
                                 <button onClick={() => setShowReportModal(false)} style={{ background: 'none', border: 'none', color: 'white', cursor: 'pointer' }}>
                                     <span className="material-icons">close</span>
                                 </button>
                             </div>
-                            <p style={{ color: '#888', marginBottom: '20px', fontSize: '14px' }}>กรุณาเลือกเหตุผลที่คุณต้องการรายงานผู้ใช้นี้</p>
+                            <p style={{ color: '#888', marginBottom: '20px', fontSize: '14px' }}>{t('report.selectReason')}</p>
                             <div style={{ marginBottom: '20px' }}>
-                                {['spam', 'อนาจาร', 'กล่าวร้ายผู้อื่น', 'แอบอ้าง', 'หลอกลวง', 'โปรไฟล์ปลอม', 'การล่วงละเมิด'].map((reason) => (
+                                {['spam', 'inappropriate', 'harassment', 'impersonation', 'fraud', 'fakeProfile', 'violation'].map((reason) => (
                                     <div key={reason} onClick={() => setReportReason(reason)} style={{ padding: '15px', marginBottom: '10px', borderRadius: '10px', border: `2px solid ${reportReason === reason ? '#a607d6' : '#333'}`, backgroundColor: reportReason === reason ? 'rgba(166, 7, 214, 0.1)' : 'transparent', cursor: 'pointer', transition: 'all 0.2s', display: 'flex', alignItems: 'center', gap: '10px' }}>
                                         <div style={{ width: '20px', height: '20px', borderRadius: '50%', border: `2px solid ${reportReason === reason ? '#a607d6' : '#666'}`, backgroundColor: reportReason === reason ? '#a607d6' : 'transparent', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                                             {reportReason === reason && (<span className="material-icons" style={{ fontSize: '14px', color: 'white' }}>check</span>)}
                                         </div>
-                                        <span>{reason}</span>
+                                        <span>{t(`report.reasons.${reason}`)}</span>
                                     </div>
                                 ))}
                             </div>
                             <div style={{ marginBottom: '20px' }}>
-                                <label style={{ display: 'block', marginBottom: '8px', fontSize: '14px', color: '#888' }}>รายละเอียดเพิ่มเติม (ถ้ามี)</label>
-                                <textarea value={reportAdditionalInfo} onChange={(e) => setReportAdditionalInfo(e.target.value)} placeholder="อธิบายเพิ่มเติมเกี่ยวกับปัญหา..." style={{ width: '100%', minHeight: '80px', padding: '10px', borderRadius: '8px', border: '1px solid #333', backgroundColor: '#2a2a2a', color: 'white', resize: 'vertical', fontFamily: 'inherit' }} />
+                                <label style={{ display: 'block', marginBottom: '8px', fontSize: '14px', color: '#888' }}>{t('report.additionalInfo')}</label>
+                                <textarea value={reportAdditionalInfo} onChange={(e) => setReportAdditionalInfo(e.target.value)} placeholder={t('report.additionalInfoPlaceholder')} style={{ width: '100%', minHeight: '80px', padding: '10px', borderRadius: '8px', border: '1px solid #333', backgroundColor: '#2a2a2a', color: 'white', resize: 'vertical', fontFamily: 'inherit' }} />
                             </div>
                             <div style={{ display: 'flex', gap: '10px', justifyContent: 'flex-end' }}>
-                                <button onClick={() => setShowReportModal(false)} style={{ padding: '12px 24px', borderRadius: '8px', border: '1px solid #333', backgroundColor: 'transparent', color: 'white', cursor: 'pointer', fontWeight: '500' }}>ยกเลิก</button>
-                                <button onClick={confirmReport} disabled={!reportReason} style={{ padding: '12px 24px', borderRadius: '8px', border: 'none', backgroundColor: reportReason ? '#ff4444' : '#555', color: 'white', cursor: reportReason ? 'pointer' : 'not-allowed', fontWeight: '500' }}>ส่งรายงาน</button>
+                                <button onClick={() => setShowReportModal(false)} style={{ padding: '12px 24px', borderRadius: '8px', border: '1px solid #333', backgroundColor: 'transparent', color: 'white', cursor: 'pointer', fontWeight: '500' }}>{t('common.cancel')}</button>
+                                <button onClick={confirmReport} disabled={!reportReason} style={{ padding: '12px 24px', borderRadius: '8px', border: 'none', backgroundColor: reportReason ? '#ff4444' : '#555', color: 'white', cursor: reportReason ? 'pointer' : 'not-allowed', fontWeight: '500' }}>{t('report.submit')}</button>
                             </div>
                         </div>
                     </div>
@@ -526,9 +526,9 @@ const ChatDetail = () => {
                             <div style={{ width: '80px', height: '80px', borderRadius: '50%', backgroundColor: 'rgba(76, 175, 80, 0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 20px', animation: 'scaleIn 0.4s ease-out' }}>
                                 <span className="material-icons" style={{ fontSize: '48px', color: '#4CAF50' }}>check_circle</span>
                             </div>
-                            <h3 style={{ margin: '0 0 12px 0', fontSize: '24px', fontWeight: '600' }}>ส่งรายงานสำเร็จ</h3>
-                            <p style={{ color: '#888', marginBottom: '30px', fontSize: '15px', lineHeight: '1.6' }}>ขอบคุณที่แจ้งให้เราทราบ<br />ทีมงานจะตรวจสอบและดำเนินการโดยเร็วที่สุด</p>
-                            <button onClick={() => setShowReportSuccessModal(false)} style={{ width: '100%', padding: '14px 24px', borderRadius: '12px', border: 'none', backgroundColor: '#a607d6', color: 'white', cursor: 'pointer', fontWeight: '600', fontSize: '16px', transition: 'all 0.2s', boxShadow: '0 4px 12px rgba(166, 7, 214, 0.3)' }}>เข้าใจแล้ว</button>
+                            <h3 style={{ margin: '0 0 12px 0', fontSize: '24px', fontWeight: '600' }}>{t('report.successTitle')}</h3>
+                            <p style={{ color: '#888', marginBottom: '30px', fontSize: '15px', lineHeight: '1.6' }} dangerouslySetInnerHTML={{ __html: t('report.successMessage') }}></p>
+                            <button onClick={() => setShowReportSuccessModal(false)} style={{ width: '100%', padding: '14px 24px', borderRadius: '12px', border: 'none', backgroundColor: '#a607d6', color: 'white', cursor: 'pointer', fontWeight: '600', fontSize: '16px', transition: 'all 0.2s', boxShadow: '0 4px 12px rgba(166, 7, 214, 0.3)' }}>{t('report.gotIt')}</button>
                         </div>
                     </div>
                 )
