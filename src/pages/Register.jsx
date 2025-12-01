@@ -30,7 +30,11 @@ const Register = () => {
     };
 
     const handleChange = (e) => {
-        setFormData({ ...formData, [e.target.name]: e.target.value });
+        const val = e.target.value;
+        // Allow only ASCII characters (English, numbers, symbols)
+        if (/^[\x00-\x7F]*$/.test(val)) {
+            setFormData({ ...formData, [e.target.name]: val });
+        }
     };
 
     React.useEffect(() => {
@@ -344,6 +348,7 @@ const Register = () => {
                             type="text"
                             name="username"
                             placeholder={t('auth.username') + " (min 8 chars)"}
+                            value={formData.username}
                             onChange={handleChange}
                             style={inputStyle}
                             minLength="8"
@@ -355,6 +360,7 @@ const Register = () => {
                             type="password"
                             name="password"
                             placeholder={t('auth.password') + " (min 8 chars)"}
+                            value={formData.password}
                             onChange={handleChange}
                             style={inputStyle}
                             minLength="8"
@@ -366,6 +372,7 @@ const Register = () => {
                             type="email"
                             name="email"
                             placeholder={t('auth.email')}
+                            value={formData.email}
                             onChange={handleChange}
                             style={inputStyle}
                             required
@@ -376,6 +383,7 @@ const Register = () => {
                             type="text"
                             name="name"
                             placeholder={t('auth.name') + " (min 3 chars)"}
+                            value={formData.name}
                             onChange={handleChange}
                             style={inputStyle}
                             minLength="3"

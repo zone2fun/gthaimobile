@@ -56,7 +56,7 @@ const AdminLayout = () => {
             allowedRoles: ['admin', 'editor'],
             count: counts.moderation
         },
-        { path: '/reports', icon: 'flag', label: 'Reports', allowedRoles: ['admin', 'editor'] },
+
         { path: '/announcements', icon: 'campaign', label: 'Announcements', allowedRoles: ['admin', 'editor'] },
         {
             path: '/approve-photo',

@@ -120,7 +120,12 @@ const Login = () => {
                             type="text"
                             placeholder={t('auth.usernameOrEmail')}
                             value={username}
-                            onChange={(e) => setUsername(e.target.value)}
+                            onChange={(e) => {
+                                const val = e.target.value;
+                                if (/^[\x00-\x7F]*$/.test(val)) {
+                                    setUsername(val);
+                                }
+                            }}
                             style={{ width: '100%', padding: '10px', borderRadius: '5px', border: 'none' }}
                         />
                     </div>
@@ -129,7 +134,12 @@ const Login = () => {
                             type="password"
                             placeholder={t('auth.password')}
                             value={password}
-                            onChange={(e) => setPassword(e.target.value)}
+                            onChange={(e) => {
+                                const val = e.target.value;
+                                if (/^[\x00-\x7F]*$/.test(val)) {
+                                    setPassword(val);
+                                }
+                            }}
                             style={{ width: '100%', padding: '10px', borderRadius: '5px', border: 'none' }}
                         />
                         <div style={{ textAlign: 'right', marginTop: '8px' }}>

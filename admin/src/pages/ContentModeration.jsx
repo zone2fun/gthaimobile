@@ -78,6 +78,8 @@ const ContentModeration = () => {
 
     // View report details
     const handleViewReport = (report) => {
+        console.log('Viewing report:', report);
+        console.log('Reported user verified status:', report.reportedUser?.isVerified);
         setSelectedReport(report);
         setShowModal(true);
     };
@@ -242,12 +244,30 @@ const ContentModeration = () => {
                                     </div>
                                 ) : selectedReport.reportType === 'user' && selectedReport.reportedUser ? (
                                     <div style={styles.userPreview}>
-                                        <img
-                                            src={selectedReport.reportedUser?.img || '/default-avatar.png'}
-                                            alt="Reported user"
-                                            style={styles.userImage}
-                                            onError={(e) => e.target.src = '/default-avatar.png'}
-                                        />
+                                        <div style={{ position: 'relative', display: 'inline-block' }}>
+                                            <img
+                                                src={selectedReport.reportedUser?.img || '/default-avatar.png'}
+                                                alt="Reported user"
+                                                style={styles.userImage}
+                                                onError={(e) => e.target.src = '/default-avatar.png'}
+                                            />
+                                            {selectedReport.reportedUser?.isVerified && (
+                                                <span className="material-icons" style={{
+                                                    position: 'absolute',
+                                                    bottom: '10px',
+                                                    right: '5px',
+                                                    backgroundColor: '#2ecc71',
+                                                    color: '#fff',
+                                                    borderRadius: '50%',
+                                                    padding: '2px',
+                                                    fontSize: '20px',
+                                                    border: '3px solid #1a1a1a',
+                                                    boxShadow: '0 2px 4px rgba(0,0,0,0.2)'
+                                                }} title="Verified User">
+                                                    verified
+                                                </span>
+                                            )}
+                                        </div>
                                         <h4 style={{ marginBottom: '15px' }}>{selectedReport.reportedUser?.name || 'Unknown User'}</h4>
 
                                         <div style={{ textAlign: 'left', marginTop: '20px' }}>
