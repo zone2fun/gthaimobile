@@ -124,7 +124,7 @@ const Chat = () => {
                                                 const text = conv.lastMessage.text || '';
 
                                                 if (conv.lastMessage.image) return t('chat.sentImage');
-                                                if (msgType === 'request_album_access') return t('chat.accessRequestText');
+                                                if (msgType === 'request_album_access' || text === 'ACCESS_REQUEST') return t('chat.accessRequestText');
 
                                                 // Check type OR text content for album access response
                                                 if (msgType === 'album_access_response' ||

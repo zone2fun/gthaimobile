@@ -265,12 +265,12 @@ const ChatDetail = () => {
             <div style={{ padding: '10px', textAlign: 'center', minWidth: '200px' }}>
                 <div style={{ marginBottom: '15px', fontWeight: 'bold', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>
                     <span className="material-icons" style={{ color: '#a607d6' }}>lock</span>
-                    <span>ขอสิทธิ์เข้าถึงอัลบั้ม</span>
+                    <span>{t('chat.requestAlbumAccess')}</span>
                 </div>
 
                 {!isMe ? (
                     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', backgroundColor: 'rgba(255,255,255,0.05)', padding: '10px 15px', borderRadius: '12px' }}>
-                        <span style={{ fontSize: '14px', color: '#ccc' }}>อนุญาตให้เข้าถึง</span>
+                        <span style={{ fontSize: '14px', color: '#ccc' }}>{t('chat.allowAccess')}</span>
                         <div
                             onClick={!loading ? handleToggle : undefined}
                             style={{
@@ -298,7 +298,7 @@ const ChatDetail = () => {
                     </div>
                 ) : (
                     <div style={{ fontSize: '12px', color: '#888', fontStyle: 'italic' }}>
-                        รอการอนุมัติจากเจ้าของ...
+                        {t('chat.waitingForApproval')}
                     </div>
                 )}
             </div>
@@ -309,7 +309,7 @@ const ChatDetail = () => {
         const msgType = msg.type;
         const text = String(msg.text || '');
 
-        if (msgType === 'request_album_access') {
+        if (msgType === 'request_album_access' || text === 'ACCESS_REQUEST') {
             return <AccessRequestMessage msg={msg} />;
         }
 
