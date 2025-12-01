@@ -228,11 +228,12 @@ const Header = () => {
         return () => clearTimeout(debounceTimer);
     }, [searchQuery, isSpecialPage]);
 
-    // Close dropdown when clicking outside
+    // Close menu when clicking outside
+    const menuRef = useRef(null);
     useEffect(() => {
         const handleClickOutside = (event) => {
-            if (searchRef.current && !searchRef.current.contains(event.target)) {
-                setShowDropdown(false);
+            if (menuRef.current && !menuRef.current.contains(event.target)) {
+                setShowMenu(false);
             }
         };
 
@@ -550,66 +551,68 @@ const Header = () => {
                     </div>
                 )}
 
-                <button className="menu-btn" onClick={() => setShowMenu(!showMenu)} style={{ padding: 0, background: 'none', border: 'none' }}>
-                    {user ? (
-                        <VerifiedAvatar
-                            src={user.img}
-                            alt={user.name}
-                            isVerified={user.isVerified}
-                            size={40}
-                            className="avatar"
-                            style={{
-                                border: '2px solid #a607d6',
-                                cursor: 'pointer'
-                            }}
-                        />
-                    ) : (
-                        <span className="material-icons">menu</span>
-                    )}
-                </button>
-                {showMenu && (
-                    <div className="dropdown-menu">
+                <div ref={menuRef} style={{ position: 'relative' }}>
+                    <button className="menu-btn" onClick={() => setShowMenu(!showMenu)} style={{ padding: 0, background: 'none', border: 'none' }}>
                         {user ? (
-                            <>
-                                <div style={{ padding: '10px 15px', borderBottom: '1px solid #333', fontSize: '14px', color: '#888' }}>
-                                    {t('auth.signedInAs')} <strong>{user.name}</strong>
-                                </div>
-                                <button className="dropdown-item" onClick={() => { setShowMenu(false); navigate('/safety-policy'); }} style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                                    <span className="material-icons" style={{ fontSize: '20px', color: '#a607d6' }}>security</span>
-                                    {t('profile.safetyPolicy')}
-                                </button>
-                                <button className="dropdown-item" onClick={() => { setShowMenu(false); navigate('/blocked-users'); }} style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                                    <span className="material-icons" style={{ fontSize: '20px', color: '#a607d6' }}>block</span>
-                                    {t('profile.blockedUsers')}
-                                </button>
-                                <div className="mobile-only" style={{ borderTop: '1px solid #333' }}>
-                                    <LanguageSelectorMobile />
-                                </div>
-                                <button className="dropdown-item" onClick={handleLogout} style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                                    <span className="material-icons" style={{ fontSize: '20px', color: '#a607d6' }}>logout</span>
-                                    {t('profile.logout')}
-                                </button>
-                            </>
+                            <VerifiedAvatar
+                                src={user.img}
+                                alt={user.name}
+                                isVerified={user.isVerified}
+                                size={40}
+                                className="avatar"
+                                style={{
+                                    border: '2px solid #a607d6',
+                                    cursor: 'pointer'
+                                }}
+                            />
                         ) : (
-                            <>
-                                <div style={{ padding: '10px 15px', borderBottom: '1px solid #333', fontSize: '14px', color: '#888' }}>
-                                    {t('auth.signedInAs')} <strong>{t('auth.guest')}</strong>
-                                </div>
-                                <button className="dropdown-item" onClick={() => { setShowMenu(false); navigate('/safety-policy'); }} style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                                    <span className="material-icons" style={{ fontSize: '20px', color: '#a607d6' }}>security</span>
-                                    {t('profile.safetyPolicy')}
-                                </button>
-                                <div className="mobile-only" style={{ borderTop: '1px solid #333' }}>
-                                    <LanguageSelectorMobile />
-                                </div>
-                                <button className="dropdown-item" onClick={() => navigate('/login')} style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                                    <span className="material-icons" style={{ fontSize: '20px', color: '#a607d6' }}>login</span>
-                                    {t('profile.login')}
-                                </button>
-                            </>
+                            <span className="material-icons">menu</span>
                         )}
-                    </div>
-                )}
+                    </button>
+                    {showMenu && (
+                        <div className="dropdown-menu">
+                            {user ? (
+                                <>
+                                    <div style={{ padding: '10px 15px', borderBottom: '1px solid #333', fontSize: '14px', color: '#888' }}>
+                                        {t('auth.signedInAs')} <strong>{user.name}</strong>
+                                    </div>
+                                    <button className="dropdown-item" onClick={() => { setShowMenu(false); navigate('/safety-policy'); }} style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                        <span className="material-icons" style={{ fontSize: '20px', color: '#a607d6' }}>security</span>
+                                        {t('profile.safetyPolicy')}
+                                    </button>
+                                    <button className="dropdown-item" onClick={() => { setShowMenu(false); navigate('/blocked-users'); }} style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                        <span className="material-icons" style={{ fontSize: '20px', color: '#a607d6' }}>block</span>
+                                        {t('profile.blockedUsers')}
+                                    </button>
+                                    <div className="mobile-only" style={{ borderTop: '1px solid #333' }}>
+                                        <LanguageSelectorMobile />
+                                    </div>
+                                    <button className="dropdown-item" onClick={handleLogout} style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                        <span className="material-icons" style={{ fontSize: '20px', color: '#a607d6' }}>logout</span>
+                                        {t('profile.logout')}
+                                    </button>
+                                </>
+                            ) : (
+                                <>
+                                    <div style={{ padding: '10px 15px', borderBottom: '1px solid #333', fontSize: '14px', color: '#888' }}>
+                                        {t('auth.signedInAs')} <strong>{t('auth.guest')}</strong>
+                                    </div>
+                                    <button className="dropdown-item" onClick={() => { setShowMenu(false); navigate('/safety-policy'); }} style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                        <span className="material-icons" style={{ fontSize: '20px', color: '#a607d6' }}>security</span>
+                                        {t('profile.safetyPolicy')}
+                                    </button>
+                                    <div className="mobile-only" style={{ borderTop: '1px solid #333' }}>
+                                        <LanguageSelectorMobile />
+                                    </div>
+                                    <button className="dropdown-item" onClick={() => navigate('/login')} style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                        <span className="material-icons" style={{ fontSize: '20px', color: '#a607d6' }}>login</span>
+                                        {t('profile.login')}
+                                    </button>
+                                </>
+                            )}
+                        </div>
+                    )}
+                </div>
             </div >
         </header >
     );
