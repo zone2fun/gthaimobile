@@ -305,7 +305,14 @@ export const createReport = async (postId, userId, reason, additionalInfo, repor
         },
         body: JSON.stringify({ postId, userId, reason, additionalInfo, reportType }),
     });
-    return response.json();
+
+    const data = await response.json();
+
+    if (!response.ok) {
+        throw new Error(data.message || 'Failed to submit report');
+    }
+
+    return data;
 };
 
 // Album Access APIs

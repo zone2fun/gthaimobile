@@ -7,6 +7,7 @@ import { getPosts, createPost, likePost, deletePost, addComment, deleteComment, 
 import SocketContext from '../context/SocketContext';
 import SkeletonPost from '../components/SkeletonPost';
 import VerifiedAvatar from '../components/VerifiedAvatar';
+import { ErrorModal } from '../components/AlertModals';
 
 const Special = () => {
     const { t } = useTranslation();
@@ -28,6 +29,7 @@ const Special = () => {
     const [reportReason, setReportReason] = useState('');
     const [reportAdditionalInfo, setReportAdditionalInfo] = useState('');
     const [showReportSuccessModal, setShowReportSuccessModal] = useState(false);
+    const [errorModal, setErrorModal] = useState({ isOpen: false, title: '', message: '' });
     const { token, user } = useContext(AuthContext);
     const { socket } = useContext(SocketContext);
     const fileInputRef = useRef(null);
@@ -199,8 +201,21 @@ const Special = () => {
             return;
         }
 
+        // Map reason keys to Thai text
+        const reasonMap = {
+            'spam': 'สแปม',
+            'inappropriate': 'เนื้อหาไม่เหมาะสม',
+            'harassment': 'การคุกคาม',
+            'impersonation': 'การแอบอ้าง',
+            'fraud': 'การหลอกลวง/ฉ้อโกง'
+        };
+
+        const thaiReason = reasonMap[reportReason] || reportReason;
+
         try {
-            await createReport(postToReport, null, reportReason, reportAdditionalInfo, 'post', token);
+            console.log('Submitting post report:', { postId: postToReport, reason: thaiReason, additionalInfo: reportAdditionalInfo });
+            const result = await createReport(postToReport, null, thaiReason, reportAdditionalInfo, 'post', token);
+            console.log('Post report submitted successfully:', result);
             setShowReportModal(false);
             setPostToReport(null);
             setReportReason('');
@@ -208,7 +223,11 @@ const Special = () => {
             setShowReportSuccessModal(true);
         } catch (error) {
             console.error('Error reporting post:', error);
-            // Keep modal open to show error
+            setErrorModal({
+                isOpen: true,
+                title: 'Error',
+                message: 'Failed to submit report: ' + error.message
+            });
         }
     };
 
@@ -961,8 +980,17 @@ const Special = () => {
                     </div>
                 </div>
             )}
+
+            {/* Error Modal */}
+            <ErrorModal
+                isOpen={errorModal.isOpen}
+                onClose={() => setErrorModal({ isOpen: false, title: '', message: '' })}
+                title={errorModal.title}
+                message={errorModal.message}
+            />
         </div>
     );
 };
 
 export default Special;
+

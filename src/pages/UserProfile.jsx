@@ -5,6 +5,7 @@ import { getUser, toggleFavorite, blockUser, unblockUser, getMe, createReport, c
 import AuthContext from '../context/AuthContext';
 import SocketContext from '../context/SocketContext';
 import VerifiedAvatar from '../components/VerifiedAvatar';
+import { ErrorModal } from '../components/AlertModals';
 
 const UserProfile = ({ userId }) => {
     const { t } = useTranslation();
@@ -29,6 +30,7 @@ const UserProfile = ({ userId }) => {
     const [showPhotoNotification, setShowPhotoNotification] = useState(false);
     const [photoNotificationData, setPhotoNotificationData] = useState({ type: '', message: '' });
     const [showShareModal, setShowShareModal] = useState(false);
+    const [errorModal, setErrorModal] = useState({ isOpen: false, title: '', message: '' });
 
     useEffect(() => {
         const fetchData = async () => {
@@ -160,23 +162,38 @@ const UserProfile = ({ userId }) => {
 
     const submitReport = async () => {
         if (!reportReason) {
-            alert('Please select a reason');
+            alert(t('report.selectReason'));
             return;
         }
 
+        // Map reason keys to Thai text
+        const reasonMap = {
+            'spam': 'สแปม',
+            'inappropriate': 'เนื้อหาไม่เหมาะสม',
+            'harassment': 'การคุกคาม',
+            'impersonation': 'การแอบอ้าง',
+            'fraud': 'การหลอกลวง',
+            'fakeProfile': 'โปรไฟล์ปลอม',
+            'violation': 'การละเมิดกฎ'
+        };
+
+        const thaiReason = reasonMap[reportReason] || reportReason;
+
         try {
-            await createReport({
-                targetId: user._id || user.id,
-                reason: reportReason,
-                additionalInfo: reportAdditionalInfo
-            }, token);
+            console.log('Submitting user report:', { userId: user._id || user.id, reason: thaiReason, additionalInfo: reportAdditionalInfo });
+            const result = await createReport(null, user._id || user.id, thaiReason, reportAdditionalInfo, 'user', token);
+            console.log('Report submitted successfully:', result);
             setShowReportModal(false);
             setShowReportSuccessModal(true);
             setReportReason('');
             setReportAdditionalInfo('');
         } catch (error) {
             console.error('Error reporting user:', error);
-            alert('Failed to submit report');
+            setErrorModal({
+                isOpen: true,
+                title: t('common.error'),
+                message: error.message || 'Failed to submit report'
+            });
         }
     };
 
@@ -639,11 +656,11 @@ const UserProfile = ({ userId }) => {
                         </div>
 
                         <p style={{ color: '#888', marginBottom: '20px', fontSize: '14px' }}>
-                            Please select a reason for reporting this user.
+                            {t('report.selectReason')}
                         </p>
 
                         <div style={{ marginBottom: '20px' }}>
-                            {['spam', 'inappropriate', 'harassment', 'impersonation', 'scam'].map((reason) => (
+                            {['spam', 'inappropriate', 'harassment', 'impersonation', 'fraud', 'fakeProfile', 'violation'].map((reason) => (
                                 <div
                                     key={reason}
                                     onClick={() => setReportReason(reason)}
@@ -674,19 +691,19 @@ const UserProfile = ({ userId }) => {
                                             <span className="material-icons" style={{ fontSize: '14px', color: 'white' }}>check</span>
                                         )}
                                     </div>
-                                    <span>{reason}</span>
+                                    <span>{t(`report.reasons.${reason}`)}</span>
                                 </div>
                             ))}
                         </div>
 
                         <div style={{ marginBottom: '20px' }}>
                             <label style={{ display: 'block', marginBottom: '8px', fontSize: '14px', color: '#888' }}>
-                                Additional Info (Optional)
+                                {t('report.additionalInfo')}
                             </label>
                             <textarea
                                 value={reportAdditionalInfo}
                                 onChange={(e) => setReportAdditionalInfo(e.target.value)}
-                                placeholder="Describe the issue..."
+                                placeholder={t('report.additionalInfoPlaceholder')}
                                 style={{
                                     width: '100%',
                                     minHeight: '80px',
@@ -729,7 +746,7 @@ const UserProfile = ({ userId }) => {
                                     fontWeight: '500'
                                 }}
                             >
-                                {t('profile.report')}
+                                {t('report.submit')}
                             </button>
                         </div>
                     </div>
@@ -743,8 +760,8 @@ const UserProfile = ({ userId }) => {
                         <div style={{ width: '60px', height: '60px', borderRadius: '50%', backgroundColor: 'rgba(76, 175, 80, 0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 20px' }}>
                             <span className="material-icons" style={{ fontSize: '30px', color: '#4CAF50' }}>check_circle</span>
                         </div>
-                        <h3 style={{ margin: '0 0 10px 0' }}>Report Submitted</h3>
-                        <p style={{ color: '#888', marginBottom: '20px' }}>Thank you for helping keep our community safe. We will review your report shortly.</p>
+                        <h3 style={{ margin: '0 0 10px 0' }}>{t('report.successTitle')}</h3>
+                        <p style={{ color: '#888', marginBottom: '20px' }} dangerouslySetInnerHTML={{ __html: t('report.successMessage') }}></p>
                         <button onClick={() => setShowReportSuccessModal(false)} style={{ padding: '10px 20px', borderRadius: '10px', border: 'none', backgroundColor: '#a607d6', color: 'white', cursor: 'pointer' }}>{t('common.close')}</button>
                     </div>
                 </div>
@@ -855,8 +872,17 @@ const UserProfile = ({ userId }) => {
                     </div>
                 </div>
             )}
+
+            {/* Error Modal */}
+            <ErrorModal
+                isOpen={errorModal.isOpen}
+                onClose={() => setErrorModal({ isOpen: false, title: '', message: '' })}
+                title={errorModal.title}
+                message={errorModal.message}
+            />
         </div>
     );
 };
 
 export default UserProfile;
+

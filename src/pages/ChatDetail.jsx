@@ -4,6 +4,7 @@ import { getUser, getMessages, sendMessage, deleteMessage, markAsRead, updateAlb
 import AuthContext from '../context/AuthContext';
 import SocketContext from '../context/SocketContext';
 import { useTranslation } from 'react-i18next';
+import { ErrorModal } from '../components/AlertModals';
 
 const ChatDetail = () => {
     const { t } = useTranslation();
@@ -26,6 +27,7 @@ const ChatDetail = () => {
     const [reportReason, setReportReason] = useState('');
     const [reportAdditionalInfo, setReportAdditionalInfo] = useState('');
     const [showReportSuccessModal, setShowReportSuccessModal] = useState(false);
+    const [errorModal, setErrorModal] = useState({ isOpen: false, title: '', message: '' });
 
     const scrollToBottom = () => {
         messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -208,14 +210,34 @@ const ChatDetail = () => {
     const confirmReport = async () => {
         if (!reportReason) return;
 
+        // Map reason keys to Thai text
+        const reasonMap = {
+            'spam': 'สแปม',
+            'inappropriate': 'เนื้อหาไม่เหมาะสม',
+            'harassment': 'การคุกคาม',
+            'impersonation': 'การแอบอ้าง',
+            'fraud': 'การหลอกลวง',
+            'fakeProfile': 'โปรไฟล์ปลอม',
+            'violation': 'การละเมิดกฎ'
+        };
+
+        const thaiReason = reasonMap[reportReason] || reportReason;
+
         try {
-            await createReport(null, id, reportReason, reportAdditionalInfo, 'user', token);
+            console.log('Submitting user report:', { userId: id, reason: thaiReason, additionalInfo: reportAdditionalInfo });
+            const result = await createReport(null, id, thaiReason, reportAdditionalInfo, 'user', token);
+            console.log('Report submitted successfully:', result);
             setShowReportModal(false);
             setReportReason('');
             setReportAdditionalInfo('');
             setShowReportSuccessModal(true);
         } catch (error) {
             console.error('Error reporting user:', error);
+            setErrorModal({
+                isOpen: true,
+                title: t('common.error'),
+                message: error.message || 'Failed to submit report'
+            });
         }
     };
 
@@ -533,8 +555,17 @@ const ChatDetail = () => {
                     </div>
                 )
             }
-        </div >
+
+            {/* Error Modal */}
+            <ErrorModal
+                isOpen={errorModal.isOpen}
+                onClose={() => setErrorModal({ isOpen: false, title: '', message: '' })}
+                title={errorModal.title}
+                message={errorModal.message}
+            />
+        </div>
     );
 };
 
 export default ChatDetail;
+

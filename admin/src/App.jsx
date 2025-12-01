@@ -5,7 +5,6 @@ import AdminLogin from './pages/AdminLogin';
 import Dashboard from './pages/Dashboard';
 import UserManagement from './pages/UserManagement';
 import ContentModeration from './pages/ContentModeration';
-import Reports from './pages/Reports';
 import AnnouncementManager from './pages/AnnouncementManager';
 import Settings from './pages/Settings';
 import ApprovePhoto from './pages/ApprovePhoto';
@@ -45,8 +44,6 @@ function App() {
                     <Route index element={<Dashboard />} />
                     <Route path="users" element={<UserManagement />} />
                     <Route path="moderation" element={<ContentModeration />} />
-                    <Route path="reports" element={<Reports />} />
-                    <Route path="report" element={<Navigate to="/reports" replace />} />
                     <Route path="announcements" element={<AnnouncementManager />} />
                     <Route path="approve-photo" element={<ApprovePhoto />} />
                     <Route path="approve-posts" element={<ApprovePosts />} />
