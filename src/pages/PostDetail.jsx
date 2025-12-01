@@ -99,7 +99,7 @@ const PostDetail = () => {
                 <button onClick={() => navigate(-1)} style={{ background: 'none', border: 'none', color: 'white', cursor: 'pointer', display: 'flex', alignItems: 'center' }}>
                     <span className="material-icons">arrow_back</span>
                 </button>
-                <h2 style={{ fontSize: '18px', margin: 0 }}>{t('special.postDetail.title')}</h2>
+                <h2 style={{ fontSize: '18px', margin: 0 }}>{t('postDetail.title')}</h2>
             </div>
 
             <div className="post-card">
