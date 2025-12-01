@@ -302,6 +302,11 @@
                 "message": "Thank you for letting us know.<br />Our team will review it as soon as possible.",
                 "gotIt": "Got it"
             }
+        },
+        "postDetail": {
+            "title": "Post",
+            "notFound": "Post not found",
+            "unknownUser": "Unknown User"
         }
     }
 }

@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useContext } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useParams, useNavigate } from 'react-router-dom';
 import AuthContext from '../context/AuthContext';
 import { getPost, likePost, addComment, deleteComment, deletePost } from '../services/api';
@@ -6,6 +7,7 @@ import SkeletonPost from '../components/SkeletonPost';
 import VerifiedAvatar from '../components/VerifiedAvatar';
 
 const PostDetail = () => {
+    const { t } = useTranslation();
     const { id } = useParams();
     const navigate = useNavigate();
     const { token, user } = useContext(AuthContext);
@@ -89,7 +91,7 @@ const PostDetail = () => {
     };
 
     if (loading) return <div className="app-content"><SkeletonPost /></div>;
-    if (!post) return <div className="app-content" style={{ textAlign: 'center', marginTop: '50px', color: 'white' }}>Post not found</div>;
+    if (!post) return <div className="app-content" style={{ textAlign: 'center', marginTop: '50px', color: 'white' }}>{t('special.postDetail.notFound')}</div>;
 
     return (
         <div className="app-content" style={{ paddingBottom: '80px' }}>
@@ -97,7 +99,7 @@ const PostDetail = () => {
                 <button onClick={() => navigate(-1)} style={{ background: 'none', border: 'none', color: 'white', cursor: 'pointer', display: 'flex', alignItems: 'center' }}>
                     <span className="material-icons">arrow_back</span>
                 </button>
-                <h2 style={{ fontSize: '18px', margin: 0 }}>Post</h2>
+                <h2 style={{ fontSize: '18px', margin: 0 }}>{t('special.postDetail.title')}</h2>
             </div>
 
             <div className="post-card">
@@ -159,7 +161,7 @@ const PostDetail = () => {
                                 </div>
                             </div>
                         )}
-                        <span style={{ fontSize: '14px', color: '#888' }}>{post.likes.length} Likes</span>
+                        <span style={{ fontSize: '14px', color: '#888' }}>{post.likes.length} {t('special.feed.likes')}</span>
                     </div>
                 </div>
 
@@ -169,11 +171,11 @@ const PostDetail = () => {
                         onClick={handleLike}
                     >
                         <span className="material-icons">{post.likes.some(like => like._id === user?._id) ? 'thumb_up' : 'thumb_up_off_alt'}</span>
-                        Like
+                        {t('special.feed.like')}
                     </button>
                     <button className="post-action-btn">
                         <span className="material-icons">chat_bubble_outline</span>
-                        Comment ({post.comments?.length || 0})
+                        {t('special.feed.comment')} ({post.comments?.length || 0})
                     </button>
                 </div>
 
@@ -191,7 +193,7 @@ const PostDetail = () => {
                                 <div style={{ flex: 1, display: 'flex', alignItems: 'flex-start', gap: '8px' }}>
                                     <div className="comment-content" style={{ backgroundColor: '#333', padding: '8px 12px', borderRadius: '15px', flex: 1 }}>
                                         <div className="comment-author" style={{ fontWeight: '600', fontSize: '13px', marginBottom: '2px' }}>
-                                            {comment.user?.name || 'Unknown User'}
+                                            {comment.user?.name || t('special.postDetail.unknownUser')}
                                         </div>
                                         <div className="comment-text" style={{ fontSize: '14px' }}>{comment.text}</div>
                                     </div>
@@ -219,7 +221,7 @@ const PostDetail = () => {
                             </div>
                         ))}
                         {(!post.comments || post.comments.length === 0) && (
-                            <div style={{ color: '#888', fontSize: '13px', textAlign: 'center', padding: '10px' }}>No comments yet.</div>
+                            <div style={{ color: '#888', fontSize: '13px', textAlign: 'center', padding: '10px' }}>{t('special.comments.noComments')}</div>
                         )}
                     </div>
                     <div className="add-comment-box" style={{ display: 'flex', alignItems: 'center', position: 'sticky', bottom: '0', backgroundColor: '#1a1a1a', padding: '10px 0' }}>
@@ -227,7 +229,7 @@ const PostDetail = () => {
                         <div style={{ flex: 1, position: 'relative', display: 'flex', alignItems: 'center', backgroundColor: '#333', borderRadius: '20px', padding: '5px 10px' }}>
                             <input
                                 type="text"
-                                placeholder="Write a comment..."
+                                placeholder={t('special.comments.placeholder')}
                                 value={commentText}
                                 onChange={(e) => setCommentText(e.target.value)}
                                 onKeyPress={(e) => e.key === 'Enter' && handleCommentSubmit()}
@@ -273,9 +275,9 @@ const PostDetail = () => {
                         }}
                         onClick={(e) => e.stopPropagation()}
                     >
-                        <h3 style={{ margin: '0 0 10px 0', fontSize: '20px' }}>Delete Post?</h3>
+                        <h3 style={{ margin: '0 0 10px 0', fontSize: '20px' }}>{t('special.modals.delete.title')}</h3>
                         <p style={{ color: '#888', marginBottom: '25px', fontSize: '14px' }}>
-                            Are you sure you want to delete this post?
+                            {t('special.modals.delete.message')}
                         </p>
                         <div style={{ display: 'flex', gap: '10px', justifyContent: 'center' }}>
                             <button
@@ -290,7 +292,7 @@ const PostDetail = () => {
                                     cursor: 'pointer'
                                 }}
                             >
-                                Cancel
+                                {t('common.cancel')}
                             </button>
                             <button
                                 onClick={handleDeletePost}
@@ -304,7 +306,7 @@ const PostDetail = () => {
                                     cursor: 'pointer'
                                 }}
                             >
-                                Delete
+                                {t('common.delete')}
                             </button>
                         </div>
                     </div>

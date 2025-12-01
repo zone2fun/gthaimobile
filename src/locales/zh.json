@@ -302,6 +302,11 @@
                 "message": "感谢你的反馈。<br />我们的团队将尽快审核并采取行动。",
                 "gotIt": "知道了"
             }
+        },
+        "postDetail": {
+            "title": "帖子",
+            "notFound": "未找到帖子",
+            "unknownUser": "未知用户"
         }
     }
 }
