@@ -1,18 +1,18 @@
 {
     "nav": {
         "home": "Home",
-        "favourites": "Favorites",
+        "favourites": "Favourites",
         "special": "Community",
         "chat": "Chat",
         "profile": "Profile"
     },
     "home": {
-        "freshFaces": "New Members",
-        "favourites": "Favorites",
-        "nearby": "Nearby",
+        "freshFaces": "Fresh Faces",
+        "favourites": "Favourites",
+        "nearby": "Nearby Users",
         "online": "Online",
-        "verify": "Verified",
-        "noFavourites": "No favorites yet"
+        "verify": "Verify Identity",
+        "noFavourites": "No favourites yet"
     },
     "profile": {
         "editProfile": "Edit Profile",
@@ -22,7 +22,7 @@
         "register": "Register",
         "blockedUsers": "Blocked Users",
         "safetyPolicy": "Safety Policy",
-        "wait": "Wait",
+        "wait": "Waiting",
         "offline": "Offline",
         "age": "Age",
         "height": "Height",
@@ -30,16 +30,16 @@
         "lookingFor": "Looking for:",
         "aboutMe": "About Me",
         "share": "Share",
-        "favorited": "Favorited",
-        "favorite": "Favorite",
+        "favorited": "Added to favourites",
+        "favorite": "Add to favourites",
         "unblock": "Unblock",
         "block": "Block",
         "report": "Report",
         "photos": "Photos",
-        "pendingPhotos": "Pending Photos",
+        "pendingPhotos": "Pending Approval Photos",
         "privateAlbum": "Private Album",
         "noPrivatePhotos": "No photos in private album",
-        "requestAccessDesc": "Request access to view photos",
+        "requestAccessDesc": "Request permission to view photos",
         "requestSent": "Request sent",
         "requestAccess": "Request Access"
     },
@@ -50,20 +50,20 @@
         "you": "You",
         "sentImage": "Sent an image",
         "requestAlbumAccess": "Request Album Access",
-        "allowAccess": "Allow Access",
-        "waitingForApproval": "Waiting for the owner's approval...",
+        "allowAccess": "Allow",
+        "waitingForApproval": "Waiting for approval...",
         "approved": "Approved",
         "rejected": "Rejected",
         "accessRequestText": "Request access to private album",
-        "accessApproved": "Album access approved",
-        "accessRejected": "Album access rejected",
+        "accessApproved": "Album access request approved",
+        "accessRejected": "Album access request rejected",
         "reportUser": "Report User",
         "blockUser": "Block User",
         "unblockUser": "Unblock User"
     },
     "report": {
         "title": "Report User",
-        "selectReason": "Please select a reason for reporting this user",
+        "selectReason": "Select a reason for reporting this user",
         "reasons": {
             "spam": "Spam",
             "inappropriate": "Inappropriate Content",
@@ -71,14 +71,14 @@
             "impersonation": "Impersonation",
             "fraud": "Fraud",
             "fakeProfile": "Fake Profile",
-            "violation": "Policy Violation"
+            "violation": "Violation"
         },
-        "additionalInfo": "Additional Details (optional)",
-        "additionalInfoPlaceholder": "Describe more about the issue...",
+        "additionalInfo": "Additional Information (optional)",
+        "additionalInfoPlaceholder": "Please describe the issue...",
         "submit": "Submit Report",
-        "successTitle": "Report Submitted",
-        "successMessage": "Thank you for informing us. Our team will review and take action as soon as possible.",
-        "gotIt": "Got it"
+        "successTitle": "Report Sent",
+        "successMessage": "Thank you for your report. Our team will review it as soon as possible.",
+        "gotIt": "OK"
     },
     "common": {
         "loading": "Loading...",
@@ -86,11 +86,22 @@
         "cancel": "Cancel",
         "delete": "Delete",
         "edit": "Edit",
-        "confirm": "Confirm",
-        "ok": "OK",
+        "send": "Send",
+        "search": "Search",
+        "searchHashtag": "Search hashtags",
+        "searchAboutMe": "Search About Me",
+        "notifications": "Notifications",
+        "noNotifications": "No notifications yet",
         "close": "Close",
+        "confirm": "Confirm",
+        "noData": "No data"
+    },
+    "auth": {
+        "username": "Username",
+        "password": "Password",
+        "email": "Email",
         "name": "Name",
-        "signedInAs": "Signed in as",
+        "signedInAs": "Signed in as:",
         "guest": "Guest",
         "forgotPassword": "Forgot password?",
         "dontHaveAccount": "Don't have an account?",
@@ -103,19 +114,19 @@
         "continueWithGoogle": "Continue with Google",
         "ageVerification": {
             "title": "Age Verification Required",
-            "content1": "This website contains adult content and is suitable for users aged",
-            "content2": "18 and over",
-            "content3": "By clicking \"Accept\", you confirm you are at least 18 years old and agree to view adult content",
+            "content1": "This website contains adult content and is intended only for users",
+            "content2": "aged 18 and above.",
+            "content3": "By clicking Accept, you confirm that you are at least 18 years old and consent to viewing adult content.",
             "accept": "Accept",
             "decline": "Decline",
             "verifyFirst": "Please verify your age first"
         },
-        "agreePolicy": "By creating an account, you agree to the",
+        "agreePolicy": "Creating an account means you agree to all site policies.",
         "location": {
-            "acquiring": "Detecting location...",
-            "found": "Location detected:",
-            "failed": "Failed to detect location, using default",
-            "notSupported": "Location not supported"
+            "acquiring": "Acquiring location...",
+            "found": "Location found:",
+            "failed": "Unable to get location. Default value will be used.",
+            "notSupported": "Location is not supported on this device"
         },
         "errors": {
             "loginFailed": "Login failed",
@@ -136,7 +147,7 @@
     },
     "editProfile": {
         "title": "Edit Profile",
-        "coverImage": "Cover Photo",
+        "coverImage": "Cover Image",
         "displayName": "Display Name",
         "age": "Age (18+)",
         "country": "Country",
@@ -145,15 +156,15 @@
         "weight": "Weight (kg)",
         "lookingFor": "Looking For",
         "aboutMe": "About Me",
-        "aboutMePlaceholder": "Write a short introduction (max 200 characters)",
+        "aboutMePlaceholder": "Write about yourself (max 200 characters)",
         "gallery": "Gallery (max 5 photos)",
         "privateAlbum": "Private Album (max 3 photos)",
-        "privateAlbumHint": "Only people you approve can view your private album",
+        "privateAlbumHint": "Private album photos are only visible to users you approve",
         "saveChanges": "Save Changes",
         "saving": "Saving...",
         "privacySecurity": "Privacy & Security",
         "publicProfile": "Public Profile",
-        "publicProfileDesc": "Allow non-members to view your profile",
+        "publicProfileDesc": "Visible to non-members",
         "changePassword": "Change Password",
         "deleteAccount": "Delete Account",
         "currentPassword": "Current Password",
@@ -164,107 +175,107 @@
         "delete": "Delete",
         "deleteAccountConfirm": "Are you sure you want to delete your account? This action cannot be undone.",
         "verificationPhoto": "Verification Photo",
-        "verificationDesc": "Take a straight-face selfie to verify your identity. Our team will review your photo.",
+        "verificationDesc": "Take a clear photo of your face for identity verification. Our team will review it.",
         "capturePhoto": "Capture Photo",
         "retake": "Retake",
         "submit": "Submit",
         "submitting": "Submitting...",
         "verified": "Verified ✓",
-        "pendingVerification": "Pending review",
-        "verificationRejected": "Verification rejected",
+        "pendingVerification": "Pending Review",
+        "verificationRejected": "Verification Rejected",
         "verifyAccount": "Verify Account",
         "errors": {
-            "age": "You must be at least 18 years old to use this service",
-            "galleryMax": "You can upload up to 5 photos",
-            "privateMax": "You can upload up to 3 private photos",
-            "passwordMismatch": "Password mismatch",
-            "passwordLength": "Password must contain at least 8 characters",
-            "passwordSuccess": "Password updated successfully",
-            "passwordFail": "Failed to change password",
+            "age": "You must be at least 18 years old",
+            "galleryMax": "Maximum 5 gallery images allowed",
+            "privateMax": "Maximum 3 private album images allowed",
+            "passwordMismatch": "New passwords do not match",
+            "passwordLength": "Password must be at least 8 characters",
+            "passwordSuccess": "Password changed successfully",
+            "passwordFail": "Password change failed",
             "errorOccurred": "An error occurred",
             "deleteFail": "Failed to delete account",
             "cameraDenied": "Camera access denied",
-            "cameraPermission": "Unable to access camera, please check permissions",
-            "noPhoto": "No photo",
+            "cameraPermission": "Unable to access camera. Please check permissions.",
+            "noPhoto": "No photo available",
             "takePhotoFirst": "Please take a photo first",
             "requestSubmitted": "Request submitted!",
-            "verificationSuccess": "Verification request submitted. Please wait for admin approval.",
+            "verificationSuccess": "Verification request sent. Please wait for approval.",
             "submissionFailed": "Submission failed",
-            "verificationFail": "Identity verification failed",
+            "verificationFail": "Verification request failed",
             "success": "Success!",
             "error": "Error",
-            "mustBe18": "You must be 18 or older"
+            "mustBe18": "You must be at least 18 years old"
         }
     },
     "safety": {
-        "title": "Safety & Community Policy",
-        "intro": "To keep GThaiLover safe and welcoming for everyone, all users must follow the rules below.<br />Using our platform means you accept all terms in this policy.",
+        "title": "Community & Safety Policy",
+        "intro": "To keep GThaiLover a safe and enjoyable place for everyone, all users must follow these rules.<br />By using this platform, you agree to all policies.",
         "sections": {
             "1": {
-                "title": "1. Prohibited Content and Behavior",
+                "title": "1. Prohibited Content & Behavior",
                 "sub1": {
                     "title": "1.1 Sexual or Explicit Content",
-                    "text1": "Pornographic or explicit sexual content is strictly prohibited",
-                    "text2": "Do not share, request, or discuss explicit sexual acts"
+                    "text1": "Posting pornographic, explicit, or obscene content is prohibited.",
+                    "text2": "Do not share, request, or discuss sexual activities explicitly."
                 },
                 "sub2": {
                     "title": "1.2 Drugs and Illegal Substances",
-                    "text1": "Do not promote, sell, or request drugs or any illegal substances"
+                    "text1": "Do not post or encourage the buying, selling, or use of illegal drugs."
                 },
                 "sub3": {
-                    "title": "1.3 Minors (Under 18)",
-                    "text1": "No profiles, photos, or content involving anyone under the age of 18",
-                    "text2": "Do not pretend to be under 18"
+                    "title": "1.3 Strictly No Minors (Under 18)",
+                    "text1": "No images, profiles, or content involving minors.",
+                    "text2": "Do not claim to be under 18."
                 },
                 "sub4": {
                     "title": "1.4 Sensitive Personal Information",
-                    "intro": "Do not share or request:",
+                    "intro": "Do not share or request the following:",
                     "list": [
                         "Credit card information",
                         "Bank account details",
-                        "Passwords or login information",
-                        "ID card numbers",
-                        "Any personal or sensitive information"
+                        "Passwords or login credentials",
+                        "Identification numbers",
+                        "Other sensitive personal data"
                     ]
                 },
                 "sub5": {
-                    "title": "1.5 Impersonation and Use of Someone Else’s Photos",
-                    "text1": "Do not use someone else's photos",
-                    "text2": "Do not impersonate another person or pretend to be a real individual",
-                    "text3": "AI-generated photos that resemble real people without permission are not allowed"
+                    "title": "1.5 Impersonation & Using Others’ Photos",
+                    "text1": "Do not use someone else's photo.",
+                    "text2": "Do not impersonate or claim to be another real person.",
+                    "text3": "Do not use AI-generated images of real people without permission."
                 },
                 "sub6": {
                     "title": "1.6 Financial Scams / Investment / Gambling",
-                    "text1": "Do not promote investment schemes, financial assistance, or money transfers",
-                    "text2": "No gambling or betting activities",
-                    "text3": "Do not solicit investments, donations, or money"
+                    "text1": "No promotions of investments, money transfers, or financial requests.",
+                    "text2": "No gambling or inviting others to gamble.",
+                    "text3": "Do not request money, investments, or donations."
                 },
                 "sub7": {
                     "title": "1.7 Illegal Activities",
-                    "text1": "Any illegal activities under applicable law are strictly prohibited"
+                    "text1": "All illegal activities are strictly prohibited."
                 }
             },
             "2": {
-                "title": "2. Warning and Ban Policy",
+                "title": "2. Warning & Ban System",
                 "intro": "To maintain community safety:",
                 "sub1": {
                     "title": "2.1 General Violations",
-                    "text": "Users who receive <1>3 warnings</1> and fail to correct the issue will be automatically banned"
+                    "text": "If a user receives <1>3 warnings</1> and continues violating rules, the account will be automatically banned."
                 },
                 "sub2": {
-                    "title": "2.2 Invalid / Prohibited Photos",
-                    "text": "Users who receive <1>10 photo warnings</1> (feed or profile) will be automatically banned"
+                    "title": "2.2 Inappropriate / Forbidden Photos",
+                    "text": "If a user receives <1>10 image warnings</1> (from feed or profile), the account will be automatically banned."
                 }
             },
             "3": {
                 "title": "3. Legal Responsibility",
-                "text1": "GThaiLover is not involved in or supportive of any illegal user actions",
-                "text2": "Any illegal behavior conducted through the platform is solely the user's responsibility",
-                "text3": "By using GThaiLover, users acknowledge and accept this responsibility"
+                "text1": "GThaiLover does not support or engage in any illegal activities by users.",
+                "text2": "Any illegal action is solely the user's responsibility.",
+                "text3": "Using this website means you accept this responsibility."
             },
             "4": {
-                "title": "4. Agreement",
-                "text": "Creating an account or using GThaiLover means you agree to follow all the above rules. Violations may result in warnings, content removal, or permanent account suspension."
+                "title": "4. Consent",
+                "text": "By signing up or using GThaiLover, you agree to all rules. Violations may result in warnings, content removal, or permanent ban."
             }
         }
     },
@@ -281,12 +292,12 @@
         },
         "feed": {
             "searching": "Searching:",
-            "noPosts": "No posts yet. Be the first to share something!",
+            "noPosts": "No posts yet. Be the first to share!",
             "pendingApproval": "Pending Approval",
-            "pendingDesc": "Posts with images must be approved by Admin before being shown to others",
+            "pendingDesc": "Posts with images must be approved before being visible to others",
             "likes": "Likes",
             "like": "Like",
-            "comment": "Comment",
+            "comment": "Comments",
             "report": "Report",
             "delete": "Delete"
         },
@@ -296,7 +307,7 @@
         },
         "modals": {
             "likes": {
-                "title": "Likes"
+                "title": "Users who liked this post"
             },
             "delete": {
                 "title": "Delete Post?",
@@ -306,23 +317,23 @@
             },
             "report": {
                 "title": "Report Post",
-                "selectReason": "Please select the reason you want to report this post",
+                "selectReason": "Select a reason for reporting this post",
                 "reasons": {
                     "spam": "Spam",
-                    "inappropriate": "Inappropriate Content",
+                    "inappropriate": "Inappropriate",
                     "harassment": "Harassment",
                     "impersonation": "Impersonation",
-                    "fraud": "Fraud/Scam"
+                    "fraud": "Fraud"
                 },
-                "additionalInfo": "Additional Details (optional)",
-                "additionalInfoPlaceholder": "Describe more about the issue...",
+                "additionalInfo": "Additional Information (optional)",
+                "additionalInfoPlaceholder": "Please describe the issue...",
                 "cancel": "Cancel",
                 "submit": "Submit Report"
             },
             "reportSuccess": {
                 "title": "Report Submitted",
-                "message": "Thank you for informing us.<br />Our team will review and take action shortly.",
-                "gotIt": "Got it"
+                "message": "Thank you for your report.<br />Our team will review it shortly.",
+                "gotIt": "OK"
             }
         }
     },
