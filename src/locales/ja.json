@@ -103,7 +103,37 @@
         "forgotPassword": "パスワードをお忘れですか？",
         "dontHaveAccount": "アカウントをお持ちでないですか？",
         "alreadyHaveAccount": "すでにアカウントをお持ちですか？",
-        "loginWithGoogle": "Googleでログイン"
+        "loginWithGoogle": "Googleでログイン",
+        "loginTitle": "ログイン",
+        "registerTitle": "登録",
+        "usernameOrEmail": "ユーザー名またはメールアドレス",
+        "or": "または",
+        "continueWithGoogle": "Googleで続行",
+        "ageVerification": {
+            "title": "年齢確認が必要です",
+            "content1": "このウェブサイトにはアダルトコンテンツが含まれており、以下のユーザーを対象としています",
+            "content2": "18歳以上",
+            "content3": "「同意する」をクリックすることで、あなたは18歳以上であることを確認し、アダルトコンテンツを閲覧することに同意したことになります。",
+            "accept": "同意する",
+            "decline": "拒否する",
+            "verifyFirst": "先に年齢を確認してください"
+        },
+        "agreePolicy": "アカウントを作成することで、あなたは以下に同意したことになります",
+        "location": {
+            "acquiring": "位置情報を取得中...",
+            "found": "位置情報が見つかりました:",
+            "failed": "位置情報の取得に失敗しました。デフォルトを使用します。",
+            "notSupported": "位置情報がサポートされていません。"
+        },
+        "errors": {
+            "loginFailed": "ログインに失敗しました",
+            "googleLoginFailed": "Googleログインに失敗しました",
+            "usernameMin": "ユーザー名は8文字以上である必要があります",
+            "passwordMin": "パスワードは8文字以上である必要があります",
+            "nameMin": "表示名は3文字以上である必要があります",
+            "invalidEmail": "有効なメールアドレスを入力してください",
+            "registrationFailed": "登録に失敗しました"
+        }
     },
     "language": {
         "select": "言語を選択",

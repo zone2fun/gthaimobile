@@ -1,6 +1,8 @@
 import React, { useState, useContext } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import AuthContext from '../context/AuthContext';
+import { useTranslation } from 'react-i18next';
+import LanguageSelector from '../components/LanguageSelector';
 
 import { useGoogleLogin } from '@react-oauth/google';
 
@@ -9,6 +11,7 @@ const Login = () => {
     const [password, setPassword] = useState('');
     const [error, setError] = useState('');
     const { login, googleLogin } = useContext(AuthContext);
+    const { t } = useTranslation();
     const navigate = useNavigate();
 
     const handleSubmit = async (e) => {
@@ -18,7 +21,7 @@ const Login = () => {
         if (result.success) {
             navigate('/');
         } else {
-            setError(result.message || 'Login failed');
+            setError(result.message || t('auth.errors.loginFailed'));
         }
     };
 
@@ -52,13 +55,13 @@ const Login = () => {
                 const result = await googleLogin(accessToken, lat, lng); // Send to backend with location
 
                 if (result.success) navigate('/');
-                else setError(result.message || 'Google login failed');
+                else setError(result.message || t('auth.errors.googleLoginFailed'));
 
             } catch (err) {
-                setError('Google login failed');
+                setError(t('auth.errors.googleLoginFailed'));
             }
         },
-        onError: () => setError('Google login failed')
+        onError: () => setError(t('auth.errors.googleLoginFailed'))
     });
 
 
@@ -109,13 +112,13 @@ const Login = () => {
                 width: '100%',
                 maxWidth: '400px'
             }}>
-                <h1 style={{ marginBottom: '20px', color: 'white' }}><span style={{ color: '#a607d6' }}>GthaiLover</span> Login</h1>
+                <h1 style={{ marginBottom: '20px', color: 'white' }}><span style={{ color: '#a607d6' }}>GthaiLover</span> {t('auth.loginTitle')}</h1>
                 {error && <p style={{ color: 'red', marginBottom: '10px' }}>{error}</p>}
                 <form onSubmit={handleSubmit} style={{ width: '100%' }}>
                     <div style={{ marginBottom: '15px' }}>
                         <input
                             type="text"
-                            placeholder="Username or Email"
+                            placeholder={t('auth.usernameOrEmail')}
                             value={username}
                             onChange={(e) => setUsername(e.target.value)}
                             style={{ width: '100%', padding: '10px', borderRadius: '5px', border: 'none' }}
@@ -124,25 +127,25 @@ const Login = () => {
                     <div style={{ marginBottom: '15px' }}>
                         <input
                             type="password"
-                            placeholder="Password"
+                            placeholder={t('auth.password')}
                             value={password}
                             onChange={(e) => setPassword(e.target.value)}
                             style={{ width: '100%', padding: '10px', borderRadius: '5px', border: 'none' }}
                         />
                         <div style={{ textAlign: 'right', marginTop: '8px' }}>
                             <Link to="/forgot-password" style={{ color: '#a607d6', fontSize: '14px', textDecoration: 'none' }}>
-                                Forgot Password?
+                                {t('auth.forgotPassword')}
                             </Link>
                         </div>
                     </div>
                     <button type="submit" style={{ width: '100%', padding: '10px', borderRadius: '5px', border: 'none', backgroundColor: '#a607d6', color: 'white', fontWeight: 'bold', cursor: 'pointer' }}>
-                        Login
+                        {t('auth.loginTitle')}
                     </button>
                 </form>
 
                 <div style={{ width: '100%', margin: '20px 0', display: 'flex', alignItems: 'center', gap: '10px' }}>
                     <div style={{ flex: 1, height: '1px', backgroundColor: '#444' }}></div>
-                    <span style={{ color: '#888', fontSize: '14px' }}>OR</span>
+                    <span style={{ color: '#888', fontSize: '14px' }}>{t('auth.or')}</span>
                     <div style={{ flex: 1, height: '1px', backgroundColor: '#444' }}></div>
                 </div>
 
@@ -169,12 +172,20 @@ const Login = () => {
                         <path fill="#FBBC05" d="M3.964 10.707c-.18-.54-.282-1.117-.282-1.707s.102-1.167.282-1.707V4.961H.957C.347 6.175 0 7.55 0 9s.348 2.825.957 4.039l3.007-2.332z" />
                         <path fill="#EA4335" d="M9 3.58c1.321 0 2.508.454 3.44 1.345l2.582-2.58C13.463.891 11.426 0 9 0 5.482 0 2.438 2.017.957 4.961L3.964 7.293C4.672 5.163 6.656 3.58 9 3.58z" />
                     </svg>
-                    Continue with Google
+                    {t('auth.continueWithGoogle')}
                 </button>
 
                 <p style={{ marginTop: '20px', color: '#a0a0a0' }}>
-                    Don't have an account? <Link to="/register" style={{ color: '#a607d6' }}>Register</Link>
+                    {t('auth.dontHaveAccount')} <Link to="/register" style={{ color: '#a607d6' }}>{t('auth.registerTitle')}</Link>
                 </p>
+            </div>
+
+            <div style={{
+                position: 'absolute',
+                bottom: '20px',
+                zIndex: 10
+            }}>
+                <LanguageSelector direction="up" />
             </div>
         </div>
     );

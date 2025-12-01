@@ -1,6 +1,8 @@
 import React, { useState, useContext } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import AuthContext from '../context/AuthContext';
+import { useTranslation } from 'react-i18next';
+import LanguageSelector from '../components/LanguageSelector';
 
 const Register = () => {
     const [formData, setFormData] = useState({
@@ -14,6 +16,7 @@ const Register = () => {
     const [showAgeModal, setShowAgeModal] = useState(true);
     const [ageVerified, setAgeVerified] = useState(false);
     const { register } = useContext(AuthContext);
+    const { t } = useTranslation();
     const navigate = useNavigate();
 
     const handleAgeAccept = () => {
@@ -39,16 +42,16 @@ const Register = () => {
                         lat: position.coords.latitude,
                         lng: position.coords.longitude
                     }));
-                    setLocationStatus(`Location found: ${position.coords.latitude.toFixed(4)}, ${position.coords.longitude.toFixed(4)}`);
+                    setLocationStatus(`${t('auth.location.found')} ${position.coords.latitude.toFixed(4)}, ${position.coords.longitude.toFixed(4)}`);
                 },
                 (error) => {
                     console.error("Error getting location:", error);
-                    setLocationStatus('Location failed. Using random default.');
+                    setLocationStatus(t('auth.location.failed'));
                 },
                 { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
             );
         } else {
-            setLocationStatus('Geolocation not supported.');
+            setLocationStatus(t('auth.location.notSupported'));
         }
     }, []);
 
@@ -58,19 +61,19 @@ const Register = () => {
 
         // Validation
         if (formData.username.length < 8) {
-            setError('Username must be at least 8 characters');
+            setError(t('auth.errors.usernameMin'));
             return;
         }
         if (formData.password.length < 8) {
-            setError('Password must be at least 8 characters');
+            setError(t('auth.errors.passwordMin'));
             return;
         }
         if (formData.name.length < 3) {
-            setError('Display name must be at least 3 characters');
+            setError(t('auth.errors.nameMin'));
             return;
         }
         if (!formData.email || !formData.email.includes('@')) {
-            setError('Please enter a valid email');
+            setError(t('auth.errors.invalidEmail'));
             return;
         }
 
@@ -78,7 +81,7 @@ const Register = () => {
         if (result.success) {
             navigate('/');
         } else {
-            setError(result.message || 'Registration failed');
+            setError(result.message || t('auth.errors.registrationFailed'));
         }
     };
 
@@ -190,7 +193,7 @@ const Register = () => {
                             WebkitTextFillColor: 'transparent',
                             backgroundClip: 'text'
                         }}>
-                            Age Verification Required
+                            {t('auth.ageVerification.title')}
                         </h2>
 
                         <p style={{
@@ -200,7 +203,7 @@ const Register = () => {
                             fontSize: '16px',
                             lineHeight: '1.6'
                         }}>
-                            This website contains adult content and is intended for users who are
+                            {t('auth.ageVerification.content1')}
                         </p>
 
                         <p style={{
@@ -211,7 +214,7 @@ const Register = () => {
                             fontWeight: 'bold',
                             textShadow: '0 0 20px rgba(166, 7, 214, 0.5)'
                         }}>
-                            18 years or older
+                            {t('auth.ageVerification.content2')}
                         </p>
 
                         <p style={{
@@ -221,7 +224,7 @@ const Register = () => {
                             fontSize: '14px',
                             lineHeight: '1.5'
                         }}>
-                            By clicking "I Accept", you confirm that you are at least 18 years old and agree to view adult content.
+                            {t('auth.ageVerification.content3')}
                         </p>
 
                         <div style={{
@@ -255,7 +258,7 @@ const Register = () => {
                                     e.target.style.boxShadow = '0 5px 20px rgba(166, 7, 214, 0.4)';
                                 }}
                             >
-                                ✓ I Accept
+                                ✓ {t('auth.ageVerification.accept')}
                             </button>
 
                             <button
@@ -284,7 +287,7 @@ const Register = () => {
                                     e.target.style.transform = 'translateY(0)';
                                 }}
                             >
-                                ✗ I Decline
+                                ✗ {t('auth.ageVerification.decline')}
                             </button>
                         </div>
                     </div>
@@ -333,14 +336,14 @@ const Register = () => {
                 width: '100%',
                 maxWidth: '400px'
             }}>
-                <h1 style={{ marginBottom: '20px', color: 'white' }}>Register</h1>
+                <h1 style={{ marginBottom: '20px', color: 'white' }}>{t('auth.registerTitle')}</h1>
                 {error && <p style={{ color: 'red', marginBottom: '10px' }}>{error}</p>}
                 <form onSubmit={handleSubmit} style={{ width: '100%' }}>
                     <div style={{ marginBottom: '10px' }}>
                         <input
                             type="text"
                             name="username"
-                            placeholder="Username (min 8 characters)"
+                            placeholder={t('auth.username') + " (min 8 chars)"}
                             onChange={handleChange}
                             style={inputStyle}
                             minLength="8"
@@ -351,7 +354,7 @@ const Register = () => {
                         <input
                             type="password"
                             name="password"
-                            placeholder="Password (min 8 characters)"
+                            placeholder={t('auth.password') + " (min 8 chars)"}
                             onChange={handleChange}
                             style={inputStyle}
                             minLength="8"
@@ -362,7 +365,7 @@ const Register = () => {
                         <input
                             type="email"
                             name="email"
-                            placeholder="Email"
+                            placeholder={t('auth.email')}
                             onChange={handleChange}
                             style={inputStyle}
                             required
@@ -372,7 +375,7 @@ const Register = () => {
                         <input
                             type="text"
                             name="name"
-                            placeholder="Display Name (min 3 characters)"
+                            placeholder={t('auth.name') + " (min 3 chars)"}
                             onChange={handleChange}
                             style={inputStyle}
                             minLength="3"
@@ -398,15 +401,23 @@ const Register = () => {
                             transition: 'all 0.3s ease'
                         }}
                     >
-                        {ageVerified ? 'Register' : 'Please verify your age first'}
+                        {ageVerified ? t('auth.registerTitle') : t('auth.ageVerification.verifyFirst')}
                     </button>
                     <p style={{ marginTop: '15px', color: '#a0a0a0', fontSize: '12px', textAlign: 'center' }}>
-                        By creating an account, you agree to our <Link to="/safety-policy" target="_blank" style={{ color: '#a607d6', textDecoration: 'underline' }}>Safety Policy</Link>
+                        {t('auth.agreePolicy')} <Link to="/safety-policy" target="_blank" style={{ color: '#a607d6', textDecoration: 'underline' }}>{t('profile.safetyPolicy')}</Link>
                     </p>
                 </form>
                 <p style={{ marginTop: '20px', color: '#a0a0a0' }}>
-                    Already have an account? <Link to="/login" style={{ color: '#a607d6' }}>Login</Link>
+                    {t('auth.alreadyHaveAccount')} <Link to="/login" style={{ color: '#a607d6' }}>{t('auth.loginTitle')}</Link>
                 </p>
+            </div>
+
+            <div style={{
+                position: 'absolute',
+                bottom: '20px',
+                zIndex: 10
+            }}>
+                <LanguageSelector direction="up" />
             </div>
         </div>
     );

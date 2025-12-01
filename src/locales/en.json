@@ -103,7 +103,37 @@
         "forgotPassword": "Forgot password?",
         "dontHaveAccount": "Don't have an account?",
         "alreadyHaveAccount": "Already have an account?",
-        "loginWithGoogle": "Login with Google"
+        "loginWithGoogle": "Login with Google",
+        "loginTitle": "Login",
+        "registerTitle": "Register",
+        "usernameOrEmail": "Username or Email",
+        "or": "OR",
+        "continueWithGoogle": "Continue with Google",
+        "ageVerification": {
+            "title": "Age Verification Required",
+            "content1": "This website contains adult content and is intended for users who are",
+            "content2": "18 years or older",
+            "content3": "By clicking \"I Accept\", you confirm that you are at least 18 years old and agree to view adult content.",
+            "accept": "I Accept",
+            "decline": "I Decline",
+            "verifyFirst": "Please verify your age first"
+        },
+        "agreePolicy": "By creating an account, you agree to our",
+        "location": {
+            "acquiring": "Acquiring location...",
+            "found": "Location found:",
+            "failed": "Location failed. Using random default.",
+            "notSupported": "Geolocation not supported."
+        },
+        "errors": {
+            "loginFailed": "Login failed",
+            "googleLoginFailed": "Google login failed",
+            "usernameMin": "Username must be at least 8 characters",
+            "passwordMin": "Password must be at least 8 characters",
+            "nameMin": "Display name must be at least 3 characters",
+            "invalidEmail": "Please enter a valid email",
+            "registrationFailed": "Registration failed"
+        }
     },
     "language": {
         "select": "Select Language",

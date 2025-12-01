@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 
-const LanguageSelector = () => {
+const LanguageSelector = ({ direction = 'down' }) => {
     const { i18n, t } = useTranslation();
     const [showDropdown, setShowDropdown] = useState(false);
     const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
@@ -52,7 +52,7 @@ const LanguageSelector = () => {
                 <span style={{ fontSize: '18px' }}>{currentLanguage.flag}</span>
                 {!isMobile && <span>{currentLanguage.name}</span>}
                 <span className="material-icons" style={{ fontSize: '18px' }}>
-                    {showDropdown ? 'expand_less' : 'expand_more'}
+                    {showDropdown ? (direction === 'up' ? 'expand_more' : 'expand_less') : (direction === 'up' ? 'expand_less' : 'expand_more')}
                 </span>
             </button>
 
@@ -71,9 +71,11 @@ const LanguageSelector = () => {
                     />
                     <div style={{
                         position: 'absolute',
-                        top: '100%',
+                        top: direction === 'down' ? '100%' : 'auto',
+                        bottom: direction === 'up' ? '100%' : 'auto',
+                        marginTop: direction === 'down' ? '8px' : 0,
+                        marginBottom: direction === 'up' ? '8px' : 0,
                         right: 0,
-                        marginTop: '8px',
                         backgroundColor: '#1a1a1a',
                         border: '1px solid #333',
                         borderRadius: '8px',
