@@ -81,7 +81,7 @@ const EditProfile = () => {
         };
 
         fetchUserProfile();
-    }, [user, token]);
+    }, [user?._id, token]);
 
     // Refresh user data to get latest verification status
     const refreshUserData = async () => {
