@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { StyleSheet, View, Text, TextInput, TouchableOpacity, Alert, Image, ImageBackground, ActivityIndicator } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter, Link, Stack } from 'expo-router';
@@ -7,6 +7,10 @@ import { Colors } from '@/constants/theme';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useAuth } from '@/contexts/AuthContext';
 import { login as apiLogin } from '@/services/api';
+import * as WebBrowser from 'expo-web-browser';
+import * as Google from 'expo-auth-session/providers/google';
+
+WebBrowser.maybeCompleteAuthSession();
 
 export default function LoginScreen() {
     const router = useRouter();
@@ -14,6 +18,64 @@ export default function LoginScreen() {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [loading, setLoading] = useState(false);
+
+    // Google Auth Request
+    const [request, response, promptAsync] = Google.useAuthRequest({
+        clientId: '851927648086-bmmmbb21cpaqr9k20dm4dd3umr86mlgq.apps.googleusercontent.com',
+        // In a real production app with native builds, you should get Android/iOS Client IDs from Google Console
+        // and add them here: androidClientId, iosClientId. 
+        // For Expo Go or Web, clientId works.
+    });
+
+    useEffect(() => {
+        if (response?.type === 'success') {
+            const { authentication } = response;
+            if (authentication?.accessToken) {
+                handleGoogleSignInSuccess(authentication.accessToken);
+            }
+        } else if (response?.type === 'error') {
+            Alert.alert('Google Login Failed', 'An error occurred during sign in.');
+        }
+    }, [response]);
+
+    const handleGoogleSignInSuccess = async (accessToken: string) => {
+        setLoading(true);
+        try {
+            // Get location
+            let lat = null, lng = null;
+            try {
+                const Location = await import('expo-location');
+                const { status } = await Location.requestForegroundPermissionsAsync();
+                if (status === 'granted') {
+                    const location = await Location.getCurrentPositionAsync({});
+                    lat = location.coords.latitude;
+                    lng = location.coords.longitude;
+                }
+            } catch (e) { console.warn('Location error:', e); }
+
+            // Call backend directly
+            const API_URL = 'https://gthai-backend.onrender.com/api';
+            const backendRes = await fetch(`${API_URL}/auth/google`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ token: accessToken, lat, lng }),
+            });
+
+            if (!backendRes.ok) {
+                const errorData = await backendRes.json();
+                throw new Error(errorData.message || 'Google login failed');
+            }
+
+            const data = await backendRes.json();
+            await login(data.user || data, data.token);
+            router.replace('/(tabs)');
+        } catch (error: any) {
+            console.error('Google login failed:', error);
+            Alert.alert('Google Login Failed', error.message || 'Failed to sign in with Google');
+        } finally {
+            setLoading(false);
+        }
+    };
 
     const handleLogin = async () => {
         if (!email || !password) {
@@ -35,9 +97,6 @@ export default function LoginScreen() {
         }
     };
 
-    const handleGoogleLogin = () => {
-        Alert.alert('Google Login', 'Coming soon!');
-    };
 
     return (
         <SafeAreaView style={styles.container}>
@@ -94,7 +153,7 @@ export default function LoginScreen() {
                         <View style={styles.dividerLine} />
                     </View>
 
-                    <TouchableOpacity style={styles.googleButton} onPress={handleGoogleLogin}>
+                    <TouchableOpacity style={styles.googleButton} onPress={() => promptAsync()}>
                         <Image
                             source={require('@/assets/images/google_logo.jpg')}
                             style={styles.googleLogo}

@@ -1,13 +1,16 @@
 import React, { useState, useEffect } from 'react';
 import { StyleSheet, View, Text, ScrollView, TextInput, TouchableOpacity, ActivityIndicator, Alert, Modal, FlatList, TouchableWithoutFeedback } from 'react-native';
+import Animated, { useSharedValue, useAnimatedStyle, withRepeat, withTiming, Easing } from 'react-native-reanimated';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Image } from 'expo-image';
 import { MaterialIcons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { Stack } from 'expo-router';
 import { LinearGradient } from 'expo-linear-gradient';
+import * as ImagePicker from 'expo-image-picker';
 import { Colors } from '@/constants/theme';
-import { getUser } from '@/services/api';
+import { getUser, updateUserProfile } from '@/services/api';
+import { useAuth } from '@/contexts/AuthContext';
 
 const COUNTRIES = [
     "Thailand", "United States", "United Kingdom", "Japan", "China", "Korea",
@@ -18,14 +21,37 @@ const COUNTRIES = [
 
 const LOOKING_FOR_OPTIONS = ["Friends", "Chat", "Dating", "Lover"];
 
+const UploadingIndicator = () => {
+    const rotation = useSharedValue(0);
+
+    useEffect(() => {
+        rotation.value = withRepeat(
+            withTiming(360, { duration: 1000, easing: Easing.linear }),
+            -1,
+            false
+        );
+    }, []);
+
+    const animatedStyle = useAnimatedStyle(() => ({
+        transform: [{ rotate: `${rotation.value}deg` }],
+    }));
+
+    return (
+        <Animated.View style={animatedStyle}>
+            <MaterialIcons name="cloud-upload" size={60} color={Colors.dark.tint} />
+        </Animated.View>
+    );
+};
+
+
+
 export default function EditProfileScreen() {
+    const { user, token, updateUser } = useAuth();
     const router = useRouter();
     const [loading, setLoading] = useState(true);
     const [saving, setSaving] = useState(false);
+    const [isUploadingImage, setIsUploadingImage] = useState(false);
     const [showCountryPicker, setShowCountryPicker] = useState(false);
-
-    // Mock current user ID
-    const currentUserId = '1';
 
     // Form state
     const [formData, setFormData] = useState({
@@ -46,12 +72,16 @@ export default function EditProfileScreen() {
     const [isVerified, setIsVerified] = useState(false);
 
     useEffect(() => {
-        fetchProfile();
-    }, []);
+        if (user) {
+            fetchProfile();
+        }
+    }, [user]);
 
     const fetchProfile = async () => {
         try {
-            const userData = await getUser(currentUserId);
+            if (!user?._id) return;
+
+            const userData = await getUser(user._id);
             setFormData({
                 name: userData.name || '',
                 age: userData.age?.toString() || '',
@@ -61,7 +91,7 @@ export default function EditProfileScreen() {
                 lookingFor: Array.isArray(userData.lookingFor) ? userData.lookingFor.join(',') : (userData.lookingFor || ''),
                 bio: userData.bio || '',
             });
-            setCoverPreview(userData.cover || 'https://images.unsplash.com/photo-1579546929518-9e396f3cc809?w=800');
+            setCoverPreview(userData.cover || '');
             setAvatarPreview(userData.img || '');
             setGalleryImages(userData.gallery || []);
             setPrivateAlbum(userData.privateAlbum || []);
@@ -74,16 +104,151 @@ export default function EditProfileScreen() {
         }
     };
 
+    const handlePickImage = async (type: 'avatar' | 'cover' | 'gallery' | 'private') => {
+        try {
+            const result = await ImagePicker.launchImageLibraryAsync({
+                mediaTypes: ImagePicker.MediaTypeOptions.Images,
+                allowsEditing: type === 'avatar' || type === 'cover',
+                aspect: type === 'avatar' ? [1, 1] : type === 'cover' ? [16, 9] : undefined,
+                quality: 0.8,
+            });
+
+            if (!result.canceled) {
+                const uri = result.assets[0].uri;
+
+                if (type === 'avatar') {
+                    setAvatarPreview(uri);
+                } else if (type === 'cover') {
+                    setCoverPreview(uri);
+                } else if (type === 'gallery') {
+                    setGalleryImages([...galleryImages, uri]);
+                } else if (type === 'private') {
+                    setPrivateAlbum([...privateAlbum, uri]);
+                }
+            }
+        } catch (error) {
+            console.error('Error picking image:', error);
+            Alert.alert('Error', 'Failed to pick image');
+        }
+    };
+
     const handleSave = async () => {
+        if (!token) return;
+
+        // Show uploading modal whenever saving
+        setIsUploadingImage(true);
         setSaving(true);
 
-        // Simulate API call
-        setTimeout(() => {
-            setSaving(false);
-            Alert.alert('Success', 'Profile updated successfully!', [
+        // Check if there are any images to upload
+        const hasNewImages =
+            (avatarPreview && !avatarPreview.startsWith('http')) ||
+            (coverPreview && !coverPreview.startsWith('http')) ||
+            galleryImages.some(img => img && !img.startsWith('http')) ||
+            privateAlbum.some(img => img && !img.startsWith('http'));
+
+
+        try {
+            const data = new FormData();
+
+            // Append text fields
+            data.append('name', formData.name);
+            data.append('age', formData.age);
+            data.append('height', formData.height);
+            data.append('weight', formData.weight);
+            data.append('country', formData.country);
+            data.append('lookingFor', formData.lookingFor);
+            data.append('bio', formData.bio);
+
+            // Handle Avatar
+            if (avatarPreview && !avatarPreview.startsWith('http')) {
+                const filename = avatarPreview.split('/').pop() || 'avatar.jpg';
+                const match = /\.(\w+)$/.exec(filename);
+                let type = match ? `image/${match[1]}` : 'image/jpeg';
+                if (type === 'image/jpg') type = 'image/jpeg';
+
+                data.append('img', {
+                    uri: avatarPreview,
+                    name: filename,
+                    type,
+                } as any);
+            } else if (avatarPreview) {
+                data.append('img', avatarPreview);
+            }
+
+            // Handle Cover
+            if (coverPreview && !coverPreview.startsWith('http')) {
+                const filename = coverPreview.split('/').pop() || 'cover.jpg';
+                const match = /\.(\w+)$/.exec(filename);
+                let type = match ? `image/${match[1]}` : 'image/jpeg';
+                if (type === 'image/jpg') type = 'image/jpeg';
+
+                data.append('cover', {
+                    uri: coverPreview,
+                    name: filename,
+                    type,
+                } as any);
+            } else if (coverPreview) {
+                data.append('cover', coverPreview);
+            }
+
+            // Handle Gallery
+            const existingGallery = galleryImages.filter(img => img.startsWith('http'));
+            const newGallery = galleryImages.filter(img => !img.startsWith('http'));
+
+            if (existingGallery.length > 0) {
+                data.append('existingGallery', existingGallery.join(','));
+            }
+
+            newGallery.forEach((uri, index) => {
+                const filename = uri.split('/').pop() || `gallery_${index}.jpg`;
+                const match = /\.(\w+)$/.exec(filename);
+                let type = match ? `image/${match[1]}` : 'image/jpeg';
+                if (type === 'image/jpg') type = 'image/jpeg';
+
+                data.append('gallery', {
+                    uri,
+                    name: filename,
+                    type,
+                } as any);
+            });
+
+            // Handle Private Album
+            const existingPrivate = privateAlbum.filter(img => img.startsWith('http'));
+            const newPrivate = privateAlbum.filter(img => !img.startsWith('http'));
+
+            if (existingPrivate.length > 0) {
+                data.append('existingPrivateAlbum', existingPrivate.join(','));
+            }
+
+            newPrivate.forEach((uri, index) => {
+                const filename = uri.split('/').pop() || `private_${index}.jpg`;
+                const match = /\.(\w+)$/.exec(filename);
+                let type = match ? `image/${match[1]}` : 'image/jpeg';
+                if (type === 'image/jpg') type = 'image/jpeg';
+
+                data.append('privateAlbum', {
+                    uri,
+                    name: filename,
+                    type,
+                } as any);
+            });
+
+            const updatedUser = await updateUserProfile(data, token);
+
+            if (updateUser) {
+                await updateUser(updatedUser);
+            }
+
+            Alert.alert('Success', 'Profile updated successfully!\nNote: Profile photos and public gallery images require admin approval before they appear.', [
                 { text: 'OK', onPress: () => router.back() }
             ]);
-        }, 1000);
+        } catch (error: any) {
+            console.error('Error updating profile:', error);
+            Alert.alert('Error', error.message || 'Failed to update profile');
+        } finally {
+            setSaving(false);
+            setIsUploadingImage(false);
+        }
     };
 
     const handleRemoveGalleryImage = (index: number) => {
@@ -164,7 +329,10 @@ export default function EditProfileScreen() {
                                 colors={['transparent', 'rgba(0,0,0,0.5)']}
                                 style={styles.coverGradient}
                             />
-                            <TouchableOpacity style={styles.editCoverButton}>
+                            <TouchableOpacity
+                                style={styles.editCoverButton}
+                                onPress={() => handlePickImage('cover')}
+                            >
                                 <MaterialIcons name="camera-alt" size={20} color="#fff" />
                                 <Text style={styles.editCoverText}>Edit Cover</Text>
                             </TouchableOpacity>
@@ -179,7 +347,10 @@ export default function EditProfileScreen() {
                                 style={styles.profilePhoto}
                                 contentFit="cover"
                             />
-                            <TouchableOpacity style={styles.changePhotoButton}>
+                            <TouchableOpacity
+                                style={styles.changePhotoButton}
+                                onPress={() => handlePickImage('avatar')}
+                            >
                                 <MaterialIcons name="camera-alt" size={20} color="#fff" />
                             </TouchableOpacity>
                         </View>
@@ -334,7 +505,10 @@ export default function EditProfileScreen() {
                             ))}
 
                             {galleryImages.length < 5 && (
-                                <TouchableOpacity style={styles.addPhotoButton}>
+                                <TouchableOpacity
+                                    style={styles.addPhotoButton}
+                                    onPress={() => handlePickImage('gallery')}
+                                >
                                     <MaterialIcons name="add-photo-alternate" size={40} color="#666" />
                                     <Text style={styles.addPhotoText}>Add Photo</Text>
                                 </TouchableOpacity>
@@ -366,7 +540,10 @@ export default function EditProfileScreen() {
                             ))}
 
                             {privateAlbum.length < 3 && (
-                                <TouchableOpacity style={styles.addPhotoButton}>
+                                <TouchableOpacity
+                                    style={styles.addPhotoButton}
+                                    onPress={() => handlePickImage('private')}
+                                >
                                     <MaterialIcons name="lock" size={40} color="#666" />
                                     <Text style={styles.addPhotoText}>Add Private</Text>
                                 </TouchableOpacity>
@@ -374,8 +551,8 @@ export default function EditProfileScreen() {
                         </View>
                     </View>
 
-                    {/* Account Section */}
-                    <View style={styles.accountSection}>
+                    {/* Account Section - Hidden for now */}
+                    {/* <View style={styles.accountSection}>
                         <Text style={styles.sectionTitle}>Account</Text>
 
                         <TouchableOpacity style={styles.accountItem}>
@@ -393,7 +570,7 @@ export default function EditProfileScreen() {
                             </View>
                             <MaterialIcons name="chevron-right" size={24} color="#ff4444" />
                         </TouchableOpacity>
-                    </View>
+                    </View> */}
 
                     <View style={{ height: 40 }} />
                 </ScrollView>
@@ -443,6 +620,23 @@ export default function EditProfileScreen() {
                         </View>
                     </TouchableWithoutFeedback>
                 </Modal>
+
+                {/* Uploading Image Modal */}
+                <Modal
+                    visible={isUploadingImage && saving}
+                    transparent={true}
+                    animationType="fade"
+                >
+                    <View style={styles.uploadingModalOverlay}>
+                        <View style={styles.uploadingContent}>
+                            <UploadingIndicator />
+                            <Text style={styles.uploadingText}>Uploading Image...</Text>
+                            <Text style={styles.uploadingSubText}>Please wait</Text>
+                        </View>
+                    </View>
+                </Modal>
+
+
             </SafeAreaView>
         </>
     );
@@ -798,5 +992,35 @@ const styles = StyleSheet.create({
     countryTextSelected: {
         color: Colors.dark.tint,
         fontWeight: '600',
+    },
+    uploadingModalOverlay: {
+        flex: 1,
+        backgroundColor: 'rgba(0,0,0,0.8)',
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+    uploadingContent: {
+        backgroundColor: '#1a1a1a',
+        padding: 40,
+        borderRadius: 20,
+        alignItems: 'center',
+        gap: 20,
+        borderWidth: 1,
+        borderColor: '#333',
+        minWidth: 250,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.3,
+        shadowRadius: 8,
+        elevation: 8,
+    },
+    uploadingText: {
+        color: '#fff',
+        fontSize: 18,
+        fontWeight: '600',
+    },
+    uploadingSubText: {
+        color: '#888',
+        fontSize: 14,
     },
 });

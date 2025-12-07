@@ -4,12 +4,15 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { Colors } from '@/constants/theme';
 import { getUsers, getUser } from '@/services/api';
 import ProfileCard from '@/components/ProfileCard';
+import { AdBanner } from '@/components/AdBanner';
 import { useProtectedRoute } from '@/hooks/useProtectedRoute';
 import { useAuth } from '@/contexts/AuthContext';
+import { useSocket } from '@/contexts/SocketContext';
 
 export default function FavouritesScreen() {
     const { isAuthenticated } = useProtectedRoute();
-    const { user, token } = useAuth();
+    const { user, token, blockedUsers } = useAuth();
+    const { socket } = useSocket();
     const [favourites, setFavourites] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
     const [refreshing, setRefreshing] = useState(false);
@@ -22,7 +25,8 @@ export default function FavouritesScreen() {
 
                 if (currentUserProfile && currentUserProfile.favorites) {
                     const favs = (allUsers as any[]).filter(u =>
-                        currentUserProfile.favorites.includes(u._id || u.id)
+                        currentUserProfile.favorites.includes(u._id || u.id) &&
+                        !blockedUsers.includes(u._id || u.id)
                     );
                     setFavourites(favs);
                 } else {
@@ -41,7 +45,18 @@ export default function FavouritesScreen() {
 
     useEffect(() => {
         fetchFavourites();
-    }, []);
+    }, [blockedUsers]);
+
+    // Listen for socket events to refresh favourites (e.g. if someone blocks us)
+    useEffect(() => {
+        if (!socket) return;
+        socket.on('blocked', fetchFavourites);
+        socket.on('unblocked', fetchFavourites);
+        return () => {
+            socket.off('blocked', fetchFavourites);
+            socket.off('unblocked', fetchFavourites);
+        };
+    }, [socket]);
 
     const onRefresh = async () => {
         setRefreshing(true);
@@ -60,6 +75,9 @@ export default function FavouritesScreen() {
                 <View style={styles.loadingContainer}>
                     <ActivityIndicator size="large" color={Colors.dark.tint} />
                 </View>
+
+                {/* Ad Banner */}
+                <AdBanner />
             </SafeAreaView>
         );
     }
@@ -92,6 +110,9 @@ export default function FavouritesScreen() {
                     </View>
                 )}
             </ScrollView>
+
+            {/* Ad Banner */}
+            <AdBanner />
         </SafeAreaView>
     );
 }

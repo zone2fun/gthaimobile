@@ -1,11 +1,15 @@
 import React, { useEffect, useState } from 'react';
 import { useLocation } from 'react-router-dom';
+import AdUnit from './AdUnit';
 
 const AdManager = () => {
     const location = useLocation();
     const [adsEnabled, setAdsEnabled] = useState(false);
     const [maintenanceMode, setMaintenanceMode] = useState(false);
     const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+
+    // Check if we are on a chat detail page
+    const isChatDetailPage = location.pathname.startsWith('/chat/') && location.pathname !== '/chat';
 
     useEffect(() => {
         const fetchSettings = async () => {
@@ -53,32 +57,15 @@ const AdManager = () => {
                 </div>
             </div>
 
-            {/* Mobile Ad - Bottom Floating */}
-            <div className="ad-mobile-bottom">
-                <div className="ad-placeholder-horizontal">
-                    <AdUnit slot="2427961590" />
+            {/* Mobile Ad - Bottom Floating - Hidden on Chat Detail Page */}
+            {!isChatDetailPage && (
+                <div className="ad-mobile-bottom">
+                    <div className="ad-placeholder-horizontal">
+                        <AdUnit slot="2427961590" />
+                    </div>
                 </div>
-            </div>
+            )}
         </>
-    );
-};
-
-const AdUnit = ({ slot }) => {
-    useEffect(() => {
-        try {
-            (window.adsbygoogle = window.adsbygoogle || []).push({});
-        } catch (e) {
-            console.error('AdSense error:', e);
-        }
-    }, []);
-
-    return (
-        <ins className="adsbygoogle"
-            style={{ display: 'block' }}
-            data-ad-client="ca-pub-9202394633228299"
-            data-ad-slot={slot}
-            data-ad-format="auto"
-            data-full-width-responsive="true"></ins>
     );
 };
 

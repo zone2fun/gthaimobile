@@ -1,27 +1,45 @@
 import React, { useState, useEffect } from 'react';
 import { StyleSheet, View, Text, FlatList, TouchableOpacity, RefreshControl, ActivityIndicator } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { useRouter } from 'expo-router';
+import { useRouter, useFocusEffect } from 'expo-router';
 import { Image } from 'expo-image';
 import { MaterialIcons } from '@expo/vector-icons';
 import { Colors } from '@/constants/theme';
 import { useProtectedRoute } from '@/hooks/useProtectedRoute';
 import { useAuth } from '@/contexts/AuthContext';
+import { useSocket } from '@/contexts/SocketContext';
 import { getConversations } from '@/services/api';
+import { useOnlineStatus } from '@/hooks/useOnlineStatus';
+import { AdBanner } from '@/components/AdBanner';
 
 export default function ChatScreen() {
     const { isAuthenticated } = useProtectedRoute();
-    const { user, token } = useAuth();
+    const { user, token, blockedUsers } = useAuth();
     const router = useRouter();
+    const { socket } = useSocket();
+    const { getOnlineStatus } = useOnlineStatus();
     const [conversations, setConversations] = useState<any[]>([]);
     const [refreshing, setRefreshing] = useState(false);
     const [loading, setLoading] = useState(true);
+
+    useFocusEffect(
+        React.useCallback(() => {
+            if (isAuthenticated && token) {
+                fetchConversations();
+            }
+        }, [isAuthenticated, token, blockedUsers])
+    );
 
     const fetchConversations = async () => {
         if (isAuthenticated && token) {
             try {
                 const data = await getConversations(token);
-                setConversations(data);
+                // Filter out conversations with blocked users
+                const filteredData = data.filter((conv: any) => {
+                    const otherUser = conv.user || conv.members?.find((m: any) => m._id !== user?._id);
+                    return otherUser && !blockedUsers.includes(otherUser._id);
+                });
+                setConversations(filteredData);
             } catch (error) {
                 console.error('Error fetching conversations:', error);
             } finally {
@@ -35,8 +53,48 @@ export default function ChatScreen() {
     };
 
     useEffect(() => {
-        fetchConversations();
-    }, [isAuthenticated, token]);
+        if (!socket) return;
+
+        const handleMessageReceived = (newMessage: any) => {
+            console.log('ChatList: message received', newMessage);
+            setConversations(prev => {
+                const senderId = newMessage.sender._id || newMessage.sender;
+                const existingConvIndex = prev.findIndex(c => {
+                    const otherUserId = c.user?._id || c.members?.find((m: any) => m._id !== user?._id)?._id;
+                    return otherUserId === senderId;
+                });
+
+                if (existingConvIndex !== -1) {
+                    // Update existing conversation
+                    const updatedConv = { ...prev[existingConvIndex] };
+                    updatedConv.lastMessage = newMessage;
+                    updatedConv.unreadCount = (updatedConv.unreadCount || 0) + 1;
+
+                    // Move to top
+                    const newConvs = [...prev];
+                    newConvs.splice(existingConvIndex, 1);
+                    return [updatedConv, ...newConvs];
+                } else {
+                    // New conversation - simpler to just refetch or we can try to construct it
+                    // For now, let's just refetch to be safe and get full user details
+                    fetchConversations();
+                    return prev;
+                }
+            });
+        };
+
+        socket.on('message received', handleMessageReceived);
+
+        // Listen for block events
+        socket.on('blocked', fetchConversations);
+        socket.on('unblocked', fetchConversations);
+
+        return () => {
+            socket.off('message received', handleMessageReceived);
+            socket.off('blocked', fetchConversations);
+            socket.off('unblocked', fetchConversations);
+        };
+    }, [socket, user, token, blockedUsers]); // Added blockedUsers to dep array since fetchConversations uses it
 
     const onRefresh = async () => {
         setRefreshing(true);
@@ -105,7 +163,7 @@ export default function ChatScreen() {
                             <MaterialIcons name="person" size={30} color="#666" />
                         </View>
                     )}
-                    {otherUser.isOnline && <View style={styles.onlineBadge} />}
+                    {getOnlineStatus(otherUser._id, otherUser.isOnline) && <View style={styles.onlineBadge} />}
                 </View>
 
                 <View style={styles.contentContainer}>
@@ -153,6 +211,9 @@ export default function ChatScreen() {
                 <View style={styles.loadingContainer}>
                     <ActivityIndicator size="large" color={Colors.dark.tint} />
                 </View>
+
+                {/* Ad Banner */}
+                <AdBanner />
             </SafeAreaView>
         );
     }
@@ -183,6 +244,9 @@ export default function ChatScreen() {
                     }
                 />
             )}
+
+            {/* Ad Banner */}
+            <AdBanner />
         </SafeAreaView>
     );
 }

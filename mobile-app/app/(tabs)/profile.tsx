@@ -1,9 +1,9 @@
-import React, { useState, useEffect } from 'react';
-import { StyleSheet, View, Text, ScrollView, TouchableOpacity, ActivityIndicator, Alert } from 'react-native';
+import React, { useState, useCallback } from 'react';
+import { StyleSheet, View, Text, ScrollView, TouchableOpacity, ActivityIndicator, Alert, Modal } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Image } from 'expo-image';
 import { MaterialIcons } from '@expo/vector-icons';
-import { useRouter } from 'expo-router';
+import { useRouter, useFocusEffect } from 'expo-router';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Colors } from '@/constants/theme';
 import { getUser } from '@/services/api';
@@ -12,21 +12,26 @@ import { useAuth } from '@/contexts/AuthContext';
 
 export default function ProfileScreen() {
     const { isAuthenticated } = useProtectedRoute();
-    const { user: authUser, token, logout } = useAuth();
+    const { user: authUser, token, logout, updateUser } = useAuth();
     const router = useRouter();
     const [user, setUser] = useState<any>(null);
     const [loading, setLoading] = useState(true);
+    const [selectedPhoto, setSelectedPhoto] = useState<string | null>(null);
 
-    useEffect(() => {
-        if (isAuthenticated && authUser && token) {
-            fetchProfile();
-        }
-    }, [isAuthenticated, authUser, token]);
+    useFocusEffect(
+        useCallback(() => {
+            if (isAuthenticated && authUser && token) {
+                fetchProfile();
+            }
+        }, [isAuthenticated, authUser, token])
+    );
 
     const fetchProfile = async () => {
         try {
             const userData = await getUser(authUser._id, token!);
             setUser(userData);
+            // Sync with global state
+            await updateUser(userData);
         } catch (error) {
             console.error("Error fetching profile:", error);
         } finally {
@@ -45,7 +50,6 @@ export default function ProfileScreen() {
                     style: "destructive",
                     onPress: async () => {
                         await logout();
-                        // Router redirection is handled by useProtectedRoute or AuthContext
                     }
                 }
             ]
@@ -82,7 +86,7 @@ export default function ProfileScreen() {
             {/* Cover Image */}
             <View style={styles.coverContainer}>
                 <Image
-                    source={{ uri: user.cover || 'https://images.unsplash.com/photo-1579546929518-9e396f3cc809?w=800' }}
+                    source={{ uri: user.pendingCover || user.cover || 'https://images.unsplash.com/photo-1579546929518-9e396f3cc809?w=800' }}
                     style={styles.coverImage}
                     contentFit="cover"
                 />
@@ -90,6 +94,11 @@ export default function ProfileScreen() {
                     colors={['transparent', 'rgba(0,0,0,0.8)']}
                     style={styles.coverGradient}
                 />
+                {user.pendingCover && (
+                    <View style={styles.pendingOverlay}>
+                        <Text style={styles.pendingText}>Waiting Approve</Text>
+                    </View>
+                )}
             </View>
 
             <View style={styles.contentContainer}>
@@ -97,10 +106,15 @@ export default function ProfileScreen() {
                 <View style={styles.headerInfo}>
                     <View style={styles.avatarContainer}>
                         <Image
-                            source={{ uri: user.img }}
+                            source={{ uri: user.pendingImg || user.img }}
                             style={styles.avatar}
                             contentFit="cover"
                         />
+                        {user.pendingImg && (
+                            <View style={styles.pendingAvatarOverlay}>
+                                <Text style={styles.pendingTextSmall}>Waiting</Text>
+                            </View>
+                        )}
                         <View style={[styles.statusDot, { backgroundColor: user.isOnline ? '#2ecc71' : '#95a5a6' }]} />
                     </View>
 
@@ -141,7 +155,7 @@ export default function ProfileScreen() {
                 {/* Edit Profile Button */}
                 <TouchableOpacity
                     style={styles.editButton}
-                    onPress={() => Alert.alert('Coming Soon', 'Edit Profile feature will be available soon!')}
+                    onPress={() => router.push('/profile/edit')}
                 >
                     <MaterialIcons name="edit" size={20} color="#fff" />
                     <Text style={styles.editButtonText}>Edit Profile</Text>
@@ -158,7 +172,9 @@ export default function ProfileScreen() {
                 {user.lookingFor && (
                     <View style={styles.detailRow}>
                         <MaterialIcons name="favorite" size={20} color={Colors.dark.tint} />
-                        <Text style={styles.detailText}>{user.lookingFor}</Text>
+                        <Text style={styles.detailText}>
+                            {Array.isArray(user.lookingFor) ? user.lookingFor.join(', ') : user.lookingFor}
+                        </Text>
                     </View>
                 )}
 
@@ -170,22 +186,64 @@ export default function ProfileScreen() {
                     </View>
                 )}
 
-                {/* Public Gallery */}
-                {user.gallery && user.gallery.length > 0 && (
+                {/* Public Gallery (Approved & Pending) */}
+                {((user.gallery && user.gallery.length > 0) || (user.pendingGallery && user.pendingGallery.length > 0)) && (
                     <View style={styles.gallerySection}>
                         <Text style={styles.sectionTitle}>Photos</Text>
                         <View style={styles.galleryGrid}>
-                            {user.gallery.map((img: string, index: number) => (
-                                <TouchableOpacity key={index} style={styles.galleryItem}>
+                            {/* Approved Images */}
+                            {user.gallery?.map((img: string, index: number) => (
+                                <TouchableOpacity
+                                    key={`gallery-${index}`}
+                                    style={styles.galleryItem}
+                                    onPress={() => setSelectedPhoto(img)}
+                                >
                                     <Image source={{ uri: img }} style={styles.galleryImage} contentFit="cover" />
+                                </TouchableOpacity>
+                            ))}
+                            {/* Pending Images */}
+                            {user.pendingGallery?.map((img: string, index: number) => (
+                                <TouchableOpacity
+                                    key={`pending-gallery-${index}`}
+                                    style={styles.galleryItem}
+                                    onPress={() => setSelectedPhoto(img)}
+                                >
+                                    <Image source={{ uri: img }} style={styles.galleryImage} contentFit="cover" />
+                                    <View style={styles.pendingOverlay}>
+                                        <Text style={[styles.pendingTextSmall, { fontSize: 10 }]}>Waiting</Text>
+                                    </View>
                                 </TouchableOpacity>
                             ))}
                         </View>
                     </View>
                 )}
 
-                {/* Settings Options */}
-                <View style={styles.settingsSection}>
+                {/* Private Gallery */}
+                {user.privateAlbum && user.privateAlbum.length > 0 && (
+                    <View style={styles.gallerySection}>
+                        <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 12 }}>
+                            <MaterialIcons name="lock" size={20} color={Colors.dark.tint} style={{ marginRight: 8 }} />
+                            <Text style={[styles.sectionTitle, { marginBottom: 0 }]}>Private Gallery</Text>
+                        </View>
+                        <View style={styles.galleryGrid}>
+                            {user.privateAlbum.map((img: string, index: number) => (
+                                <TouchableOpacity
+                                    key={`private-${index}`}
+                                    style={styles.galleryItem}
+                                    onPress={() => setSelectedPhoto(img)}
+                                >
+                                    <Image source={{ uri: img }} style={styles.galleryImage} contentFit="cover" />
+                                    <View style={styles.privateIconOverlay}>
+                                        <MaterialIcons name="lock" size={16} color="#fff" />
+                                    </View>
+                                </TouchableOpacity>
+                            ))}
+                        </View>
+                    </View>
+                )}
+
+                {/* Settings Options - Hidden for now */}
+                {/* <View style={styles.settingsSection}>
                     <Text style={styles.sectionTitle}>Settings</Text>
 
                     <TouchableOpacity style={styles.settingItem}>
@@ -230,8 +288,43 @@ export default function ProfileScreen() {
                         </View>
                         <MaterialIcons name="chevron-right" size={24} color="#ff4444" />
                     </TouchableOpacity>
-                </View>
+                </View> */}
+
+                {/* Logout Button */}
+                <TouchableOpacity
+                    style={styles.logoutButton}
+                    onPress={handleLogout}
+                >
+                    <MaterialIcons name="logout" size={20} color="#fff" />
+                    <Text style={styles.logoutButtonText}>Logout</Text>
+                </TouchableOpacity>
             </View>
+
+            {/* Photo Modal */}
+            <Modal
+                visible={!!selectedPhoto}
+                transparent={true}
+                animationType="fade"
+                onRequestClose={() => setSelectedPhoto(null)}
+            >
+                <View style={styles.modalContainer}>
+                    <TouchableOpacity
+                        style={styles.modalCloseButton}
+                        onPress={() => setSelectedPhoto(null)}
+                    >
+                        <MaterialIcons name="close" size={30} color="#fff" />
+                    </TouchableOpacity>
+                    <View style={styles.modalContent}>
+                        {selectedPhoto && (
+                            <Image
+                                source={{ uri: selectedPhoto }}
+                                style={styles.modalImage}
+                                contentFit="contain"
+                            />
+                        )}
+                    </View>
+                </View>
+            </Modal>
         </ScrollView>
     );
 }
@@ -435,9 +528,94 @@ const styles = StyleSheet.create({
         aspectRatio: 1,
         borderRadius: 8,
         overflow: 'hidden',
+        backgroundColor: '#333',
     },
     galleryImage: {
         width: '100%',
         height: '100%',
+    },
+    modalContainer: {
+        flex: 1,
+        backgroundColor: 'rgba(0,0,0,0.9)',
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+    modalCloseButton: {
+        position: 'absolute',
+        top: 50,
+        right: 20,
+        zIndex: 1,
+        padding: 10,
+    },
+    modalContent: {
+        width: '100%',
+        height: '80%',
+    },
+    modalImage: {
+        width: '100%',
+        height: '100%',
+    },
+    pendingOverlay: {
+        position: 'absolute',
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
+        backgroundColor: 'rgba(0,0,0,0.5)',
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+    pendingText: {
+        color: '#FFD700',
+        fontWeight: 'bold',
+        fontSize: 16,
+        backgroundColor: 'rgba(0,0,0,0.7)',
+        paddingHorizontal: 12,
+        paddingVertical: 6,
+        borderRadius: 20,
+    },
+    pendingAvatarOverlay: {
+        position: 'absolute',
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
+        backgroundColor: 'rgba(0,0,0,0.5)',
+        justifyContent: 'center',
+        alignItems: 'center',
+        borderRadius: 50,
+    },
+    pendingTextSmall: {
+        color: '#FFD700',
+        fontWeight: 'bold',
+        fontSize: 12,
+        backgroundColor: 'rgba(0,0,0,0.7)',
+        paddingHorizontal: 8,
+        paddingVertical: 4,
+        borderRadius: 10,
+    },
+    privateIconOverlay: {
+        position: 'absolute',
+        bottom: 4,
+        left: 4,
+        backgroundColor: 'rgba(0,0,0,0.6)',
+        borderRadius: 10,
+        padding: 4,
+    },
+    logoutButton: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'center',
+        backgroundColor: '#ff4444',
+        paddingVertical: 14,
+        borderRadius: 25,
+        marginTop: 12,
+        marginBottom: 24,
+    },
+    logoutButtonText: {
+        color: '#fff',
+        fontWeight: 'bold',
+        fontSize: 16,
+        marginLeft: 8,
     },
 });

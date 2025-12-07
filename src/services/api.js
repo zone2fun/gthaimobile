@@ -355,3 +355,8 @@ export const checkAlbumAccess = async (userId, token) => {
     });
     return response.json();
 };
+
+export const getPublicSettings = async () => {
+    const response = await fetch(`${API_URL}/settings/public`);
+    return response.json();
+};

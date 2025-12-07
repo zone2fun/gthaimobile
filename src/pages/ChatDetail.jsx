@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef, useContext } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { getUser, getMessages, sendMessage, deleteMessage, markAsRead, updateAlbumAccessRequest, blockUser, unblockUser, createReport, getMe } from '../services/api';
+import { getUser, getMessages, sendMessage, deleteMessage, markAsRead, updateAlbumAccessRequest, blockUser, unblockUser, createReport, getMe, getPublicSettings } from '../services/api';
+import AdUnit from '../components/AdUnit';
 import AuthContext from '../context/AuthContext';
 import SocketContext from '../context/SocketContext';
 import { useTranslation } from 'react-i18next';
@@ -19,6 +20,7 @@ const ChatDetail = () => {
     const messagesEndRef = useRef(null);
     const fileInputRef = useRef(null);
     const typingTimeoutRef = useRef(null);
+    const chatContainerRef = useRef(null);
 
     // Menu & Action States
     const [showMenu, setShowMenu] = useState(false);
@@ -28,9 +30,33 @@ const ChatDetail = () => {
     const [reportAdditionalInfo, setReportAdditionalInfo] = useState('');
     const [showReportSuccessModal, setShowReportSuccessModal] = useState(false);
     const [errorModal, setErrorModal] = useState({ isOpen: false, title: '', message: '' });
+    // Default to true for better UX (optimistic), will disable if settings load and say otherwise
+    const [adsEnabled, setAdsEnabled] = useState(true);
+
+    useEffect(() => {
+        const fetchSettings = async () => {
+            try {
+                const settings = await getPublicSettings();
+                if (settings) {
+                    // Check explicitly for false to disable, otherwise keep true
+                    if (settings.adsenseEnabled === false) {
+                        setAdsEnabled(false);
+                    }
+                }
+            } catch (error) {
+                console.error("Failed to load settings", error);
+                // Keep default true or set to false on error? 
+                // If error, maybe better to show nothing? Or show it?
+                // Let's assume if error, we stick with default.
+            }
+        };
+        fetchSettings();
+    }, []);
 
     const scrollToBottom = () => {
-        messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+        if (chatContainerRef.current) {
+            chatContainerRef.current.scrollTop = chatContainerRef.current.scrollHeight;
+        }
     };
 
     useEffect(() => {
@@ -121,10 +147,6 @@ const ChatDetail = () => {
         setInputText(e.target.value);
         handleTyping();
     };
-
-    if (!user) {
-        return <div className="app-content" style={{ color: 'white', textAlign: 'center', marginTop: '50px' }}>Loading...</div>;
-    }
 
     const handleSend = async () => {
         if (inputText.trim() === '') return;
@@ -244,9 +266,6 @@ const ChatDetail = () => {
     const handleAccessResponse = async (requestId, status) => {
         try {
             await updateAlbumAccessRequest(requestId, status, token);
-            // Update message status locally or re-fetch messages
-            // For simplicity, we can just reload messages or update the specific message if we had state for it
-            // But since the backend creates a new response message, we should just see it appear
         } catch (error) {
             console.error('Error updating access request:', error);
         }
@@ -254,14 +273,6 @@ const ChatDetail = () => {
 
     const AccessRequestMessage = ({ msg }) => {
         const isMe = msg.sender._id === currentUser?._id || msg.sender === currentUser?._id;
-        // We need to know the current status. For now, we'll assume 'pending' initially 
-        // or try to infer from recent messages? 
-        // Better: fetch status on mount if it's a request message
-        // But for simplicity in this turn, let's use a local state that defaults to false (not approved)
-        // unless we know otherwise.
-        // Actually, the toggle should reflect the TRUE state.
-        // Let's assume the user starts with 'pending' (false).
-        // Initialize state from the populated relatedId object
         const [isApproved, setIsApproved] = useState(msg.relatedId?.status === 'approved');
         const [loading, setLoading] = useState(false);
 
@@ -270,7 +281,6 @@ const ChatDetail = () => {
 
             setLoading(true);
             const newStatus = isApproved ? 'rejected' : 'approved';
-            // Use _id if populated, otherwise use relatedId directly if it's a string
             const requestId = msg.relatedId._id || msg.relatedId;
 
             try {
@@ -371,12 +381,20 @@ const ChatDetail = () => {
                 <button className="back-btn-chat" onClick={() => navigate(-1)}>
                     <span className="material-icons">arrow_back</span>
                 </button>
-                <div className="chat-user-info" onClick={() => navigate(`/user/${id}`)} style={{ cursor: 'pointer' }}>
+                <div className="chat-user-info" onClick={() => user && navigate(`/user/${id}`)} style={{ cursor: 'pointer' }}>
                     <div className="chat-avatar">
-                        <img src={user.img} alt={user.name} />
-                        <div className={`status-dot ${user.isOnline ? 'online' : 'offline'}`}></div>
+                        {user ? (
+                            <img src={user.img} alt={user.name} />
+                        ) : (
+                            <div style={{ width: '100%', height: '100%', borderRadius: '50%', backgroundColor: '#333' }}></div>
+                        )}
+                        {user && <div className={`status-dot ${user.isOnline ? 'online' : 'offline'}`}></div>}
                     </div>
-                    <span className="chat-username">{user.name}</span>
+                    {user ? (
+                        <span className="chat-username">{user.name}</span>
+                    ) : (
+                        <div style={{ width: '100px', height: '20px', backgroundColor: '#333', borderRadius: '4px' }}></div>
+                    )}
                 </div>
                 <div style={{ position: 'relative' }}>
                     <button className="more-btn" onClick={() => setShowMenu(!showMenu)}>
@@ -438,40 +456,56 @@ const ChatDetail = () => {
                 </div>
             </header>
 
-            <div className="chat-messages">
-                {messages.map((msg) => (
-                    <div key={msg._id || msg.id} className={`message-bubble ${(msg.sender._id === currentUser?._id || msg.sender === currentUser?._id) ? 'me' : 'them'}`}>
-                        <div className="message-content">
-                            {renderMessageContent(msg)}
-                        </div>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                            <span className="message-time">
-                                {new Date(msg.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                            </span>
-                            {(msg.sender._id === currentUser?._id || msg.sender === currentUser?._id) && (
-                                <button
-                                    onClick={() => handleDeleteMessage(msg._id)}
-                                    style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '2px' }}
-                                >
-                                    <span className="material-icons" style={{ fontSize: '16px', color: '#fff' }}>delete</span>
-                                </button>
-                            )}
-                        </div>
+            {adsEnabled && (
+                <div className="mobile-only" style={{ width: '100%', display: 'flex', justifyContent: 'center', backgroundColor: '#000', padding: '10px 0', borderBottom: '1px solid #333', position: 'sticky', top: '60px', zIndex: 99 }}>
+                    <div className="ad-placeholder-horizontal" style={{ height: '50px', width: '320px', position: 'relative' }}>
+                        <AdUnit slot="2427961590" />
+                        <span style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', fontSize: '10px', color: '#444', zIndex: 0, pointerEvents: 'none' }}>Advertisement</span>
                     </div>
-                ))}
+                </div>
+            )}
 
-                {/* Typing Indicator Bubble */}
-                {isTyping && (
-                    <div className="message-bubble them">
-                        <div className="typing-indicator">
-                            <span></span>
-                            <span></span>
-                            <span></span>
-                        </div>
+            <div className="chat-messages" ref={chatContainerRef}>
+                {!user ? (
+                    <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100%' }}>
+                        <div style={{ color: '#888' }}>Loading...</div>
                     </div>
+                ) : (
+                    <>
+                        {messages.map((msg) => (
+                            <div key={msg._id || msg.id} className={`message-bubble ${(msg.sender._id === currentUser?._id || msg.sender === currentUser?._id) ? 'me' : 'them'}`}>
+                                <div className="message-content">
+                                    {renderMessageContent(msg)}
+                                </div>
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                    <span className="message-time">
+                                        {new Date(msg.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                                    </span>
+                                    {(msg.sender._id === currentUser?._id || msg.sender === currentUser?._id) && (
+                                        <button
+                                            onClick={() => handleDeleteMessage(msg._id)}
+                                            style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '2px' }}
+                                        >
+                                            <span className="material-icons" style={{ fontSize: '16px', color: '#fff' }}>delete</span>
+                                        </button>
+                                    )}
+                                </div>
+                            </div>
+                        ))}
+
+                        {/* Typing Indicator Bubble */}
+                        {isTyping && (
+                            <div className="message-bubble them">
+                                <div className="typing-indicator">
+                                    <span></span>
+                                    <span></span>
+                                    <span></span>
+                                </div>
+                            </div>
+                        )}
+                        <div ref={messagesEndRef} />
+                    </>
                 )}
-
-                <div ref={messagesEndRef} />
             </div>
 
             <div className="chat-input-bar">
@@ -479,7 +513,7 @@ const ChatDetail = () => {
                     {/* <button className="icon-btn">
                         <span className="material-icons">camera_alt</span>
                     </button> */}
-                    <button className="icon-btn" onClick={() => fileInputRef.current.click()}>
+                    <button className="icon-btn" onClick={() => fileInputRef.current && fileInputRef.current.click()}>
                         <span className="material-icons">image</span>
                     </button>
                     <input

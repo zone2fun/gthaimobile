@@ -1,40 +1,60 @@
-// TEST UPDATE - User Profile with 5 buttons
 import React, { useState, useEffect } from 'react';
-import { StyleSheet, View, Text, ScrollView, TouchableOpacity, Dimensions, ActivityIndicator, Modal } from 'react-native';
+import { StyleSheet, View, Text, ScrollView, TouchableOpacity, Dimensions, ActivityIndicator, Modal, Share, Alert } from 'react-native';
 import { useLocalSearchParams, useRouter, Stack } from 'expo-router';
 import { Image } from 'expo-image';
 import { MaterialIcons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Colors } from '@/constants/theme';
-import { getUser } from '@/services/api';
+import { getUser, toggleFavorite, blockUser, unblockUser, requestAlbumAccess, checkAlbumAccess } from '@/services/api';
+import { useAuth } from '@/contexts/AuthContext';
+import { useSocket } from '@/contexts/SocketContext';
+import { useOnlineStatus } from '@/hooks/useOnlineStatus';
 
 const { width } = Dimensions.get('window');
 
 export default function UserProfileScreen() {
     const { id } = useLocalSearchParams();
     const router = useRouter();
+    const { user: currentUser, token, addBlockedUser, removeBlockedUser, updateUser, blockedUsers } = useAuth();
+    const { socket } = useSocket();
+    const { getOnlineStatus } = useOnlineStatus();
+
     const [user, setUser] = useState<any>(null);
     const [loading, setLoading] = useState(true);
     const [isFavorite, setIsFavorite] = useState(false);
+    const [isBlocked, setIsBlocked] = useState(false);
     const [lightboxVisible, setLightboxVisible] = useState(false);
     const [currentImageIndex, setCurrentImageIndex] = useState(0);
     const [lightboxImages, setLightboxImages] = useState<string[]>([]);
 
-    // Mock current user
-    const currentUser = { _id: '1' };
-    const token = 'mock-token';
+    // Album Access State
+    const [albumAccessStatus, setAlbumAccessStatus] = useState<{
+        hasAccess: boolean;
+        hasPendingRequest: boolean;
+        isOwner: boolean;
+    } | null>(null);
 
     useEffect(() => {
-        console.log('UserProfileScreen - Received ID:', id, 'Type:', typeof id);
+        const fetchData = async () => {
+            if (!id || !token) return;
 
-        const fetchUser = async () => {
             try {
                 const userData = await getUser(id as string, token);
                 setUser(userData);
-                // Mock favorite check
-                if (currentUser._id === '1' && (userData as any).favorites?.includes(id)) {
+
+                // Check if favorite
+                if (currentUser && (currentUser as any).favorites?.includes(id)) {
                     setIsFavorite(true);
                 }
+
+                // Check if blocked
+                if (blockedUsers.includes(id as string)) {
+                    setIsBlocked(true);
+                }
+
+                // Check album access status
+                const accessStatus = await checkAlbumAccess(id as string, token);
+                setAlbumAccessStatus(accessStatus);
             } catch (error) {
                 console.error("Error fetching user:", error);
             } finally {
@@ -42,10 +62,29 @@ export default function UserProfileScreen() {
             }
         };
 
-        if (id) {
-            fetchUser();
-        }
-    }, [id]);
+        fetchData();
+    }, [id, token, currentUser]);
+
+
+
+    // Socket listener for blocked event
+    useEffect(() => {
+        if (!socket) return;
+
+        const handleBlocked = (data: any) => {
+            if (data.byUser === id) {
+                Alert.alert('Access Denied', 'You have been blocked by this user.', [
+                    { text: 'OK', onPress: () => router.back() }
+                ]);
+            }
+        };
+
+        socket.on('blocked', handleBlocked);
+
+        return () => {
+            socket.off('blocked', handleBlocked);
+        };
+    }, [socket, id]);
 
     const openLightbox = (images: string[], index: number) => {
         setLightboxImages(images);
@@ -63,6 +102,108 @@ export default function UserProfileScreen() {
 
     const closeLightbox = () => {
         setLightboxVisible(false);
+    };
+
+    const handleShare = async () => {
+        try {
+            await Share.share({
+                message: `Check out ${user?.name}'s profile on GTHAILOVER!`,
+            });
+        } catch (error) {
+            console.error(error);
+        }
+    };
+
+    const handleToggleFavorite = async () => {
+        if (!token || !user) return;
+        try {
+            await toggleFavorite(user._id, token);
+            const newIsFavorite = !isFavorite;
+            setIsFavorite(newIsFavorite);
+
+            // Update currentUser favorites in AuthContext to persist the change
+            if (currentUser) {
+                const updatedFavorites = newIsFavorite
+                    ? [...(currentUser.favorites || []), user._id]
+                    : (currentUser.favorites || []).filter((favId: string) => favId !== user._id);
+
+                const updatedUser = {
+                    ...currentUser,
+                    favorites: updatedFavorites
+                };
+
+                // Update in AuthContext
+                await updateUser(updatedUser);
+            }
+        } catch (error) {
+            console.error('Error toggling favorite:', error);
+            Alert.alert('Error', 'Failed to update favorite status');
+        }
+    };
+
+    const handleBlock = () => {
+        Alert.alert(
+            'Block User',
+            'Are you sure you want to block this user?',
+            [
+                { text: 'Cancel', style: 'cancel' },
+                {
+                    text: 'Block',
+                    style: 'destructive',
+                    onPress: async () => {
+                        if (!token || !user) return;
+                        try {
+                            await blockUser(user._id, token);
+                            addBlockedUser(user._id);
+                            setIsBlocked(true);
+                            Alert.alert('Success', 'User blocked');
+                        } catch (error) {
+                            Alert.alert('Error', 'Failed to block user');
+                        }
+                    }
+                }
+            ]
+        );
+    };
+
+    const handleUnblock = () => {
+        Alert.alert(
+            'Unblock User',
+            'Are you sure you want to unblock this user?',
+            [
+                { text: 'Cancel', style: 'cancel' },
+                {
+                    text: 'Unblock',
+                    onPress: async () => {
+                        if (!token || !user) return;
+                        try {
+                            await unblockUser(user._id, token);
+                            removeBlockedUser(user._id);
+                            setIsBlocked(false);
+                            Alert.alert('Success', 'User unblocked');
+                        } catch (error) {
+                            Alert.alert('Error', 'Failed to unblock user');
+                        }
+                    }
+                }
+            ]
+        );
+    };
+
+    const handleRequestPrivateAlbum = async () => {
+        if (!token || !user) return;
+
+        try {
+            await requestAlbumAccess(user._id, token);
+            // Update local state
+            setAlbumAccessStatus({
+                ...albumAccessStatus!,
+                hasPendingRequest: true
+            });
+            Alert.alert('Success', 'Request sent successfully');
+        } catch (error: any) {
+            Alert.alert('Error', error.message || 'Failed to send request');
+        }
     };
 
 
@@ -165,15 +306,15 @@ export default function UserProfileScreen() {
                                     contentFit="cover"
                                 />
                             </TouchableOpacity>
-                            <View style={[styles.statusDot, { backgroundColor: user.isOnline ? '#2ecc71' : '#95a5a6' }]} />
+                            <View style={[styles.statusDot, { backgroundColor: getOnlineStatus(user._id, user.isOnline) ? '#2ecc71' : '#95a5a6' }]} />
                         </View>
 
                         <View style={styles.nameContainer}>
                             <Text style={styles.name}>{user.name}</Text>
                             <View style={styles.statusContainer}>
-                                <View style={[styles.statusDotSmall, { backgroundColor: user.isOnline ? '#2ecc71' : '#95a5a6' }]} />
-                                <Text style={[styles.statusText, { color: user.isOnline ? '#2ecc71' : '#95a5a6' }]}>
-                                    {user.isOnline ? 'Online' : 'Offline'}
+                                <View style={[styles.statusDotSmall, { backgroundColor: getOnlineStatus(user._id, user.isOnline) ? '#2ecc71' : '#95a5a6' }]} />
+                                <Text style={[styles.statusText, { color: getOnlineStatus(user._id, user.isOnline) ? '#2ecc71' : '#95a5a6' }]}>
+                                    {getOnlineStatus(user._id, user.isOnline) ? 'Online' : 'Offline'}
                                 </Text>
                             </View>
                         </View>
@@ -228,13 +369,6 @@ export default function UserProfileScreen() {
                             </TouchableOpacity>
                         ) : (
                             <View style={styles.actionButtonsGrid}>
-                                {user.isPublic && (
-                                    <TouchableOpacity style={[styles.actionBtn, styles.shareBtn]} onPress={() => alert('Share pressed')}>
-                                        <MaterialIcons name="share" size={20} color="#fff" />
-                                        <Text style={styles.actionBtnText}>Share</Text>
-                                    </TouchableOpacity>
-                                )}
-
                                 <TouchableOpacity style={[styles.actionBtn, styles.chatBtn]} onPress={() => router.push(`/chat/${user._id}`)}>
                                     <MaterialIcons name="chat-bubble" size={20} color="#fff" />
                                     <Text style={styles.actionBtnText}>Chat</Text>
@@ -242,18 +376,25 @@ export default function UserProfileScreen() {
 
                                 <TouchableOpacity
                                     style={[styles.actionBtn, styles.favBtn, isFavorite && styles.favBtnActive]}
-                                    onPress={() => setIsFavorite(!isFavorite)}
+                                    onPress={handleToggleFavorite}
                                 >
                                     <MaterialIcons name={isFavorite ? "star" : "star-border"} size={20} color="#fff" />
                                     <Text style={styles.actionBtnText}>{isFavorite ? 'Favorited' : 'Favorite'}</Text>
                                 </TouchableOpacity>
 
-                                <TouchableOpacity style={[styles.actionBtn, styles.blockBtn]} onPress={() => alert('Block pressed')}>
-                                    <MaterialIcons name="block" size={20} color="#fff" />
-                                    <Text style={styles.actionBtnText}>Block</Text>
-                                </TouchableOpacity>
+                                {isBlocked ? (
+                                    <TouchableOpacity style={[styles.actionBtn, styles.unblockBtn]} onPress={handleUnblock}>
+                                        <MaterialIcons name="block" size={20} color="#fff" />
+                                        <Text style={styles.actionBtnText}>Unblock</Text>
+                                    </TouchableOpacity>
+                                ) : (
+                                    <TouchableOpacity style={[styles.actionBtn, styles.blockBtn]} onPress={handleBlock}>
+                                        <MaterialIcons name="block" size={20} color="#fff" />
+                                        <Text style={styles.actionBtnText}>Block</Text>
+                                    </TouchableOpacity>
+                                )}
 
-                                <TouchableOpacity style={[styles.actionBtn, styles.reportBtn]} onPress={() => alert('Report pressed')}>
+                                <TouchableOpacity style={[styles.actionBtn, styles.reportBtn]} onPress={() => router.push(`/report/user/${user._id}`)}>
                                     <MaterialIcons name="flag" size={20} color="#fff" />
                                     <Text style={styles.actionBtnText}>Report</Text>
                                 </TouchableOpacity>
@@ -279,23 +420,56 @@ export default function UserProfileScreen() {
                         </View>
                     )}
 
-                    {/* Private Album Placeholder */}
+                    {/* Private Album */}
                     <View style={styles.gallerySection}>
                         <View style={styles.privateHeader}>
                             <Text style={styles.sectionTitle}>Private Album</Text>
-                            {!isOwnProfile && <MaterialIcons name="lock" size={16} color="#888" />}
+                            {!isOwnProfile && !albumAccessStatus?.hasAccess && <MaterialIcons name="lock" size={16} color="#888" />}
                         </View>
-                        {/* Logic for private album would go here similar to web */}
-                        <View style={styles.privatePlaceholder}>
-                            <View style={styles.lockIconContainer}>
-                                <MaterialIcons name="lock" size={30} color={Colors.dark.tint} />
+
+                        {albumAccessStatus?.isOwner || albumAccessStatus?.hasAccess ? (
+                            // Show private album if owner or has access
+                            user.privateAlbum && user.privateAlbum.length > 0 ? (
+                                <View style={styles.galleryGrid}>
+                                    {user.privateAlbum.map((img: string, index: number) => (
+                                        <TouchableOpacity
+                                            key={index}
+                                            style={styles.galleryItem}
+                                            onPress={() => openLightbox(user.privateAlbum, index)}
+                                        >
+                                            <Image source={{ uri: img }} style={styles.galleryImage} contentFit="cover" />
+                                        </TouchableOpacity>
+                                    ))}
+                                </View>
+                            ) : (
+                                <View style={styles.privatePlaceholder}>
+                                    <MaterialIcons name="photo-library" size={30} color="#666" />
+                                    <Text style={styles.privateSubText}>No photos in private album</Text>
+                                </View>
+                            )
+                        ) : (
+                            // Show request button or pending status
+                            <View style={styles.privatePlaceholder}>
+                                <View style={styles.lockIconContainer}>
+                                    <MaterialIcons
+                                        name={albumAccessStatus?.hasPendingRequest ? "schedule" : "lock"}
+                                        size={30}
+                                        color={albumAccessStatus?.hasPendingRequest ? "#FFA500" : Colors.dark.tint}
+                                    />
+                                </View>
+                                <Text style={styles.privateText}>Private Album</Text>
+                                <Text style={styles.privateSubText}>
+                                    {albumAccessStatus?.hasPendingRequest
+                                        ? 'Request pending...'
+                                        : 'Request access to view photos'}
+                                </Text>
+                                {!albumAccessStatus?.hasPendingRequest && (
+                                    <TouchableOpacity style={styles.requestBtn} onPress={handleRequestPrivateAlbum}>
+                                        <Text style={styles.requestBtnText}>Request Access</Text>
+                                    </TouchableOpacity>
+                                )}
                             </View>
-                            <Text style={styles.privateText}>Private Album</Text>
-                            <Text style={styles.privateSubText}>Request access to view photos</Text>
-                            <TouchableOpacity style={styles.requestBtn}>
-                                <Text style={styles.requestBtnText}>Request Access</Text>
-                            </TouchableOpacity>
-                        </View>
+                        )}
                     </View>
 
                 </View>
@@ -530,18 +704,33 @@ const styles = StyleSheet.create({
         backgroundColor: '#333',
     },
     chatBtn: {
-        backgroundColor: Colors.dark.tint,
+        backgroundColor: '#FF6B35', // Bright orange
         flexBasis: '48%',
     },
     favBtn: {
-        backgroundColor: '#333',
-        borderWidth: 1,
-        borderColor: '#444',
+        backgroundColor: '#28A745', // Green
         flexBasis: '48%',
     },
     favBtnActive: {
-        borderColor: Colors.dark.tint,
-        backgroundColor: 'rgba(166, 7, 214, 0.1)',
+        backgroundColor: '#20C997', // Lighter green when active
+    },
+    blockBtn: {
+        backgroundColor: '#E63946', // Red
+        flexBasis: '48%',
+    },
+    unblockBtn: {
+        backgroundColor: '#555', // Grey
+        flexBasis: '48%',
+    },
+    reportBtn: {
+        backgroundColor: '#D62828', // Darker red
+        flexBasis: '48%',
+    },
+    actionButtonsGrid: {
+        flexDirection: 'row',
+        flexWrap: 'wrap',
+        gap: 10,
+        width: '100%',
     },
     gallerySection: {
         marginBottom: 25,
@@ -604,24 +793,6 @@ const styles = StyleSheet.create({
     requestBtnText: {
         color: '#fff',
         fontWeight: '600',
-    },
-    actionButtonsGrid: {
-        flexDirection: 'row',
-        flexWrap: 'wrap',
-        gap: 10,
-        width: '100%',
-    },
-    shareBtn: {
-        backgroundColor: '#00C300', // Line Green
-        flexBasis: '48%',
-    },
-    blockBtn: {
-        backgroundColor: '#a607d6',
-        flexBasis: '48%',
-    },
-    reportBtn: {
-        backgroundColor: '#ff4444',
-        flexBasis: '48%',
     },
     lightboxContainer: {
         flex: 1,

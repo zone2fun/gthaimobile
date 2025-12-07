@@ -33,3 +33,6 @@ backend/
 
 # Admin panel (deployed separately)
 # admin/
+
+# Mobile App (local development only)
+mobile-app/
