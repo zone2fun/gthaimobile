@@ -122,6 +122,29 @@ export const register = async (userData: {
     }
 };
 
+export const forgotPassword = async (email: string) => {
+    try {
+        console.log(`Requesting password reset for ${email} at ${API_URL}/auth/forgot-password`);
+        const res = await fetch(`${API_URL}/auth/forgot-password`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ email }),
+        });
+
+        if (!res.ok) {
+            const errorData = await res.json();
+            throw new Error(errorData.message || 'Failed to request password reset');
+        }
+
+        const data = await res.json();
+        console.log('Password reset request successful');
+        return data;
+    } catch (error: any) {
+        console.error('Forgot password error:', error);
+        throw error;
+    }
+};
+
 export const getFreshFaces = async (token?: string) => {
     try {
         const headers: any = { 'Content-Type': 'application/json' };

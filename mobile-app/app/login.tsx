@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { StyleSheet, View, Text, TextInput, TouchableOpacity, Alert, Image, ImageBackground, ActivityIndicator } from 'react-native';
+import { StyleSheet, View, Text, TextInput, TouchableOpacity, Alert, Image, ImageBackground, ActivityIndicator, Modal } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter, Link, Stack } from 'expo-router';
 import { MaterialIcons, FontAwesome } from '@expo/vector-icons';
@@ -19,12 +19,15 @@ export default function LoginScreen() {
     const [password, setPassword] = useState('');
     const [loading, setLoading] = useState(false);
 
+    // Modal State
+    const [modalVisible, setModalVisible] = useState(false);
+    const [modalTitle, setModalTitle] = useState('');
+    const [modalMessage, setModalMessage] = useState('');
+    const [modalType, setModalType] = useState<'success' | 'error'>('error');
+
     // Google Auth Request
     const [request, response, promptAsync] = Google.useAuthRequest({
         clientId: '851927648086-bmmmbb21cpaqr9k20dm4dd3umr86mlgq.apps.googleusercontent.com',
-        // In a real production app with native builds, you should get Android/iOS Client IDs from Google Console
-        // and add them here: androidClientId, iosClientId. 
-        // For Expo Go or Web, clientId works.
     });
 
     useEffect(() => {
@@ -71,7 +74,10 @@ export default function LoginScreen() {
             router.replace('/(tabs)');
         } catch (error: any) {
             console.error('Google login failed:', error);
-            Alert.alert('Google Login Failed', error.message || 'Failed to sign in with Google');
+            setModalTitle('Google Login Failed');
+            setModalMessage(error.message || 'An error occurred during Google sign in.');
+            setModalType('error');
+            setModalVisible(true);
         } finally {
             setLoading(false);
         }
@@ -79,7 +85,10 @@ export default function LoginScreen() {
 
     const handleLogin = async () => {
         if (!email || !password) {
-            Alert.alert('Error', 'Please enter email and password');
+            setModalTitle('Error');
+            setModalMessage('Please enter email and password');
+            setModalType('error');
+            setModalVisible(true);
             return;
         }
 
@@ -87,16 +96,17 @@ export default function LoginScreen() {
         try {
             const { user, token } = await apiLogin(email, password);
             await login(user, token);
-            // Alert.alert('Success', `Welcome back, ${user.name}!`);
             router.replace('/(tabs)');
         } catch (error: any) {
             console.error('Login failed:', error);
-            Alert.alert('Login Failed', error.message || 'Invalid email or password');
+            setModalTitle('Login Failed');
+            setModalMessage(error.message || 'Invalid email or password');
+            setModalType('error');
+            setModalVisible(true);
         } finally {
             setLoading(false);
         }
     };
-
 
     return (
         <SafeAreaView style={styles.container}>
@@ -124,7 +134,7 @@ export default function LoginScreen() {
                         secureTextEntry
                     />
 
-                    <TouchableOpacity style={styles.forgotPassword}>
+                    <TouchableOpacity style={styles.forgotPassword} onPress={() => router.push('/forgot-password')}>
                         <Text style={styles.forgotPasswordText}>Forgot Password?</Text>
                     </TouchableOpacity>
 
@@ -178,6 +188,43 @@ export default function LoginScreen() {
                     </TouchableOpacity>
                 </View>
             </View>
+
+            {/* Custom Modal */}
+            <Modal
+                animationType="fade"
+                transparent={true}
+                visible={modalVisible}
+                onRequestClose={() => setModalVisible(false)}
+            >
+                <View style={styles.modalOverlay}>
+                    <View style={[styles.modalContent, modalType === 'error' ? styles.modalError : styles.modalSuccess]}>
+                        <View style={[styles.modalIcon, { backgroundColor: modalType === 'success' ? '#4CAF50' : '#ff4444' }]}>
+                            <MaterialIcons
+                                name={modalType === 'success' ? "check" : "error-outline"}
+                                size={40}
+                                color="#fff"
+                            />
+                        </View>
+
+                        <Text style={styles.modalTitle}>
+                            {modalTitle || (modalType === 'success' ? 'Success' : 'Error')}
+                        </Text>
+
+                        <Text style={styles.modalMessage}>
+                            {modalMessage}
+                        </Text>
+
+                        <TouchableOpacity
+                            style={[styles.modalButton, { backgroundColor: modalType === 'success' ? '#4CAF50' : '#ff4444' }]}
+                            onPress={() => setModalVisible(false)}
+                        >
+                            <Text style={styles.modalButtonText}>
+                                {modalType === 'success' ? 'OK' : 'Try Again'}
+                            </Text>
+                        </TouchableOpacity>
+                    </View>
+                </View>
+            </Modal>
         </SafeAreaView>
     );
 }
@@ -307,5 +354,70 @@ const styles = StyleSheet.create({
         color: Colors.dark.tint,
         fontSize: 16,
         fontWeight: '600',
+    },
+
+    // Modal Styles
+    modalOverlay: {
+        flex: 1,
+        backgroundColor: 'rgba(0, 0, 0, 0.7)',
+        justifyContent: 'center',
+        alignItems: 'center',
+        padding: 20,
+    },
+    modalContent: {
+        width: '85%',
+        backgroundColor: '#1e1e1e',
+        borderRadius: 20,
+        padding: 24,
+        alignItems: 'center',
+        elevation: 5,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.25,
+        shadowRadius: 3.84,
+        borderWidth: 1,
+        borderColor: '#333',
+    },
+    modalError: {
+        borderColor: '#ff4444',
+    },
+    modalSuccess: {
+        borderColor: '#4CAF50',
+    },
+    modalIcon: {
+        width: 70,
+        height: 70,
+        borderRadius: 35,
+        justifyContent: 'center',
+        alignItems: 'center',
+        marginBottom: 20,
+        marginTop: -50,
+        borderWidth: 4,
+        borderColor: '#1e1e1e',
+    },
+    modalTitle: {
+        fontSize: 22,
+        fontWeight: 'bold',
+        color: '#fff',
+        marginBottom: 10,
+    },
+    modalMessage: {
+        fontSize: 16,
+        color: '#ccc',
+        textAlign: 'center',
+        marginBottom: 24,
+        lineHeight: 22,
+    },
+    modalButton: {
+        paddingVertical: 12,
+        paddingHorizontal: 30,
+        borderRadius: 25,
+        width: '100%',
+        alignItems: 'center',
+    },
+    modalButtonText: {
+        color: '#fff',
+        fontSize: 16,
+        fontWeight: 'bold',
     },
 });

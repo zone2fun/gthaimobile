@@ -162,7 +162,28 @@ export default function ChatDetailScreen() {
         }
     };
 
-    const handleImagePick = async () => {
+    const handleImagePick = () => {
+        Alert.alert(
+            'Upload Image',
+            'Choose an option',
+            [
+                {
+                    text: 'Camera',
+                    onPress: handleCameraPick,
+                },
+                {
+                    text: 'Gallery',
+                    onPress: handleGalleryPick,
+                },
+                {
+                    text: 'Cancel',
+                    style: 'cancel',
+                },
+            ]
+        );
+    };
+
+    const handleGalleryPick = async () => {
         try {
             const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
             if (status !== 'granted') {
@@ -178,12 +199,34 @@ export default function ChatDetailScreen() {
             });
 
             if (!result.canceled && result.assets[0]) {
-                // Set selected image for preview instead of sending immediately
                 setSelectedImage(result.assets[0].uri);
             }
         } catch (error) {
             console.error('Error picking image:', error);
             Alert.alert('Error', 'Failed to pick image');
+        }
+    };
+
+    const handleCameraPick = async () => {
+        try {
+            const { status } = await ImagePicker.requestCameraPermissionsAsync();
+            if (status !== 'granted') {
+                Alert.alert('Permission Required', 'Please allow access to your camera');
+                return;
+            }
+
+            const result = await ImagePicker.launchCameraAsync({
+                allowsEditing: true,
+                aspect: [4, 3],
+                quality: 0.8,
+            });
+
+            if (!result.canceled && result.assets[0]) {
+                setSelectedImage(result.assets[0].uri);
+            }
+        } catch (error) {
+            console.error('Error taking photo:', error);
+            Alert.alert('Error', 'Failed to take photo');
         }
     };
 

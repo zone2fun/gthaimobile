@@ -434,6 +434,25 @@ body {
     margin-bottom: 2px;
 }
 
+.notification-badge {
+    position: absolute;
+    top: -5px;
+    right: -5px;
+    background-color: #ff3b30;
+    color: white;
+    font-size: 10px;
+    font-weight: bold;
+    min-width: 16px;
+    height: 16px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0 4px;
+    z-index: 10;
+    border: 1px solid #000;
+}
+
 /* User Profile Page */
 .user-profile-page {
     position: relative;

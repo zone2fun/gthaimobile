@@ -2,6 +2,7 @@ import React, { createContext, useState, useEffect, useContext } from 'react';
 import io from 'socket.io-client';
 import AuthContext from './AuthContext';
 import Toast from '../components/Toast';
+import { getConversations } from '../services/api';
 
 const SocketContext = createContext();
 
@@ -9,71 +10,96 @@ export const SocketProvider = ({ children }) => {
     const [socket, setSocket] = useState(null);
     const [unreadCount, setUnreadCount] = useState(0);
     const [toasts, setToasts] = useState([]);
-    const { user } = useContext(AuthContext);
+    const { user, token } = useContext(AuthContext);
 
     useEffect(() => {
-        const setupSocketWithFavorites = async () => {
-            if (user && user._id) {
+        if (!user || !user._id) return;
+
+        // Initialize socket synchronously
+        const newSocket = io(import.meta.env.VITE_API_URL);
+        setSocket(newSocket);
+
+        newSocket.emit('setup', user);
+        console.log('Socket initialized and setup emitted for user:', user._id);
+
+        // Fetch initial unread count
+        const fetchUnreadCount = async () => {
+            if (token) {
                 try {
-                    // First, fetch user favorites
-                    const response = await fetch(`${import.meta.env.VITE_API_URL}/api/users/${user._id}`, {
-                        headers: {
-                            Authorization: `Bearer ${localStorage.getItem('token')}`,
-                        },
-                    });
-                    const userData = await response.json();
-                    const favorites = userData.favorites || [];
-                    console.log('User favorites loaded:', favorites);
-
-                    // Then, setup socket connection
-                    const newSocket = io(import.meta.env.VITE_API_URL);
-                    setSocket(newSocket);
-
-                    newSocket.emit('setup', user);
-
-                    newSocket.on('message received', (newMessage) => {
-                        // Only increment if we are not the sender
-                        if (newMessage.sender._id !== user._id) {
-                            setUnreadCount(prev => prev + 1);
-                        }
-                    });
-
-                    // Listen for user status changes
-                    newSocket.on('user status', ({ userId, isOnline, userName, userImg }) => {
-                        console.log('User status event:', { userId, isOnline, userName, userImg });
-                        console.log('Checking against favorites:', favorites);
-
-                        // Check if this user is in favorites and just came online
-                        if (isOnline && favorites.includes(userId)) {
-                            console.log('✅ Favorite user came online!', userName);
-                            // Show toast notification
-                            const toastId = Date.now();
-                            setToasts(prev => [...prev, {
-                                id: toastId,
-                                message: `${userName} is now online`,
-                                avatar: userImg
-                            }]);
-                        }
-                    });
-
+                    const conversations = await getConversations(token);
+                    const totalUnread = conversations.reduce((sum, conv) => sum + (conv.unreadCount || 0), 0);
+                    console.log('Initial total unread count:', totalUnread);
+                    setUnreadCount(totalUnread);
                 } catch (error) {
-                    console.error('Error setting up socket:', error);
+                    console.error('Error fetching unread count:', error);
                 }
             }
         };
 
-        setupSocketWithFavorites();
+        fetchUnreadCount();
+
+        // Global message listener for unread count
+        newSocket.on('message received', (newMessage) => {
+            console.log('Socket: Message received:', newMessage);
+            const senderId = newMessage.sender._id || newMessage.sender;
+
+            // Only increment if we are not the sender
+            if (senderId !== user._id) {
+                console.log(`Socket: Incrementing unread count. Sender (${senderId}) !== User (${user._id})`);
+                setUnreadCount(prev => prev + 1);
+            } else {
+                console.log('Socket: Ignoring own message for unread count.');
+            }
+        });
+
+        const setupFavoritesListener = async () => {
+            try {
+                // Fetch favorites
+                const response = await fetch(`${import.meta.env.VITE_API_URL}/api/users/${user._id}`, {
+                    headers: {
+                        Authorization: `Bearer ${localStorage.getItem('token')}`,
+                    },
+                });
+                const userData = await response.json();
+                const favorites = userData.favorites || [];
+                // console.log('User favorites loaded:', favorites);
+
+                // Listen for user status changes
+                newSocket.on('user status', ({ userId, isOnline, userName, userImg }) => {
+                    // console.log('User status event:', { userId, isOnline, userName, userImg });
+
+                    // Check if this user is in favorites and just came online
+                    if (isOnline && favorites.includes(userId)) {
+                        // console.log('✅ Favorite user came online!', userName);
+                        // Show toast notification
+                        const toastId = Date.now();
+                        setToasts(prev => [...prev, {
+                            id: toastId,
+                            message: `${userName} is now online`,
+                            avatar: userImg
+                        }]);
+                    }
+                });
+
+            } catch (error) {
+                console.error('Error setting up socket favorites:', error);
+            }
+        };
+
+        setupFavoritesListener();
 
         // Cleanup
         return () => {
-            if (socket) {
-                socket.close();
+            if (newSocket) {
+                console.log('Socket: Cleaning up connection');
+                newSocket.close();
                 setSocket(null);
             }
         };
-    }, [user]);
+    }, [user, token]);
 
     const resetUnreadCount = () => {
+        console.log('Socket: Resetting unread count');
         setUnreadCount(0);
     };
 
