@@ -812,6 +812,28 @@ export const likePost = async (postId: string, token: string) => {
     }
 };
 
+export const updatePushToken = async (pushToken: string, token: string) => {
+    try {
+        const res = await fetch(`${API_URL}/users/push-token`, {
+            method: 'PUT',
+            headers: {
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ pushToken }),
+        });
+
+        if (!res.ok) {
+            throw new Error('Failed to update push token');
+        }
+
+        return await res.json();
+    } catch (error) {
+        console.error('Error updating push token:', error);
+        // Don't throw, just log
+    }
+};
+
 // Post Comments API
 export const getComments = async (postId: string, token: string) => {
     try {

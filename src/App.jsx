@@ -23,6 +23,7 @@ import ResetPassword from './pages/ResetPassword';
 import LocationTracker from './components/LocationTracker';
 import AdManager from './components/AdManager';
 import SafetyPolicy from './pages/SafetyPolicy';
+import AppPolicy from './pages/AppPolicy';
 import Maintenance from './pages/Maintenance';
 
 const MainLayout = () => {
@@ -83,6 +84,12 @@ function App() {
             <Route path="/register" element={<Register />} />
             <Route path="/forgot-password" element={<ForgotPassword />} />
             <Route path="/reset-password/:token" element={<ResetPassword />} />
+
+            {/* Public routes without MainLayout for standalone policies if preferred, but user just said 'no link' not 'no header'.
+                However, usually policy pages for Play Store are cleaner without app navigation.
+                Let's put it OUTSIDE MainLayout to be safe and clean since it might be opened in a webview or external browser.
+            */}
+            <Route path="/app-policy" element={<AppPolicy />} />
 
             <Route element={<MainLayout />}>
               {/* Public route - Home only */}

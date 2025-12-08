@@ -1,5 +1,7 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState, useEffect, useRef } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { registerForPushNotificationsAsync, Notifications } from '@/services/notifications';
+import { updatePushToken } from '@/services/api';
 
 interface AuthContextType {
     isAuthenticated: boolean;
@@ -27,10 +29,54 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     const [blockedUsers, setBlockedUsers] = useState<string[]>([]);
 
+    const notificationListener = useRef<any>(null);
+    const responseListener = useRef<any>(null);
+
     // Load auth state from storage on mount
     useEffect(() => {
         loadAuthState();
     }, []);
+
+    useEffect(() => {
+        // This listener is fired whenever a notification is received while the app is foregrounded
+        notificationListener.current = Notifications.addNotificationReceivedListener(notification => {
+            // console.log('Notification received:', notification);
+        });
+
+        // This listener is fired whenever a user taps on or interacts with a notification
+        responseListener.current = Notifications.addNotificationResponseReceivedListener(response => {
+            // console.log('Notification response:', response);
+        });
+
+        return () => {
+            notificationListener.current && notificationListener.current.remove();
+            responseListener.current && responseListener.current.remove();
+        };
+    }, []);
+
+    useEffect(() => {
+        if (isAuthenticated && token) {
+            registerForNotifications();
+        }
+    }, [isAuthenticated, token]);
+
+    const registerForNotifications = async () => {
+        try {
+            console.log('Attemptng to register for push notifications...');
+            const pushToken = await registerForPushNotificationsAsync();
+            console.log('Got push token from expo:', pushToken);
+
+            if (pushToken && token) {
+                console.log('Sending push token to backend...');
+                const result = await updatePushToken(pushToken, token);
+                console.log('Push token sent to backend, result:', result);
+            } else {
+                console.log('Missing pushToken or authToken:', { hasPushToken: !!pushToken, hasAuthToken: !!token });
+            }
+        } catch (error) {
+            console.error('Failed to register for notifications:', error);
+        }
+    };
 
     const loadAuthState = async () => {
         try {
