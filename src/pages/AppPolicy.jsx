@@ -60,7 +60,6 @@ const AppPolicy = () => {
                             Our app prohibits the following content:
                         </p>
                         <ul style={styles.list}>
-                            <li>Sexual or explicit content involving minors</li>
                             <li>Harassment or hate speech</li>
                             <li>Illegal activities or goods</li>
                             <li>Impersonation</li>
@@ -68,6 +67,31 @@ const AppPolicy = () => {
                         <p style={styles.text}>
                             We enforce strict moderation. Violations may result in content removal or account bans.
                         </p>
+                    </div>
+
+                    <div style={styles.section}>
+                        <h2 style={styles.sectionTitle}>Child Sexual Abuse and Exploitation (CSAE)</h2>
+                        <p style={styles.text}><strong style={{ color: '#ff4444' }}>ZERO TOLERANCE POLICY</strong></p>
+                        <p style={styles.text}>
+                            We have a strict, zero-tolerance policy regarding any content that depicts, promotes, or facilitates Child Sexual Abuse and Exploitation (CSAE).
+                        </p>
+                        <p style={styles.text}>
+                            This includes, but is not limited to:
+                        </p>
+                        <ul style={styles.list}>
+                            <li>Any visual depiction of a minor engaged in sexual acts or in a sexually suggestive manner.</li>
+                            <li>Solicitation or grooming of minors for sexual purposes.</li>
+                            <li>Textual descriptions of sexual acts involving minors.</li>
+                            <li>Distribution or links to CSAM (Child Sexual Abuse Material).</li>
+                        </ul>
+                        <p style={styles.text}>
+                            <strong>Our Response to Violations:</strong>
+                        </p>
+                        <ul style={styles.list}>
+                            <li><strong>Immediate Removal:</strong> Any confirmed CSAE content will be removed immediately.</li>
+                            <li><strong>Permanent Ban:</strong> Accounts involved in uploading or sharing CSAE will be permanently banned without warning.</li>
+                            <li><strong>Reporting to Authorities:</strong> We will report any instances of CSAE to the National Center for Missing & Exploited Children (NCMEC) and relevant law enforcement agencies, including user IP addresses and account details as required by law.</li>
+                        </ul>
                     </div>
 
                     <div style={styles.section}>
@@ -79,6 +103,7 @@ const AppPolicy = () => {
                 </div>
             </div>
         </div>
+
     );
 };
 
